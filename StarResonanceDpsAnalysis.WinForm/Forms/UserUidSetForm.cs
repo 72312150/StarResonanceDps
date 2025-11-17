@@ -33,28 +33,28 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 优化的UID设置控件 - 增强验证和用户体验
+        /// Enhanced UID settings workflow with validation and better UX
         /// </summary>
         private void UserUidSet_Load(object sender, EventArgs e)
         {
-            // 从AppConfig加载已保存的设置到界面
+            // Load persisted settings from AppConfig into the UI
             LoadCurrentSettingsToUI();
 
-            // 添加实时验证
+            // Enable real-time validation
             InitializeValidation();
 
-            // 显示当前用户信息
+            // Display the current user information
             DisplayCurrentUserInfo();
         }
 
         /// <summary>
-        /// 从AppConfig加载当前设置到界面控件
+        /// Load the current configuration into UI controls
         /// </summary>
         private void LoadCurrentSettingsToUI()
         {
             try
             {
-                // 加载昵称设置
+                // Load the saved nickname
                 string savedNickname = AppConfig.GetValue("UserConfig", "NickName", "Unknown nickname");
                 if (string.Equals(savedNickname, "未知昵称", StringComparison.OrdinalIgnoreCase))
                 {
@@ -62,7 +62,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 }
                 input2.Text = savedNickname;
 
-                // 安全地加载UID设置
+                // Load the saved UID safely
                 string savedUidStr = AppConfig.GetValue("UserConfig", "Uid", "0");
                 if (ulong.TryParse(savedUidStr, out ulong savedUid))
                 {
@@ -74,7 +74,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                     inputNumber1.Value = 0;
                     Console.WriteLine($"UID configuration is invalid: {savedUidStr}. Reset to 0.");
 
-                    // 修复损坏的配置
+                    // Repair corrupted configuration
                     AppConfig.SetValue("UserConfig", "Uid", "0");
                 }
                 var savedProfession = AppConfig.GetValue("UserConfig", "Profession", "未知职业");
@@ -84,7 +84,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 }
                 select1.SelectedValue = professionDisplay;
 
-                // 确保AppConfig的全局属性与界面同步
+                // Keep the global AppConfig fields in sync with the UI
                 AppConfig.Uid = (long)inputNumber1.Value;
                 AppConfig.NickName = input2.Text;
                 AppConfig.Profession = savedProfession;
@@ -93,18 +93,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             {
                 Console.WriteLine($"Failed to load user settings: {ex.Message}");
 
-                // 出错时设置默认值
+                // Fall back to defaults on failure
                 inputNumber1.Value = 0;
                 input2.Text = "Unknown nickname";
             }
         }
 
         /// <summary>
-        /// 初始化输入验证
+        /// Wire up input validation
         /// </summary>
         private void InitializeValidation()
         {
-            // UID输入验证 - 确保是有效的ulong范围
+            // UID validation – ensure the value fits within the ulong range
             inputNumber1.ValueChanged += (s, e) =>
             {
                 if (inputNumber1.Value > ulong.MaxValue || inputNumber1.Value < 0)
@@ -114,7 +114,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 }
             };
 
-            // 昵称输入验证
+            // Nickname length guard
             input2.TextChanged += (s, e) =>
             {
                 string nickname = input2.Text.Trim();
@@ -128,7 +128,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 显示当前用户信息
+        /// Display the currently selected user details
         /// </summary>
         private void DisplayCurrentUserInfo()
         {
@@ -137,32 +137,32 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             {
                 var (nickname, combatPower, profession) = StatisticData._manager.GetPlayerBasicInfo(currentUid);
 
-                // 可以添加一个信息显示区域
+                // Optional: update a UI region with this information
                 Console.WriteLine($"Current user - UID: {currentUid}, Nickname: {nickname}, Power: {combatPower}, Profession: {profession}");
 
-                // 如果有UI标签可以显示这些信息
-                // lblCurrentInfo.Text = $"当前: {nickname} (战力: {combatPower})";
+                // If there is a UI label, it could display:
+                // lblCurrentInfo.Text = $"Current: {nickname} (Power: {combatPower})";
             }
         }
 
         /// <summary>
-        /// 公开的保存用户设置方法，供Modal调用
+        /// Public entry point to persist the user settings (used by the modal)
         /// </summary>
         public void SaveUserSettings()
         {
-            // 验证输入数据
+            // Validate incoming data
             if (!ValidateInput(out string errorMessage))
             {
                 throw new ArgumentException(errorMessage);
             }
 
-            // 从界面获取当前输入的值
+            // Gather the values currently shown in the UI
             var newUid = (long)inputNumber1.Value;
             string newNickname = input2.Text.Trim();
             string professionDisplay = select1.SelectedValue?.ToString()?.Trim() ?? string.Empty;
             string professionInternal = GetProfessionInternal(professionDisplay);
 
-            // 获取原始配置值用于比较
+            // Retrieve the previous configuration values for comparison
             string oldUidStr = AppConfig.GetValue("UserConfig", "Uid", "0");
             string oldNickname = AppConfig.GetValue("UserConfig", "NickName", "Unknown nickname");
             if (string.Equals(oldNickname, "未知昵称", StringComparison.OrdinalIgnoreCase))
@@ -176,14 +176,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             bool nicknameChanged = oldNickname != newNickname;
             bool professionChanged = !string.Equals(oldProfession, professionInternal, StringComparison.Ordinal);
 
-            // 只有当值真正发生变化时才保存
+            // Persist only when something actually changed
             if (!uidChanged && !nicknameChanged && !professionChanged)
             {
                 Console.WriteLine("No changes detected; skipping save.");
                 return;
             }
 
-            // 保存界面配置到AppConfig
+            // Write the UI values back to AppConfig
             if (uidChanged)
             {
                 AppConfig.SetValue("UserConfig", "Uid", newUid.ToString());
@@ -202,16 +202,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 Console.WriteLine($"Profession updated: {oldProfession} → {professionInternal}");
             }
 
-            // 更新全局AppConfig属性以保持一致性
+            // Update AppConfig globals to keep everything consistent
             AppConfig.Uid = newUid;
             AppConfig.NickName = newNickname;
             AppConfig.Profession = professionInternal;
 
-            // 同步到统计数据管理器
+            // Synchronize with the statistics manager
             StatisticData._manager.SetNickname(newUid, newNickname);
             StatisticData._manager.SetProfession(newUid, professionInternal);
 
-            // 如果UID发生变化，询问用户是否清空统计数据
+            // If the UID changed, ask whether to clear existing statistics
             if (uidChanged && oldUid != 0)
             {
                 var result = MessageBox.Show(

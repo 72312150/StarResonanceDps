@@ -12,55 +12,56 @@ using static StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics.PlayerData
 namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 {
     /// <summary>
-    /// 通用统计类：用于伤害或治疗的数据累计、次数统计、实时窗口统计，以及总 DPS/HPS 计算
-    /// 设计要点：
-    /// 1. 写入路径：通过 <see cref="AddRecord"/> 进行统一写入，确保“累计值/次数/极值/实时窗口/时间范围”一致推进。
-    /// 2. 实时统计：使用固定秒级窗口（默认 1s）衡量 RealtimeValue（可作为瞬时DPS/HPS展示）。
-    /// 3. 总平均：通过首末记录时间计算总平均每秒，避免依赖外部时钟。
-    /// 4. 线程模型：本类型未加锁，默认在同一线程上下文使用；如并发写入，请在调用方序列化或加锁。
+    /// General-purpose statistic accumulator used for damage or healing totals, count tracking,
+    /// realtime windows, and overall DPS/HPS computation.
+    /// Design notes:
+    /// 1. Write path: use <see cref="AddRecord"/> exclusively so totals/counters/extrema/realtime windows/time ranges advance together.
+    /// 2. Realtime: maintains a fixed-width window (default 1s) to produce RealtimeValue for instantaneous DPS/HPS displays.
+    /// 3. Averages: derive total averages from the first/last record timestamps instead of relying on external clocks.
+    /// 4. Threading: this type is not internally synchronized; callers should serialize access if writing from multiple threads.
     /// </summary>
     public class StatisticData
     {
-        #region 常量
-        //锁对象
+        #region Constants
+        // Lock object for realtime window updates
         private readonly object _realtimeLock = new();
 
         /// <summary>
-        /// 实时统计的时间窗口（秒），用于计算实时值与峰值。
-        /// 注意：窗口越短越敏捷，但波动越明显；越长越平滑，但延迟越大。
+        /// Realtime statistics window (seconds) used to calculate live values and peaks.
+        /// Note: shorter windows are more responsive but noisier; longer windows are smoother but introduce lag.
         /// </summary>
-        private const double 实时窗口秒数 = 1.0;
+        private const double RealtimeWindowSeconds = 1.0;
 
         #endregion
 
-        #region 静态成员
+        #region Static members
 
         /// <summary>
-        /// 全局玩家数据管理器（按你原代码保持不变）。
-        /// 用于跨玩家聚合、定时刷新、快照与战斗时钟等。
+        /// Global player data manager (kept consistent with the original code).
+        /// Handles cross-player aggregation, periodic refreshes, snapshots, and battle timers.
         /// </summary>
         public static readonly PlayerDataManager _manager = new PlayerDataManager();
 
         /// <summary>
-        /// 全局 NPC 数据管理器：用于统计 NPC 承伤与对NPC的玩家排名
+        /// Global NPC manager: tracks NPC taken damage and attacker rankings.
         /// </summary>
         public static readonly NpcManager _npcManager = new NpcManager(_manager);
         #endregion
 
-        #region 数值累计（只读属性，内部递增）
+        #region Aggregate values (read-only, internally incremented)
 
         /// <summary>
-        /// Miss 次数（未命中次数）
-        /// - 统计该技能在承伤统计中被判定为 Miss 的次数
-        /// - Miss 不会累加到伤害值，只是计数，用于命中率统计
+        /// Miss count (number of misses)
+        /// - Counts how many times the skill registers as a miss in taken-damage tracking
+        /// - Misses do not add to damage totals; they are counted for hit-rate analysis
         /// </summary>
         public int CountMiss { get; private set; }
 
         /// <summary>
-        /// 击杀次数（目标死亡次数）
-        /// - 统计该技能在承伤统计中导致目标死亡的次数
-        /// - 用于显示“该技能打死过几次”的额外信息
-        /// - 注意：死亡是承伤结果，伤害依然正常累加
+        /// Kill count (number of target deaths)
+        /// - Tracks how many times the skill causes a target to die in taken-damage statistics
+        /// - Useful for highlighting how often the skill delivered killing blows
+        /// - Deaths are a result of taken damage; the damage still accumulates normally
         /// </summary>
         public int CountDead { get; private set; }
 
@@ -69,98 +70,96 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 
 
         /// <summary>
-        /// 因果幸运总伤害值
-        /// - 当一次命中既是幸运触发（isLucky=true）
-        ///   且由因果效果导致（isCauseLucky=true）时
-        ///   就把伤害数额累加到这里。
-        /// - 用来区分「普通幸运伤害」和「因果触发的幸运伤害」
+        /// Cause-lucky total damage
+        /// - Sum of hits that were both lucky (isLucky=true) and caused by a “cause lucky” effect (isCauseLucky=true)
+        /// - Allows us to distinguish between normal lucky damage and cause-triggered lucky damage
         /// </summary>
         public ulong CauseLucky { get; private set; }
 
         /// <summary>
-        /// 因果幸运命中次数
-        /// - 统计触发「因果幸运」的命中次数（计数）
-        /// - 对比 CountLucky 可以看出其中有多少次幸运是由因果触发的
+        /// Cause-lucky hit count
+        /// - Number of hits that triggered the cause-lucky effect
+        /// - Compare with CountLucky to see how many lucky hits stemmed from cause triggers
         /// </summary>
         public int CountCauseLucky { get; private set; }
 
 
-        /// <summary>普通命中数值总和。</summary>
+        /// <summary>Total amount of non-critical, non-lucky hits.</summary>
         public ulong Normal { get; private set; }
 
-        /// <summary>暴击数值总和。</summary>
+        /// <summary>Total amount from critical hits.</summary>
         public ulong Critical { get; private set; }
 
-        /// <summary>幸运命中数值总和。</summary>
+        /// <summary>Total amount from lucky hits.</summary>
         public ulong Lucky { get; private set; }
 
-        public ulong LuckyAndCritical { get; private set; }      // 幸运伤害总和（= Lucky + CritLucky）
+        public ulong LuckyAndCritical { get; private set; }      // Combined lucky damage (= Lucky + CritLucky)
 
 
-        /// <summary>暴击且幸运数值总和。</summary>
+        /// <summary>Total amount from hits that were both critical and lucky.</summary>
         public ulong CritLucky { get; private set; }
 
-        /// <summary>HP 减少总和（伤害统计专用）。用于承伤时记录真实扣血值（可与 <see cref="Total"/> 不同）。</summary>
+        /// <summary>Total HP reduction (damage-side only). Used to log real HP loss when tracking taken damage, which may differ from <see cref="Total"/>.</summary>
         public ulong HpLessen { get; private set; }
 
-        /// <summary>所有命中数值总和（Damage/HPS 的基础累计）。</summary>
+        /// <summary>Total amount across all hits (baseline for DPS/HPS calculations).</summary>
         public ulong Total { get; private set; }
 
-        /// <summary>单次命中最大值（写入时更新）。</summary>
+        /// <summary>Maximum single-hit value (updated at write time).</summary>
         public ulong MaxSingleHit { get; private set; }
 
-        /// <summary>单次命中最小值（非 0；初值为 <see cref="ulong.MaxValue"/> 以便正确取 min）。</summary>
+        /// <summary>Minimum single-hit value (non-zero; initialized to <see cref="ulong.MaxValue"/> so Min works correctly).</summary>
         public ulong MinSingleHit { get; private set; } = ulong.MaxValue;
 
         #endregion
 
-        #region 次数统计（只读属性，内部递增）
+        #region Count statistics (read-only, internally incremented)
 
-        /// <summary>普通命中次数。</summary>
+        /// <summary>Number of normal hits.</summary>
         public int CountNormal { get; private set; }
 
-        /// <summary>暴击次数。</summary>
+        /// <summary>Number of critical hits.</summary>
         public int CountCritical { get; private set; }
 
-        /// <summary>幸运命中次数。</summary>
+        /// <summary>Number of lucky hits.</summary>
         public int CountLucky { get; private set; }
 
-        /// <summary>总命中次数（普通/暴击/幸运的合计，按逻辑累加）。</summary>
+        /// <summary>Total hit count (sum of normal, critical, and lucky hits).</summary>
         public int CountTotal { get; private set; }
 
         #endregion
 
-        #region 实时统计窗口
+        #region Realtime window tracking
 
         /// <summary>
-        /// 最近时间窗口内的记录（用于实时 DPS/HPS）。
-        /// 元组包含（记录时间戳，数值）。
+        /// Recent records inside the realtime window (used for instantaneous DPS/HPS).
+        /// Each tuple stores (timestamp, value).
         /// </summary>
         private readonly List<(DateTime Time, ulong Value)> _realtimeWindow = new();
 
-        /// <summary>窗口内实时累计值（例如用于瞬时 DPS/HPS 展示）。</summary>
+        /// <summary>Realtime total inside the window (e.g., for instantaneous DPS/HPS display).</summary>
         public ulong RealtimeValue { get; private set; }
 
-        /// <summary>历史窗口最大峰值（用于“本场最高瞬时值”展示）。</summary>
+        /// <summary>Historical peak within the window (for the “highest instantaneous value” display).</summary>
         public ulong RealtimeMax { get; private set; }
 
         #endregion
 
-        #region 时间范围（用于总平均每秒值）
-        // 首次 AddRecord 触发
+        #region Time range tracking (for overall per-second averages)
+        // Set on first AddRecord invocation
         private DateTime? _startTime;
 
-        // 最近一次 AddRecord 的时间（也是“最后一次记录时间”）
+        // Timestamp of the most recent AddRecord
         private DateTime? _endTime;
 
-        /// <summary>最后一次记录时间（对外暴露只读）。</summary>
+        /// <summary>Read-only accessor for the last record time.</summary>
         public DateTime? LastRecordTime => _endTime;
 
         #endregion
 
 
 
-        #region 公开方法
+        #region Public API
         public void RegisterMiss() { CountMiss++; }
         public void RegisterKill() { CountDead++; }
 
@@ -169,18 +168,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         /// <summary>
         /// 添加一条新的统计记录（伤害或治疗）。此方法是唯一写入口，负责推进所有派生统计。
         /// </summary>
-        /// <param name="value">记录数值（伤害量或治疗量）。为 0 时不参与最小值计算。</param>
-        /// <param name="isCrit">是否暴击。会影响 <see cref="Critical"/> 或 <see cref="CritLucky"/> 累加与计数。</param>
-        /// <param name="isLucky">是否幸运。会影响 <see cref="Lucky"/> 或 <see cref="CritLucky"/> 累加与计数。</param>
+        /// <param name="value">Recorded amount (damage or healing). Zero values do not affect the minimum.</param>
+        /// <param name="isCrit">Flag indicating a critical hit; affects <see cref="Critical"/> or <see cref="CritLucky"/> totals and counters.</param>
+        /// <param name="isLucky">Flag indicating a lucky hit; affects <see cref="Lucky"/> or <see cref="CritLucky"/> totals and counters.</param>
         /// <param name="hpLessenValue">
-        /// HP 减少值（仅伤害/承伤场景传入）。
-        /// 当统计承伤时可用以与 <see cref="Total"/> 区分（例如溢出伤、护盾、减伤后真实掉血量）。
+        /// HP reduction (for damage/taken scenarios).
+        /// Distinguishes real HP loss from <see cref="Total"/> when tracking taken damage (e.g., overkill, shields, mitigation).
         /// </param>
         public void AddRecord(ulong value, bool isCrit, bool isLucky, ulong hpLessenValue = 0, bool isCauseLucky = false) // ★ 新增参数：是否因果幸运
         {
             var now = DateTime.Now;
 
-            // —— 原有累计/计数/极值逻辑保持不变 —— 
+            // Preserve the existing total/counter/extrema logic
             if (isCrit && isLucky)
             {
                 CritLucky += value;
@@ -246,7 +245,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             // 1) 锁内：剔除过期 + 复制快照
             lock (_realtimeLock)
             {
-                _realtimeWindow.RemoveAll(e => (now - e.Time).TotalSeconds > 实时窗口秒数);
+                _realtimeWindow.RemoveAll(e => (now - e.Time).TotalSeconds > RealtimeWindowSeconds);
 
                 if (_realtimeWindow.Count > 0)
                     snapshot = new List<(DateTime, ulong)>(_realtimeWindow);

@@ -73,7 +73,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private static Form[] SameSettingForms => [SettingsForm, DpsStatistics, UserUidSetForm];
         /// <summary>
-        /// 统一设置是否在最上端显示
+        /// Apply the same TopMost setting to the shared window set
         /// </summary>
         /// <param name="topMost"></param>
         public static void SetTopMost(bool topMost) 
@@ -88,7 +88,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
         }
         /// <summary>
-        /// 统一设置透明度
+        /// Apply a unified transparency value across shared windows
         /// </summary>
         /// <param name="opacity"></param>
         public static void FullFormTransparency(double opacity, bool force = false)

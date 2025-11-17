@@ -32,7 +32,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 检测窗体字体颜色(主题)变动
+        /// Detect theme (foreground color) changes for the window
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -52,7 +52,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 标题鼠标按下事件
+        /// Handle mouse press on the title label
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -81,7 +81,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 鼠标穿透键位
+        /// Mouse-through hotkey verification
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -98,7 +98,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 清空数据键位
+        /// Clear-data hotkey verification
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -140,7 +140,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 确定按钮点击
+        /// Handle the confirmation button click
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

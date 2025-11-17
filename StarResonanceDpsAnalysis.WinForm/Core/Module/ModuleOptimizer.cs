@@ -8,13 +8,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
 {
     public class ModuleOptimizer
     {
-        // —— 超标容差：允许比“期望等级”最多高出这么多“级”而不扣分（默认 1 级）
+        // Overshoot tolerance: allows exceeding the target level by this many levels before penalties apply (default 1 level)
         private const int OvershootToleranceLevels = 1;
-        // —— 超过容差后，每超出 1 级的惩罚（保持你原本的力度 200）
+        // Penalty applied for each additional level once the tolerance is exceeded
         private const double OvershootHardPenaltyPerLevel = 50;
 
 
-        // 目标等级映射：属性名 -> 期望等级（1~6，0 或缺省表示不限制）
+        // Target level map: attribute name -> desired level (1-6, 0 or missing means no constraint)
         private readonly Dictionary<string, int> _desiredLevels = new(StringComparer.Ordinal);
 
         public void SetDesiredLevels(Dictionary<string, int> desiredLevels)
@@ -23,17 +23,17 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             if (desiredLevels == null) return;
             foreach (var kv in desiredLevels)
             {
-                // 只保留 >0 的目标
+                // Keep only targets greater than zero
                 if (kv.Value > 0) _desiredLevels[kv.Key] = kv.Value;
             }
         }
-        // 等级接近度：差距越小越好；差 0 得 6 分，差 1 得 5 分 ... 差>=6 得 0
+        // Level closeness: the smaller the gap, the better; gap 0 scores 6, gap 1 scores 5 ... gap >= 6 scores 0
         private double ComputeCloseness(Dictionary<string, int> breakdown)
         {
             if (_desiredLevels.Count == 0) return 0.0;
 
             double closeness = 0.0;
-            const int MaxPerAttr = 6; // 单项满分
+            const int MaxPerAttr = 6; // Maximum score per attribute
 
             foreach (var kv in _desiredLevels)
             {
@@ -43,16 +43,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
 
                 if (!breakdown.TryGetValue(name, out var v)) continue;
 
-                int level = ToLevel(v); // 你已有的等级换算
+                int level = ToLevel(v); // Convert current value to its level
 
                 if (level >= desired)
                 {
-                    // 达到或超过期望等级：给满分，不再因超过而扣分
+                    // Meeting or exceeding the desired level: award full score without penalties
                     closeness += MaxPerAttr;
                 }
                 else
                 {
-                    // 未达标：按差距扣分（差1→5分，差2→4分，最低0）
+                    // Below target: deduct based on the gap (gap 1→5 points, gap 2→4 points, minimum 0)
                     int diff = desired - level;
                     int score = MaxPerAttr - diff;
                     if (score < 0) score = 0;
@@ -65,9 +65,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
 
 
 
-        // ModuleOptimizer.cs 顶部字段区
+        // ModuleOptimizer.cs top-level fields
         private readonly HashSet<string> _priorityAttrs;
-        // ====== 配置/依赖（通过构造函数注入） ======
+        // ====== Configuration / dependencies (provided via constructor) ======
         public enum ModuleCategory { ATTACK, DEFENSE, SUPPORT, ALL }
 
         public interface IModulePart
@@ -77,23 +77,23 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             int Value { get; }
         }
         /// <summary>
-        /// 排名方式
+        /// Ranking mode
         /// </summary>
         public enum SortMode
         {
             /// <summary>
-            /// 按战力排序
+            /// Sort by combat power
             /// </summary>
             ByScore,
             /// <summary>
-            /// 按属性分解排序
+            /// Sort by attribute breakdown
             /// </summary>
-            ByTotalAttr    // 总属性
+            ByTotalAttr    // Total attribute value
         }
 
         public interface IModuleInfo
         {
-            string Uuid { get; }      // 唯一标识，用于去重
+            string Uuid { get; }      // Unique identifier used for de-duplication
             string Name { get; }
             int Quality { get; }
             int ConfigId { get; }
@@ -109,7 +109,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
         private readonly ISet<int> _specialAttrIds;
         private readonly IReadOnlyDictionary<string, string> _attrNameTypeMap; // "basic"/"special"
 
-        // ====== 参数/状态 ======
+        // ====== Parameters / runtime state ======
         private readonly Random _rand = new();
         private string? _resultLogFile = null;
 
@@ -117,7 +117,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
         public int MaxSolutions { get; set; } = 60;
 
 
-        // 属性等级权重
+        // Attribute level weights
         private readonly Dictionary<int, double> _levelWeights = new()
     {
         {1, 1.0},
@@ -155,15 +155,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                 : new HashSet<string>(StringComparer.Ordinal);
         }
 
-        // ====== 解结构 ======
+        // ====== Solution definition ======
         public sealed class ModuleSolution
         {
             public List<IModuleInfo> Modules { get; }
             public double Score { get; }
             public Dictionary<string, int> AttrBreakdown { get; }
-            public int PriorityLevel { get; }            // 新增：勾选属性最高等级（用于排序/比较）
+            public int PriorityLevel { get; }            // Highest level among the selected attributes (used for ordering/comparison)
 
-            // 新增：总属性值
+            // Total attribute value cache
             public int TotalAttrValue { get; }
             public ModuleSolution(List<IModuleInfo> modules, double score,
                   Dictionary<string, int> attrBreakdown, int priorityLevel = 0)
@@ -172,11 +172,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                 Score = score;
                 AttrBreakdown = attrBreakdown;
                 PriorityLevel = priorityLevel;
-                TotalAttrValue = attrBreakdown?.Values.Sum() ?? 0;   // ← 新增
+                TotalAttrValue = attrBreakdown?.Values.Sum() ?? 0;
             }
         }
 
-        // ====== 工具 ======
+        // ====== Utility helpers ======
         private void LogResult(string message)
         {
             if (string.IsNullOrEmpty(_resultLogFile)) return;
@@ -184,7 +184,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             {
                 File.AppendAllText(_resultLogFile, message + Environment.NewLine);
             }
-            catch { /* 忽略日志异常 */ }
+            catch { /* Ignore logging failures */ }
         }
 
         private ModuleCategory GetModuleCategory(IModuleInfo module)
@@ -228,7 +228,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                 foreach (var p in m.Parts)
                     breakdown[p.Name] = breakdown.TryGetValue(p.Name, out var cur) ? cur + p.Value : p.Value;
 
-            // 勾选属性最高等级（无勾选则为 0）
+            // Highest level among selected attributes (0 when none selected)
             int priorityLevel = 0;
             if (_priorityAttrs != null && _priorityAttrs.Count > 0)
             {
@@ -237,20 +237,20 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                         priorityLevel = Math.Max(priorityLevel, ToLevel(v));
             }
 
-            var (combatPower, _) = CalculateCombatPower(modules);  // 你原来的战斗力
+            var (combatPower, _) = CalculateCombatPower(modules);  // Reuse the existing combat power calculation
             return (priorityLevel, combatPower, breakdown);
         }
 
-        // ====== 评分函数：统一将 “白名单覆盖” 放最高优先 ======
-        // 评分：目标白名单(有期望) >> 白名单(无期望) >> 非白名单 >> 战力
-        // 其中：对“有期望”的属性，超标会被强扣分（绝不优于刚好达标）
+        // ====== Scoring function: prioritize whitelisted attributes ======
+        // Priority order: whitelisted attributes with targets >> whitelisted without targets >> non-whitelisted >> combat power
+        // Attributes with explicit targets are penalized heavily when they overshoot (never better than hitting the target exactly)
         private (double score, Dictionary<string, int> breakdown, int priorityMaxLevel)
             CalculatePriorityAwareScore(IReadOnlyList<IModuleInfo> modules)
         {
-            // 1) 基础统计
+            // 1) Basic statistics
             var (combatPower, breakdown) = CalculateCombatPower(modules);
 
-            // 2) 计算各属性的“效果等级”1..6
+            // 2) Compute the effective level (1..6) for each attribute
             int priorityMaxLevel = 0;
             var levelByAttr = new Dictionary<string, int>(StringComparer.Ordinal);
             foreach (var kv in breakdown)
@@ -269,12 +269,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             var whitelist = _priorityAttrs ?? new HashSet<string>(StringComparer.Ordinal);
             var desired = _desiredLevels ?? new Dictionary<string, int>(StringComparer.Ordinal);
 
-            // 3) 三层分数桶
-            double tier1 = 0.0; // 白名单且有期望（最优先）
-            double tier2 = 0.0; // 白名单无期望
-            double tier3 = 0.0; // 非白名单
+            // 3) Three scoring tiers
+            double tier1 = 0.0; // Whitelisted with a desired level (highest priority)
+            double tier2 = 0.0; // Whitelisted without a desired level
+            double tier3 = 0.0; // Not whitelisted
 
-            int globalCloseness = (int)ComputeCloseness(breakdown); // 仅做同分细分
+            int globalCloseness = (int)ComputeCloseness(breakdown); // Used only for tie-breaking
 
             foreach (var (attr, lvl) in levelByAttr)
             {
@@ -285,54 +285,54 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
 
                 if (isWhite && hasTarget)
                 {
-                    // —— 新逻辑：无论期望如何，整体往 6 凑；允许小幅超出期望不扣分
+                    // New logic: always aim for level 6; allow small overshoots without penalties
                     const int AimLevel = 6;
 
                     if (lvl >= AimLevel)
                     {
-                        // 命中 6 级：直接给最强奖励（视为理想命中）
+                        // Hit level 6: award the highest bonus (ideal outcome)
                         tier1 += 2000.0;
                     }
                     else if (lvl >= targetLvl)
                     {
-                        // 达到或超过期望但尚未到 6
+                        // Meets or exceeds the target but is below level 6
                         int overshoot = lvl - targetLvl; // >= 0
 
                         if (overshoot <= OvershootToleranceLevels)
                         {
-                            // 小幅超出期望：不扣分（视作“合理溢出”）
+                            // Small overshoot: no penalty (treated as acceptable overflow)
                             tier1 += 2000.0;
                         }
                         else
                         {
-                            // 超过“容差”之后才开始扣
+                            // Apply penalties only after exceeding the tolerance
                             int hard = overshoot - OvershootToleranceLevels;
                             tier1 += 2000.0 - hard * OvershootHardPenaltyPerLevel;
                         }
                     }
                     else
                     {
-                        // 未达标：仍然按“接近程度”给分（与你原来的权重一致）
+                        // Below target: score based on closeness (same weighting as before)
                         int diff = Math.Min(6, targetLvl - lvl);
                         int closenessLocal = 6 - diff;      // 0..6
-                        tier1 += closenessLocal * 20.0;     // 适中权重（保持原有手感）
+                        tier1 += closenessLocal * 20.0;     // Moderate weight (preserves original feel)
                     }
 
-                    // 注意：有期望的属性，不再额外叠加 w 避免“超标因为权重更高反而被奖励”
+                    // Note: attributes with desired levels no longer accumulate weight `w` to avoid rewarding overshoots
                 }
                 else if (isWhite)
                 {
-                    // 白名单但无期望：谁等级更高谁好（直接用等级权重）
+                    // Whitelisted without desired level: higher levels are better (use weight directly)
                     tier2 += w;
                 }
                 else
                 {
-                    // 非白名单：最低优先
+                    // Non-whitelisted: lowest priority
                     tier3 += w;
                 }
             }
 
-            // 4) 组合分数：Tier1 >> Tier2 >> Tier3 >> 贴近度/战力 做细分
+            // 4) Final score combination: Tier1 >> Tier2 >> Tier3 >> closeness / combat power for tie-breaking
             double score =
                   tier1 * 1_000_000_000.0
                 + tier2 * 1_000_000.0
@@ -346,7 +346,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
 
 
 
-        // ====== 预筛选（按每种属性取前30条） ======
+        // ====== Prefilter modules (top 30 per attribute) ======
         public List<IModuleInfo> PrefilterModules(IReadOnlyList<IModuleInfo> modules)
         {
             var attrModules = new Dictionary<string, List<(IModuleInfo m, int v)>>();
@@ -375,7 +375,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             return candidate.ToList();
         }
 
-        // ====== 战斗力计算（阈值战力 + 总属性战力） ======
+        // ====== Combat power calculation (threshold power + total attribute power) ======
         public (int power, Dictionary<string, int> attrBreakdown) CalculateCombatPower(IReadOnlyList<IModuleInfo> modules)
         {
             var breakdown = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -409,7 +409,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             return (totalPower, breakdown);
         }
 
-        // ====== 评分函数（如果你项目里只用战斗力，可不调用这个） ======
+        // ====== Alternative scoring function (skip if combat power alone is sufficient) ======
         public (double score, Dictionary<string, int> attrBreakdown) CalculateSolutionScore(IReadOnlyList<IModuleInfo> modules)
         {
             var breakdown = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -447,7 +447,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             return (score, breakdown);
         }
 
-        // ====== 贪心构造初始解（4件） ======
+        // ====== Greedy construction of the initial solution (4 modules) ======
         public ModuleSolution GreedyConstructSolution(IReadOnlyList<IModuleInfo> modules)
         {
             if (modules.Count < 4) return null;
@@ -464,7 +464,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                     if (current.Contains(m)) continue;
 
                     var test = current.Concat(new[] { m }).ToList();
-                    var (sc, _, _) = CalculatePriorityAwareScore(test); // ← 统一评分
+                    var (sc, _, _) = CalculatePriorityAwareScore(test); // Use the unified scoring function
 
                     if (sc > bestScore)
                     {
@@ -477,12 +477,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                 current.Add(pick);
             }
 
-            // 为 UI/结构补齐 PriorityLevel 和 breakdown
-            var (pri, pow, bd) = Evaluate(current); // 你已有的接口:contentReference[oaicite:5]{index=5}
+            // Populate priority level and breakdown for UI/struct consumers
+            var (pri, pow, bd) = Evaluate(current); // Reuse the existing Evaluate helper
             return new ModuleSolution(current, pow, bd, pri);
         }
 
-        // ====== 局部搜索（单点替换提升） ======
+        // ====== Local search (single-point replacement improvements) ======
         public ModuleSolution LocalSearchImprove(ModuleSolution solution, IReadOnlyList<IModuleInfo> allModules)
         {
             if (solution == null) return null;
@@ -493,7 +493,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                 solution.PriorityLevel
             );
 
-            // 现状最好分数（用统一评分）
+            // Current best score (using the unified scoring function)
             var (bestScoreUnified, _, _) = CalculatePriorityAwareScore(best.Modules);
 
             for (int iter = 0; iter < LocalSearchIterations; iter++)
@@ -531,27 +531,27 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
 
 
 
-        // ====== 主流程：优化 ======
+        // ====== Main optimization flow ======
         public List<ModuleSolution> OptimizeModules(
             IReadOnlyList<IModuleInfo> modules,
             ModuleCategory category,
             int topN = 40,
-                SortMode sortMode = SortMode.ByTotalAttr   // ← 新增参数，默认按属性
+                SortMode sortMode = SortMode.ByTotalAttr   // Default to sorting by attribute totals
 
           )
         {
-            // 过滤类型
+            // Filter by requested category
             List<IModuleInfo> filtered = (category == ModuleCategory.ALL)
                 ? modules.ToList()
                 : modules.Where(m => GetModuleCategory(m) == category).ToList();
 
             if (filtered.Count < 4) return new List<ModuleSolution>();
 
-            // 预筛选
+            // Prefilter the candidates
             var candidates = PrefilterModules(filtered);
 
             var solutions = new List<ModuleSolution>();
-            var seen = new HashSet<string>(); // 用模块uuid组合去重
+            var seen = new HashSet<string>(); // Deduplicate by module UUID combinations
 
             int attempts = 0;
             int maxAttempts = MaxSolutions * 20;
@@ -571,13 +571,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                     solutions.Add(improved);
                 }
             }
-            // ModuleOptimizer.OptimizeModules 末尾
-            // OptimizeModules(...) 返回前
-            // 末尾排序处：改成根据 sortMode 排序
+            // Final sorting based on the requested mode
             List<ModuleSolution> ordered;
             if (sortMode == SortMode.ByTotalAttr)
             {
-                // “按最高属性等级排序”：先看勾选属性最高等级 → 再看总属性值 → 再看战力
+                // Sort by highest priority attribute level → total attribute value → combat power
                 ordered = solutions
                     .OrderByDescending(s => s.PriorityLevel)
                     .ThenByDescending(s => s.TotalAttrValue)
@@ -586,7 +584,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             }
             else // SortMode.ByScore
             {
-                // “按综合评分排序（战力）”：先战力 → 再勾选属性最高等级 → 再总属性值
+                // Sort by overall score (combat power) → highest priority attribute level → total attribute value
                 ordered = solutions
                     .OrderByDescending(s => s.Score)
                     .ThenByDescending(s => s.PriorityLevel)
@@ -600,33 +598,33 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
 
         }
 
-        // ====== 打印/展示 ======
+        // ====== Printing / display helpers ======
         public void PrintSolutionDetails(ModuleSolution solution, int rank)
         {
             if (solution == null) return;
 
-            Console.WriteLine($"\n=== 第{rank}名搭配 ===");
-            LogResult($"\n=== 第{rank}名搭配 ===");
+            Console.WriteLine($"\n=== Combination #{rank} ===");
+            LogResult($"\n=== Combination #{rank} ===");
 
             int totalValue = solution.AttrBreakdown.Values.Sum();
-            Console.WriteLine($"总属性值: {totalValue}");
-            LogResult($"总属性值: {totalValue}");
+            Console.WriteLine($"Total attribute value: {totalValue}");
+            LogResult($"Total attribute value: {totalValue}");
 
-            Console.WriteLine($"战斗力: {solution.Score:F2}");
-            LogResult($"战斗力: {solution.Score:F2}");
+            Console.WriteLine($"Combat power: {solution.Score:F2}");
+            LogResult($"Combat power: {solution.Score:F2}");
 
             Console.WriteLine("\nModule list:");
-            LogResult("\n模组列表:");
+            LogResult("\nModule list:");
             for (int i = 0; i < solution.Modules.Count; i++)
             {
                 var m = solution.Modules[i];
                 var partsStr = string.Join(", ", m.Parts.Select(p => $"{p.Name}+{p.Value}"));
-                Console.WriteLine($"  {i + 1}. {m.Name} (品质{m.Quality}) - {partsStr}");
-                LogResult($"  {i + 1}. {m.Name} (品质{m.Quality}) - {partsStr}");
+                Console.WriteLine($"  {i + 1}. {m.Name} (Quality {m.Quality}) - {partsStr}");
+                LogResult($"  {i + 1}. {m.Name} (Quality {m.Quality}) - {partsStr}");
             }
 
             Console.WriteLine("\nAttribute distribution:");
-            LogResult("\n属性分布:");
+            LogResult("\nAttribute distribution:");
             foreach (var kv in solution.AttrBreakdown.OrderBy(k => k.Key))
             {
                 Console.WriteLine($"  {kv.Key}: +{kv.Value}");

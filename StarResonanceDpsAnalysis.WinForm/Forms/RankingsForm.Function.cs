@@ -33,7 +33,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
               
                 new AntdUI.Column("MaxInstantDps","Peak DPS"){ Fixed = true,SortOrder=true},
 
-                //new AntdUI.Column("battleTime","战斗时长"),
+                //new AntdUI.Column("battleTime","Battle Duration"),
             };
 
             table_DpsDetailDataTable.Binding(LeaderboardTableDatas.LeaderboardTable);
@@ -83,7 +83,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             //}
             //else
             //{
-            //    //AntdUI.Modal.open(new AntdUI.Modal.Config(this, "获取失败", "获取失败")
+            //    //AntdUI.Modal.open(new AntdUI.Modal.Config(this, "Fetch Failed", "Fetch Failed")
             //    //{
             //    //    CloseIcon = true,
             //    //    Keyboard = false,

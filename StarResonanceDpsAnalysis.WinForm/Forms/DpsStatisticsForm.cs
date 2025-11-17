@@ -32,40 +32,40 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             InitializeComponent();
 
-            // 统一设置窗体默认 GUI 风格（字体、间距、阴影等）
+            // Apply the default window GUI style (fonts, spacing, shadows, etc.)
             FormGui.SetDefaultGUI(this);
-            //设置窗体颜色, 根据配置设置窗体的颜色主题（明亮/深色）
+            // Set the window color theme (light/dark) based on configuration
             FormGui.SetColorMode(this, AppConfig.IsLight);
 
             Text = FormManager.APP_NAME;
 
-            // 从资源文件设置字体
+            // Pull fonts from embedded resources
             SetDefaultFontFromResources();
 
-            // 安装键盘钩子，用于全局热键监听与处理
+            // Install the global keyboard hook for hotkey handling
             RegisterKeyboardHook();
 
-            // 初始化用户设置
+            // Load persisted user preferences
             LoadAppConfig();
 
-            // 读取玩家信息缓存
+            // Prime player information cache
             LoadPlayerCache();
 
-            // 加载技能配置
-            LoadFromEmbeddedSkillConfig(); // 从内置资源读取并加载技能数据（元数据/图标/映射）
+            // Load skill configuration
+            LoadFromEmbeddedSkillConfig(); // Pull skill metadata/icons/mappings from embedded resources
 
-            SetStyle(); // 设置/应用本窗体的个性化样式（定义在同类/局部类的其他部分）
+            SetStyle(); // Apply the form-specific styling (defined in partial class)
 
-            // 监听服务器连接状态变更事件
+            // Observe server connection state changes
             DataStorage.ServerConnectionStateChanged += DataStorage_ServerConnectionStateChanged;
 
-            // 服务器变更事件
+            // Observe server switching events
             DataStorage.ServerChanged += DataStorage_ServerChanged;
 
-            // 启动新分段事件
+            // Listen for new combat segment creation
             DataStorage.NewSectionCreated += DataStorage_NewSectionCreated;
 
-            // 开始监听DPS更新事件
+            // React to DPS updates
             DataStorage.DpsDataUpdated += DataStorage_DpsDataUpdated;
 
             Task.Run(async () =>
@@ -103,27 +103,27 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 窗体加载事件
+        /// Form load event
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void DpsStatistics_Load(object sender, EventArgs e) // 窗体 Load 事件处理
+        private void DpsStatistics_Load(object sender, EventArgs e) // Form load handler
         {
-            // 启动网络抓包/数据采集
+            // Start network capture / data collection
             StartCapture();
 
-            // 重置为上次关闭前的位置与大小
+            // Restore window position and size from last session
             SetStartupPositionAndSize();
 
             EnsureTopMost();
         }
 
         /// <summary>
-        /// 数据包到达事件
+        /// Packet arrival handler
         /// </summary>
         private void Device_OnPacketArrival(object sender, PacketCapture e)
         {
-            // # 抓包事件：回调于数据包到达时（SharpPcap线程）
+            // Capture callback invoked when new packets arrive (SharpPcap thread)
             try
             {
                 var dev = (ICaptureDevice)sender;
@@ -131,13 +131,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
             catch (Exception ex)
             {
-                // # 异常保护：避免抓包线程因未处理异常中断
+                // Guard against unhandled exceptions interrupting the capture thread
                 Console.WriteLine($"Error while processing captured packets: {ex.Message}\r\n{ex.StackTrace}");
             }
         }
 
         /// <summary>
-        /// 监听服务器连接状态变更事件
+        /// Handle server connection state changes
         /// </summary>
         /// <param name="serverConnectionState"></param>
         private void DataStorage_ServerConnectionStateChanged(bool serverConnectionState)
@@ -159,7 +159,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
         }
 
-        #region 钩子
+        #region Hooks
         private KeyboardHook KbHook { get; } = new();
         public void RegisterKeyboardHook()
         {
@@ -275,7 +275,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                     // 昵称/职业/战力（或 UID）的显示文本
                     renderContent[1].Text = $"{(playerInfo?.Name == null ? string.Empty : $"{playerInfo.Name}-")}{playerInfo?.SubProfessionName ?? professionName}({playerInfo?.CombatPower?.ToString() ?? ($"UID: {e.UID}")})";
 
-                    // 总数值 + 平均每秒（DPS/HPS等）
+                    // Aggregate value plus per-second average (DPS/HPS/etc.)
                     renderContent[2].Text = $"{Vsh(value)} ({Vsh(value / Math.Max(1, TimeSpan.FromTicks(e.LastLoggedTick - (e.StartLoggedTick ?? 0)).TotalSeconds))})";
 
                     // 团队占比（四舍五入为整数百分比）
@@ -285,10 +285,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                     return new ProgressBarData()
                     {
                         ID = e.UID, // 绑定玩家 ID
-                        ProgressBarColor = professionName.GetProfessionThemeColor(Config.IsLight), // 进度条颜色随职业变化
-                        ProgressBarCornerRadius = 3, // 圆角大小
-                        ProgressBarValue = (float)value / maxValue, // 当前值/最大值 → 进度条比例
-                        ContentList = renderContent // 渲染文本和图片
+                        ProgressBarColor = professionName.GetProfessionThemeColor(Config.IsLight), // Color adapts to the profession
+                        ProgressBarCornerRadius = 3, // Rounded corner radius
+                        ProgressBarValue = (float)value / maxValue, // Current value / max value → progress ratio
+                        ContentList = renderContent // Rendered text and imagery
                     };
                 }).ToList();
 
@@ -390,13 +390,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         // # 顶部：置顶窗口按钮
-        private void button_AlwaysOnTop_Click(object sender, EventArgs e) // 置顶按钮点击事件
+        private void button_AlwaysOnTop_Click(object sender, EventArgs e) // Toggle-on-top button handler
         {
-            TopMost = !TopMost; // 简化切换
-            button_AlwaysOnTop.Toggle = TopMost; // 同步按钮的视觉状态
+            TopMost = !TopMost; // Flip TopMost state
+            button_AlwaysOnTop.Toggle = TopMost; // Keep button visual in sync
         }
 
-        #region 切换显示类型（支持单次/全程伤害） // 折叠：视图标签与切换逻辑
+        #region Switch between single-fight and full-session views // Collapsible view tabs and toggle logic
 
         /// <summary>
         /// 获取当前统计类型 (伤害 / 治疗 / 承伤 / NPC承伤)
@@ -431,7 +431,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button_SwitchStatisticsMode_Click(object sender, EventArgs e) // 单次/全程切换按钮事件
+        private void button_SwitchStatisticsMode_Click(object sender, EventArgs e) // Single fight / full session toggle handler
         {
             _isShowFullData = !_isShowFullData;
 
@@ -452,7 +452,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button_RefreshDps_Click(object sender, EventArgs e) // 清空按钮点击：触发清空逻辑
+        private void button_RefreshDps_Click(object sender, EventArgs e) // Clear button click handler
         {
             Action clearHandler = _isShowFullData
                 ? HandleClearAllData
@@ -514,15 +514,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         // # 按钮提示气泡（清空）
-        private void button_RefreshDps_MouseEnter(object sender, EventArgs e) // 鼠标进入“清空”按钮时显示提示
+        private void button_RefreshDps_MouseEnter(object sender, EventArgs e) // Show tooltip when hovering the clear button
         {
-            ToolTip(button_RefreshDps, "Clear current data"); // 显示“清空当前数据”的气泡提示
+            ToolTip(button_RefreshDps, "Clear current data"); // Tooltip: highlight the clear action
         }
 
         // # 按钮提示气泡（单次/全程切换）
-        private void button_SwitchStatisticsMode_MouseEnter(object sender, EventArgs e) // 鼠标进入“单次/全程切换”按钮时显示提示
+        private void button_SwitchStatisticsMode_MouseEnter(object sender, EventArgs e) // Hover tooltip for single/full toggle button
         {
-            ToolTip(button_SwitchStatisticsMode, "Toggle: single battle / full session"); // 显示切换提示（原文如此，保留）
+            ToolTip(button_SwitchStatisticsMode, "Toggle: single battle / full session"); // Provide guidance on the toggle choice
         }
 
         /// <summary>
@@ -684,7 +684,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // # 状态翻转：明/暗
             AppConfig.IsLight = !AppConfig.IsLight;
 
-            button_ThemeSwitch.Toggle = !AppConfig.IsLight; // # UI同步：按钮切换状态
+            button_ThemeSwitch.Toggle = !AppConfig.IsLight; // Keep theme toggle button aligned with current mode
 
             // 通知其他窗口更新主题
             FormGui.SetColorMode(this, AppConfig.IsLight);

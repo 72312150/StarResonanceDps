@@ -37,7 +37,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 new AntdUI.Column("CritLuckyHealingDone", "Critical + Lucky Healing"),
                 new AntdUI.Column("MaxInstantHps", "Peak HPS"),
                 new AntdUI.Column("DamageTaken", "Damage Taken"),
-               // new AntdUI.Column("Share","占比"),
+               // new AntdUI.Column("Share","Damage Share"),
                 new AntdUI.Column("DmgShare","Team Damage Share (%)"),
             };
 

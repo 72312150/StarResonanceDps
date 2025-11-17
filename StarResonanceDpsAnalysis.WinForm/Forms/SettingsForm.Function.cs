@@ -14,7 +14,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
     {
         private bool _netcardChanged = false;
         /// <summary>
-        /// 设置默认字体
+        /// Apply fonts sourced from resources
         /// </summary>
         private void SetDefaultFontFromResources()
         {
@@ -32,11 +32,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 将配置文件的设定, 设置到UI上
+        /// Apply persisted configuration values to the UI
         /// </summary>
         private void LoadConfigSetUI()
         {
-            // 避免网卡设备发生变动, 故最好不要将 LoadDevices 操作与 netcardIndex 赋值分离
+            // Keep LoadDevices and netcardIndex assignment together to avoid adapter changes mid-load
             var devices = CaptureDeviceList.Instance;
             LoadDevices(devices);
 
@@ -55,7 +55,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 加载本机所有网卡到下拉框
+        /// Populate the dropdown with all local network adapters
         /// </summary>
         private void LoadDevices(CaptureDeviceList devices)
         {

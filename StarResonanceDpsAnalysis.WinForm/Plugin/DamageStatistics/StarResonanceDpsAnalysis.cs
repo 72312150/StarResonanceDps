@@ -1,56 +1,56 @@
 namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 {
     /// <summary>
-    /// 全程记录（跨战斗，会话级）：通过在 AddDamage/AddHealing/AddTakenDamage 内部打点，实时累加
-    /// - Start(): 开启记录（不会被 ClearAll 清掉）
-    /// - Stop(): 关闭记录（保留数据，可随时快照）
-    /// - Reset(): 手动清空本会话
-    /// - TakeSnapshot(): 生成“全程快照”（含玩家聚合与技能明细）
-    /// - GetTeamDps()/GetPlayerDps(): 全程秒伤
+    /// Session-wide recorder (spans multiple battles): increments in real time via AddDamage/AddHealing/AddTakenDamage hooks.
+    /// - Start(): begin recording (ClearAll will not remove this state)
+    /// - Stop(): end recording while keeping the data for on-demand snapshots
+    /// - Reset(): manually clear the current session
+    /// - TakeSnapshot(): create a “full session snapshot” (includes player aggregates and skill breakdowns)
+    /// - GetTeamDps()/GetPlayerDps(): compute per-second damage for the session
     /// </summary>
     public static class FullRecord
     {
-        // # 导航 / 分类索引（仅注释，不影响代码）：
-        // #   1) 通用工具与数值格式: R2()
-        // #   2) Shim 只读外观（与 StatisticData 口径对齐）: Shim.StatsLike / Shim.PlayerLike / Shim.TakenOverviewLike
-        // #   3) UI 视图投影: StatView / ToView() / MergeStats()
-        // #   4) 对外统计查询（与 StatisticData 一致口径）: GetPlayerDamageStats/HealingStats/TakenStats
-        // #   5) 会话状态与控制: IsRecording/StartedAt/EndedAt + Start/Stop/Reset/GetSessionTotalTimeSpan
-        // #   6) 快照入口与历史: TakeSnapshot / SessionHistory / 内部 StopInternal/EffectiveEndTime
-        // #   7) 写入点（由解码管线调用）: RecordDamage/RecordHealing/RecordTakenDamage + UpdateRealtimeDps
-        // #   8) 快照 & 秒伤对外接口: GetPlayersWithTotals/GetPlayersWithTotalsArray/GetTeamDps/GetPlayerDps 等
-        // #   9) 快照时间检索: GetAllPlayersDataBySnapshotTime/GetPlayerSkillsBySnapshotTime
-        // #  10) 内部实现工具: SessionSeconds/GetOrCreate/Accumulate/ToSkillSummary
-        // #  11) 内部数据结构: PlayerAcc / StatAcc
+        // # Navigation / category index (documentation only):
+        // #   1) Common helpers & number formatting: R2()
+        // #   2) Shim read-only facades (aligned with StatisticData): Shim.StatsLike / Shim.PlayerLike / Shim.TakenOverviewLike
+        // #   3) UI projection helpers: StatView / ToView() / MergeStats()
+        // #   4) External statistics queries (matching StatisticData): GetPlayerDamageStats/HealingStats/TakenStats
+        // #   5) Session state & control: IsRecording/StartedAt/EndedAt + Start/Stop/Reset/GetSessionTotalTimeSpan
+        // #   6) Snapshot entry points & history: TakeSnapshot / SessionHistory / internal StopInternal/EffectiveEndTime
+        // #   7) Write hooks (invoked by the decode pipeline): RecordDamage/RecordHealing/RecordTakenDamage + UpdateRealtimeDps
+        // #   8) Snapshot & DPS public APIs: GetPlayersWithTotals/GetPlayersWithTotalsArray/GetTeamDps/GetPlayerDps/etc.
+        // #   9) Snapshot time queries: GetAllPlayersDataBySnapshotTime/GetPlayerSkillsBySnapshotTime
+        // #  10) Internal utilities: SessionSeconds/GetOrCreate/Accumulate/ToSkillSummary
+        // #  11) Internal data structures: PlayerAcc / StatAcc
 
         // ======================================================================
-        // # 分类 1：通用工具与数值格式
+        // # Section 1: Common helpers and numeric formatting
         // ======================================================================
 
-        // # 通用：两位小数四舍五入（远离零）
+        // # Common helper: round to two decimals (away from zero)
         private static double R2(double v) => Math.Round(v, 2, MidpointRounding.AwayFromZero);
 
         // ======================================================================
-        // # 分类 2：Shim 只读外观（对齐 StatisticData 接口口径，便于 UI 复用）
+        // # Section 2: Shim read-only facades (aligned with StatisticData for UI reuse)
         // ======================================================================
         public static class Shim
         {
-            // # —— 与 PlayerData.*Stats 口径一致的“只读统计对象” —— 
-            // # 用于向上层提供只读统计视图，避免直接暴露内部累加器
+            // # — Read-only statistical object mirroring PlayerData.*Stats —
+            // # Provides read-only views to upper layers without exposing internal accumulators
             public sealed class StatsLike
             {
                 public ulong Total, Normal, Critical, Lucky;
                 public int CountTotal, CountNormal, CountCritical, CountLucky;
-                public ulong MaxSingleHit, MinSingleHit; // Min=0 表示无记录
-                public double ActiveSeconds;             // 用于计算 Dps/Hps
+                public ulong MaxSingleHit, MinSingleHit; // Min=0 means no record
+                public double ActiveSeconds;             // Used when computing DPS/HPS
 
                 public double GetAveragePerHit() => CountTotal > 0 ? R2((double)Total / CountTotal) : 0.0;
                 public double GetCritRate() => CountTotal > 0 ? R2((double)CountCritical * 100.0 / CountTotal) : 0.0;
                 public double GetLuckyRate() => CountTotal > 0 ? R2((double)CountLucky * 100.0 / CountTotal) : 0.0;
             }
 
-            // # —— 与 StatisticData._manager.GetOrCreate(uid) 返回的“p”相似的外观 —— 
-            // # 上层可像使用当前战斗统计那样读“全程统计”
+            // # — Facade similar to StatisticData._manager.GetOrCreate(uid) —
+            // # Allows callers to consume session stats the same way they use live stats
             public sealed class PlayerLike
             {
                 public StatsLike DamageStats { get; init; } = new();
@@ -61,7 +61,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 public double GetTotalHps() => HealingStats.ActiveSeconds > 0 ? R2(HealingStats.Total / HealingStats.ActiveSeconds) : 0.0;
             }
 
-            // # 承伤总览（用于 UI 顶部概览）
+            // # Taken-damage overview (used by the UI summary header)
             public sealed class TakenOverviewLike
             {
                 public ulong Total { get; init; }
@@ -70,30 +70,30 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 public ulong MinSingleHit { get; init; }
             }
 
-            // # 内部：将累加器转换为只读 StatsLike
+            // # Internal: convert an accumulator into a read-only StatsLike
             private static StatsLike From(StatAcc s)
             {
-                // # 将内部累加器 StatAcc 投影为只读 StatsLike，供 UI/外部展示
+                // # Project the internal StatAcc into a read-only StatsLike for UI/external display
                 return new StatsLike
                 {
                     Total = s.Total,
                     Normal = s.Normal,
                     Critical = s.Critical,
-                    Lucky = s.Lucky + s.CritLucky,   // ★ 合并
+                    Lucky = s.Lucky + s.CritLucky,   // Merge lucky + crit-lucky contributions
                     CountTotal = s.CountTotal,
                     CountNormal = s.CountNormal,
                     CountCritical = s.CountCritical,
                     CountLucky = s.CountLucky,
                     MaxSingleHit = s.MaxSingleHit,
-                    MinSingleHit = s.MinSingleHit, // 0 代表没记录
+                    MinSingleHit = s.MinSingleHit, // 0 indicates no record
                     ActiveSeconds = s.ActiveSeconds
                 };
             }
 
-            // # 内部：聚合一组统计（常用于承伤按技能 → 玩家层合并）
+            // # Internal: aggregate a set of StatAcc (e.g., merge per-skill taken damage into player totals)
             private static StatAcc MergeStats(IEnumerable<StatAcc> items)
             {
-                // # 聚合多项 StatAcc：用于把逐技能合并为玩家层（承伤等）
+                // # Merge multiple StatAcc entries into a player-level aggregate (taken damage, etc.)
                 var acc = new StatAcc();
                 ulong min = 0; bool hasMin = false;
                 double maxActiveSecs = 0;
@@ -118,26 +118,26 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 }
 
                 acc.MinSingleHit = hasMin ? min : 0;
-                acc.ActiveSeconds = maxActiveSecs; // 不相加，取最大活跃时长，避免夸大分母
+                acc.ActiveSeconds = maxActiveSecs; // Use the maximum active time to avoid inflating the denominator
                 return acc;
             }
 
             /// <summary>
-            /// # 获取“只读玩家视图”：从 FullRecord 内部数据投影为与 StatisticData 类似的结构
+            /// Obtain a read-only player view by projecting FullRecord data into a StatisticData-like structure.
             /// </summary>
             public static PlayerLike GetOrCreate(long uid)
             {
-                // # 以 FullRecord 的内部累加为来源，返回近似 StatisticData 的“只读外观”
+                // # Use FullRecord accumulators to return a facade similar to StatisticData
                 lock (_sync)
                 {
                     if (!_players.TryGetValue(uid, out var p))
                         return new PlayerLike();
 
-                    // Damage / Healing 直接来自 FullRecord 的玩家聚合器
+                    // Damage / Healing pulled directly from the FullRecord player aggregators
                     var dmg = From(p.Damage);
                     var heal = From(p.Healing);
 
-                    // Taken：按技能合并（若没有按技能承伤，则用 TakenDamage + 会话秒数兜底）
+                    // Taken: merge per-skill stats; if none exist, fall back to TakenDamage + session duration
                     StatAcc takenAcc;
                     if (p.TakenSkills != null && p.TakenSkills.Count > 0)
                         takenAcc = MergeStats(p.TakenSkills.Values);
@@ -159,11 +159,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             }
 
             /// <summary>
-            /// # 承伤总览（合计、每秒均值、最大/最小单次）
+            /// Taken damage overview (total, per-second average, max/min hit).
             /// </summary>
             public static TakenOverviewLike GetPlayerTakenOverview(long uid)
             {
-                // # 承伤总览：总量/每秒均值/单击最大最小
+                // # Overview of taken damage: total, per-second average, max/min
                 var p = GetOrCreate(uid);
                 var t = p.TakenStats;
                 double perSec = t.ActiveSeconds > 0 ? R2(t.Total / t.ActiveSeconds) : 0.0;
@@ -179,10 +179,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         // ======================================================================
-        // # 分类 3：UI 只读统计视图（StatView 映射与合并工具）
+        // # Section 3: UI read-only statistic projections (StatView mapping/merging)
         // ======================================================================
 
-        // # === UI 只读统计视图 ===
+        // # === UI read-only StatView representation ===
         public readonly record struct StatView(
             ulong Total,
             ulong Normal,
@@ -196,14 +196,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             ulong MinSingleHit,
             double PerSecond,      // = Total / ActiveSeconds(>0 ?)
             double AveragePerHit,  // = Total / CountTotal(>0 ?)
-            double CritRate,       // %，两位小数
+            double CritRate,       // Percentage with two decimal places
             double LuckyRate       // %
         );
 
-        // # 将内部累加器 → UI 展示用视图
+        // # Convert an internal accumulator into a UI-facing view
         private static StatView ToView(StatAcc s)
         {
-            // # 将内部累加器映射为 UI 展示用视图（带每秒/均伤/暴击率/幸运率）
+            // # Map the accumulator into a UI-ready view (per-second, averages, crit/lucky rates)
             int ct = s.CountTotal;
             double secs = s.ActiveSeconds > 0 ? s.ActiveSeconds : 0;
             double perSec = secs > 0 ? R2(s.Total / secs) : 0;
@@ -211,8 +211,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             double crit = ct > 0 ? R2((double)s.CountCritical * 100.0 / ct) : 0.0;
             double lucky = ct > 0 ? R2((double)s.CountLucky * 100.0 / ct) : 0.0;
 
-            ulong min = s.MinSingleHit; // StatAcc 里 Min=0 表示未赋值，直接返回 0 即可
-            ulong luckyCombined = s.Lucky + s.CritLucky;   // ★ 关键：合并
+            ulong min = s.MinSingleHit; // In StatAcc, Min=0 means “not set yet”, so return 0
+            ulong luckyCombined = s.Lucky + s.CritLucky;   // ★ Key: combine the lucky buckets
             return new StatView(
                 Total: s.Total,
                 Normal: s.Normal,
@@ -231,7 +231,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             );
         }
 
-        // # 合并一组 StatAcc（用于 Taken：把各技能承伤合成玩家总承伤视图）
+        // # Merge a set of StatAcc entries (used for taken damage: collapse per-skill stats into a player total)
         private static StatAcc MergeStats(IEnumerable<StatAcc> items)
         {
             var acc = new StatAcc();
@@ -260,15 +260,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             }
 
             acc.MinSingleHit = hasMin ? min : 0;
-            acc.ActiveSeconds = maxActiveSecs; // 取最大活跃秒数，避免相加放大
+            acc.ActiveSeconds = maxActiveSecs; // Use the maximum active seconds to avoid inflating totals
             return acc;
         }
 
         // ======================================================================
-        // # 分类 4：对外统计查询（口径对齐 StatisticData）
+        // # Section 4: External statistics queries (aligned with StatisticData)
         // ======================================================================
 
-        /// <summary>获取玩家全程伤害统计（UI 视图口径）。</summary>
+        /// <summary>Retrieve a player's session-wide damage statistics (UI view).</summary>
         public static StatView GetPlayerDamageStats(long uid)
         {
             lock (_sync)
@@ -279,7 +279,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             }
         }
 
-        /// <summary>获取玩家全程治疗统计（UI 视图口径）。</summary>
+        /// <summary>Retrieve a player's session-wide healing statistics (UI view).</summary>
         public static StatView GetPlayerHealingStats(long uid)
         {
             lock (_sync)
@@ -290,7 +290,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             }
         }
 
-        /// <summary>获取玩家全程承伤统计（UI 视图口径）。</summary>
+        /// <summary>Retrieve a player's session-wide taken-damage statistics (UI view).</summary>
         public static StatView GetPlayerTakenStats(long uid)
         {
             lock (_sync)
@@ -300,8 +300,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                     if (p.TakenSkills.Count > 0)
                         return ToView(MergeStats(p.TakenSkills.Values));
 
-                    // 没有逐技能承伤明细时，至少返回 Total；秒数兜底用会话时长
-                    var secs = GetSessionTotalTimeSpan().TotalSeconds; // 你已实现的会话秒数API
+                    // When no per-skill details exist, return at least Total; fall back to session duration for seconds
+                    var secs = GetSessionTotalTimeSpan().TotalSeconds; // Uses the existing session-duration API
                     var fake = new StatAcc { Total = p.TakenDamage, ActiveSeconds = secs > 0 ? secs : 0 };
                     return ToView(fake);
                 }
@@ -310,10 +310,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         // ======================================================================
-        // # 分类 4.5：死亡统计查询（基于 TakenSkills.CountDead）
+        // # Section 4.5: Death statistics queries (based on TakenSkills.CountDead)
         // ======================================================================
 
-        /// <summary>获取团队在当前会话的总死亡次数（所有玩家之和）。</summary>
+        /// <summary>Get the total number of deaths for the team during the current session.</summary>
         public static int GetTeamDeathCount()
         {
             int teamDeaths = 0;
@@ -327,7 +327,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             return teamDeaths;
         }
 
-        /// <summary>获取指定玩家在当前会话的死亡次数。</summary>
+        /// <summary>Get the number of deaths for a specific player during the current session.</summary>
         public static int GetPlayerDeathCount(long uid)
         {
             lock (_sync)
@@ -341,8 +341,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 获取“所有玩家”的死亡次数清单（默认降序）。
-        /// includeZero=false 时，会过滤掉死亡数为 0 的玩家。
+        /// Return a death-count roster for all players (descending by default).
+        /// When includeZero=false, players with zero deaths are filtered out.
         /// </summary>
         public static List<(long Uid, string Nickname, int CombatPower, string Profession, string? SubProfession, int Deaths)>
             GetAllPlayerDeathCounts(bool includeZero = false)
@@ -361,12 +361,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                     result.Add((p.Uid, p.Nickname, p.CombatPower, p.Profession, p.SubProfession, deaths));
             }
 
-            return result.OrderByDescending(x => x.Item6).ToList(); // 按 Deaths 降序
+            return result.OrderByDescending(x => x.Item6).ToList(); // Sort descending by death count
         }
 
         /// <summary>
-        /// 获取“某玩家按技能”的死亡次数细分（降序）。
-        /// 返回：SkillId, SkillName, Deaths
+        /// Get a per-skill breakdown of a player's deaths (descending).
+        /// Returns tuples of SkillId, SkillName, Deaths.
         /// </summary>
         public static List<(long SkillId, string SkillName, int Deaths)>
             GetPlayerDeathBreakdownBySkill(long uid)
@@ -391,10 +391,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             }
         }
         // ======================================================================
-        // # 分类 5：对外绑定的行结构（列表项定义）
+        // # Section 5: Row definitions exposed for external binding
         // ======================================================================
 
-        // # 用于对外绑定的行结构（可按需增删字段）
+        // # Row structure for external binding (extend fields as needed)
         public sealed record FullPlayerTotal(
                 long Uid,
                 string Nickname,
@@ -404,58 +404,58 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 ulong TotalDamage,
                 ulong TotalHealing,
                 ulong TakenDamage,
-                double Dps,   // 全程秒伤（只算伤害）
-                double Hps    // 全程秒疗
+                double Dps,   // Session DPS (damage only)
+                double Hps    // Session HPS
             );
 
         // ======================================================================
-        // # 分类 6：会话状态与控制（启动/停止/重置/时长）
+        // # Section 6: Session state and control (start / stop / reset / duration)
         // ======================================================================
 
-        // # 会话状态字段 —— 记录当前是否在录制，以及开始/结束时间点
+        // # Session state fields — track whether recording is active and start/end timestamps
         public static bool IsRecording { get; private set; }
         public static DateTime? StartedAt { get; private set; }
         public static DateTime? EndedAt { get; private set; }
 
-        // # 彻底取消“事件空闲期自动停止”机制：不再跟踪 LastEventAt / 不再使用定时器
-        // # 保留占位但不再使用（如需可直接删除字段与引用）
+        // # Fully disable the “idle auto-stop” mechanism: no longer track LastEventAt or use timers.
+        // # Field retained for compatibility; remove if no longer referenced.
         private static readonly bool DisableIdleAutoStop = true;
 
-        // # 持久累加存储：跨战斗的全程聚合
+        // # Persistent accumulators: session aggregates spanning battles
         private static readonly Dictionary<long, PlayerAcc> _players = new();
 
-        // # ★ 全程快照历史（Stop 或 自动停止时都会入栈）
+        // # ★ Session snapshot history (pushed on Stop or automatic stop)
         private static readonly List<FullSessionSnapshot> _sessionHistory = new();
-        public static IReadOnlyList<FullSessionSnapshot> SessionHistory => _sessionHistory; // 只读暴露，便于 UI 历史查看
+        public static IReadOnlyList<FullSessionSnapshot> SessionHistory => _sessionHistory; // Exposed as read-only for UI consumption
 
-        // # —— 新增：实时队伍 DPS（便于 UI 显示）
-        public static double TeamRealtimeDps { get; private set; }     // 基于“有效会话秒数”的实时队伍DPS（只算伤害）
+        // # New: realtime team DPS (for UI display)
+        public static double TeamRealtimeDps { get; private set; }     // Based on effective session seconds (damage only)
 
-        // # 区域：控制（启动/停止/重置） ------------------------------------------------------
-        #region 控制
+        // # Control region (start / stop / reset) ------------------------------------------------------
+        #region Control
 
         /// <summary>
-        /// 启动全程记录：
-        /// - 若已在记录则直接返回；
-        /// - 首次启动设置 StartedAt；
-        /// - EndedAt 清空以表示进行中。
+        /// Start session-wide recording:
+        /// - If a session is already running, return immediately;
+        /// - On the very first start, capture StartedAt;
+        /// - Clear EndedAt to indicate the session is active.
         /// </summary>
         public static void Start()
         {
             if (IsRecording) return;
 
             IsRecording = true;
-            if (StartedAt is null) StartedAt = DateTime.Now; // 记录首次启动时间
+            if (StartedAt is null) StartedAt = DateTime.Now; // Track the first start timestamp
             EndedAt = null;
         }
 
         private static readonly object _sync = new();
 
         /// <summary>
-        /// 手动停止全程记录（不清空数据）：
-        /// - 如在录制，生成一次会话快照；
-        /// - 然后清空“当前会话”累计数据（历史快照保留）；
-        /// - 重置时间基，准备新会话。
+        /// Manually stop session recording without clearing historical data:
+        /// - If currently recording, emit a session snapshot;
+        /// - Clear only the “current session” aggregates (snapshots remain intact);
+        /// - Reset time markers so a new session can begin.
         /// </summary>
         public static void Stop()
         {
@@ -468,7 +468,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 // 2) 清【当前会话】累计（不动历史）
                 _players.Clear();
                 TeamRealtimeDps = 0;
-                _npcs.Clear();          // ★ 全程 NPC 会话数据清空
+                _npcs.Clear();          // Reset NPC session accumulators
 
 
                 // 3) 重置时间基，准备新会话
@@ -478,7 +478,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 清空快照
+        /// Clear all stored session snapshots
         /// </summary>
         public static void ClearSessionHistory()
         {
@@ -491,32 +491,32 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 
 
         /// <summary>
-        /// 重置当前会话：
-        /// - 如有进行中的或已有数据的会话，先保存一次快照；
-        /// - 清除当前会话累计与时间基；
-        /// - IsRecording 置为 true（进入新会话录制状态）。
+        /// Reset the current session:
+        /// - If a session is active or data exists, persist a snapshot first;
+        /// - Clear the current session aggregates and time markers;
+        /// - Set IsRecording to true to enter a fresh recording state.
         /// </summary>
         public static void Reset(bool preserveHistory = true)
         {
 
-            if (AppConfig.ClearAllDataWhenSwitch && preserveHistory) return;//如果是0，则不清除数据
+            if (AppConfig.ClearAllDataWhenSwitch && preserveHistory) return; // Honor global config: skip clearing when switch protection is on
             lock (_sync)
             {
                 // 1) 如有进行中的或已有数据的会话，先入一条快照（不影响历史）
                 bool hasData = _players.Count > 0 || StartedAt != null;
                 if (hasData)
                 {
-                    // StopInternal: 固定 EndedAt，生成快照，加入 _sessionHistory
+                    // StopInternal: lock in EndedAt, create a snapshot, append to _sessionHistory
                     StopInternal(auto: false);
                 }
 
                 // 2) 清【当前会话】累计（不动历史，除非显式要求清）
                 _players.Clear();
                 TeamRealtimeDps = 0;
-                _npcs.Clear();          // ★
+                _npcs.Clear();          // Reset NPC accumulators
 
                 // 3) 清时间基与录制状态
-                StartedAt = DateTime.Now;   // 原来是 null
+                StartedAt = DateTime.Now;   // Resume with a fresh start time
                 EndedAt = null;
                 IsRecording = true;
 
@@ -526,9 +526,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 获取当前会话总时长（TimeSpan）。
-        /// - 进行中：Now - StartedAt
-        /// - 已停止：EndedAt - StartedAt
+        /// Get the total duration of the current session (TimeSpan).
+        /// - While recording: Now - StartedAt
+        /// - After stopping: EndedAt - StartedAt
         /// </summary>
         public static TimeSpan GetSessionTotalTimeSpan()
         {
@@ -558,29 +558,29 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         #endregion
 
         // ======================================================================
-        // # 分类 7：列表数据获取 / 汇总：用于 UI 绑定与展示
+        // # Category 7: list retrieval / aggregation helpers for UI binding and display
         // ======================================================================
 
         /// <summary>
-        /// 获取“此刻”的全程逐玩家总量清单（默认按总伤害降序）。
-        /// includeZero=false 时会过滤掉三项全为 0 的玩家。
-        /// Dps/Hps 分母为各自“有效活跃秒数”（无活跃时回退会话时长）。
+        /// Retrieve the current session totals per player (sorted by total damage descending).
+        /// When includeZero=false, players with zero damage/healing/taken values are filtered out.
+        /// DPS/HPS denominators use each player’s active seconds (falling back to session duration when inactive).
         /// </summary>
         public static List<FullPlayerTotal> GetPlayersWithTotals(bool includeZero = false)
         {
             var snap = TakeSnapshot();
 
-            // 不再用 snap.Duration 作为统一分母
+            // Do not rely on snap.Duration as a universal denominator
             var list = new List<FullPlayerTotal>(snap.Players.Count);
             foreach (var kv in snap.Players)
             {
                 var p = kv.Value;
 
-                // 各自有效分母（回退到会话时长以兜底）
+                // Determine effective denominators (fallback to session length as a safety net)
                 var secsDmg = p.ActiveSecondsDamage > 0 ? p.ActiveSecondsDamage : snap.Duration.TotalSeconds;
                 var secsHeal = p.ActiveSecondsHealing > 0 ? p.ActiveSecondsHealing : snap.Duration.TotalSeconds;
 
-                // includeZero 过滤逻辑保持不变
+                // Preserve the includeZero filtering logic
                 if (!includeZero && p.TotalDamage == 0 && p.TotalHealing == 0 && p.TakenDamage == 0)
                     continue;
 
@@ -602,14 +602,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 查看全程战斗时间（HH:mm:ss，基于 Damage 有效时长最大值）
-        /// 用于 UI 文本显示。
+        /// Return the overall combat duration (HH:mm:ss based on the maximum damage active time),
+        /// primarily for UI text display.
         /// </summary>
         public static string GetEffectiveDurationString()
         {
             double activeSeconds = 0;
 
-            // 先在锁内把集合定格为数组，锁外再计算
+            // Snapshot the collection inside the lock; perform calculations afterwards
             PlayerAcc[] playersSnapshot;
             lock (_sync)
             {
@@ -627,21 +627,21 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 便于外层直接 ToArray 绑定（示例对齐 StatisticData 用法）。
+        /// Convenience helper so callers can directly bind via ToArray (mirrors StatisticData usage).
         /// </summary>
         public static FullPlayerTotal[] GetPlayersWithTotalsArray(bool includeZero = false)
             => GetPlayersWithTotals(includeZero).ToArray();
 
         // ======================================================================
-        // # 分类 8：内部停止与有效结束时间（快照辅助）
+        // # Category 8: internal stop handling and effective end time (snapshot helpers)
         // ======================================================================
 
-        // # 内部调用
+        // # Internal helper
         /// <summary>
-        /// 内部停止封装：
-        /// - auto=true 表示由空闲超时触发；
-        /// - 固化 EndedAt；
-        /// - 生成快照并写入历史。
+        /// Internal stop wrapper:
+        /// - auto=true indicates the stop was triggered by idle timeout;
+        /// - Fix EndedAt to mark the session end;
+        /// - Generate a snapshot and append it to history.
         /// </summary>
         private static void StopInternal(bool auto)
         {
@@ -659,21 +659,21 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 
             if (!hasAnyData) return;
 
-            var snapshot = TakeSnapshot(); // 见下一节我们也会把 TakeSnapshot 做成快照安全
+            var snapshot = TakeSnapshot(); // Snapshot-safe even when called from auto-stop
             if (snapshot.Duration.TotalSeconds >= 1 || hasAnyData)
             {
-                lock (_sync) // 写历史列表也建议锁一下
+                lock (_sync) // Guard history list mutations as well
                 {
                     _sessionHistory.Add(snapshot);
                 }
             }
         }
 
-        // # 内部调用
+        // # Internal helper
         /// <summary>
-        /// 获取“有效结束时间”：
-        /// - 录制中：以 Now 为结束点；
-        /// - 已停止：使用 EndedAt。
+        /// Determine the “effective end time”:
+        /// - When recording, use the current time as the endpoint;
+        /// - After stopping, reuse EndedAt.
         /// </summary>
         private static DateTime EffectiveEndTime()
         {
@@ -682,34 +682,34 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         // ======================================================================
-        // # 分类 9：写入点（由外部解码/事件管线调用）
+        // # Category 9: write entry points invoked by the decoding/event pipeline
         // ======================================================================
 
-        #region 内嵌写入点会调用的 API（只加一行即可）
+        #region Embedded write APIs (only require a single call from the pipeline)
 
         /// <summary>
-        /// 记录伤害事件：
-        /// - 聚合到玩家总伤害与对应技能；
-        /// - 更新实时 DPS（基于伤害侧有效秒数）；
-        /// - 忽略 0 值。
+        /// Record a damage event:
+        /// - Aggregate into player totals and per-skill buckets;
+        /// - Update realtime DPS (based on damage-active seconds);
+        /// - Ignore zero values.
         /// </summary>
         public static void RecordDamage(
             long uid, long skillId, ulong value, bool isCrit, bool isLucky, ulong hpLessen,
             string nickname, int combatPower, string profession,
-            string? damageElement = null, bool isCauseLucky = false, string? subProfession = null // ★ 新增
+            string? damageElement = null, bool isCauseLucky = false, string? subProfession = null
         )
         {
             if (!IsRecording || value == 0) return;
             var p = GetOrCreate(uid, nickname, combatPower, profession, subProfession);
 
-            // ① 顶层聚合：带 isCauseLucky
+            // ① Aggregate at the player level, preserving isCauseLucky
             Accumulate(p.Damage, value, isCrit, isLucky, hpLessen, isCauseLucky);
 
-            // ② 逐技能：带 isCauseLucky
+            // ② Aggregate per skill, also tracking isCauseLucky
             var s = p.DamageSkills.TryGetValue(skillId, out var tmp) ? tmp : (p.DamageSkills[skillId] = new StatAcc());
             Accumulate(s, value, isCrit, isLucky, hpLessen, isCauseLucky);
 
-            // ③ 可选：按元素细分（如果你传了 element）
+            // ③ Optional: break down by element when provided
             if (!string.IsNullOrEmpty(damageElement))
             {
                 if (!p.DamageSkillsByElement.TryGetValue(skillId, out var byElem))
@@ -721,45 +721,45 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 Accumulate(es, value, isCrit, isLucky, hpLessen, isCauseLucky);
             }
 
-            // —— 更新实时DPS（保持原逻辑）
+            // Update realtime DPS (same behavior as before)
             UpdateRealtimeDps(p);
 
         }
 
         /// <summary>
-        /// 记录治疗事件：
-        /// - 聚合到玩家总治疗与对应技能；
-        /// - 更新“治疗侧”实时指标（RealtimeDpsHealing）；
-        /// - 忽略 0 值。
+        /// Record a healing event:
+        /// - Aggregate into player totals and per-skill buckets;
+        /// - Update realtime healing metrics (RealtimeDpsHealing);
+        /// - Ignore zero values.
         /// </summary>
         public static void RecordHealing(
             long uid, long skillId, ulong value, bool isCrit, bool isLucky,
             string nickname, int combatPower, string profession,
-            string? damageElement = null, bool isCauseLucky = false, ulong targetUuid = 0, string? subProfession = null // ★ 新增
+            string? damageElement = null, bool isCauseLucky = false, ulong targetUuid = 0, string? subProfession = null
         )
 
         {
             if (!IsRecording || value == 0) return;
             var p = GetOrCreate(uid, nickname, combatPower, profession, subProfession);
 
-            // 顶层
+            // Player aggregate
             Accumulate(p.Healing, value, isCrit, isLucky, 0, isCauseLucky);
 
-            // 逐技能
+            // Per-skill aggregate
             var s = p.HealingSkills.TryGetValue(skillId, out var tmp) ? tmp : (p.HealingSkills[skillId] = new StatAcc());
             Accumulate(s, value, isCrit, isLucky, 0, isCauseLucky);
 
-            // 可选：按元素
+            // Optional: per-element breakdown
             if (!string.IsNullOrEmpty(damageElement))
             {
-                if (!p.DamageSkillsByElement.TryGetValue(skillId, out var byElem)) // 也可以单独建 HealingSkillsByElement，看你是否要分开
+                if (!p.DamageSkillsByElement.TryGetValue(skillId, out var byElem)) // Reuse the same map; split if you prefer separate structures
                     byElem = p.DamageSkillsByElement[skillId] = new Dictionary<string, StatAcc>();
                 if (!byElem.TryGetValue(damageElement, out var es))
                     es = byElem[damageElement] = new StatAcc();
                 Accumulate(es, value, isCrit, isLucky, 0, isCauseLucky);
             }
 
-            // 可选：按目标
+            // Optional: per-target breakdown
             if (targetUuid != 0)
             {
                 if (!p.HealingSkillsByTarget.TryGetValue(skillId, out var byTarget))
@@ -774,61 +774,61 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 记录承伤事件：
-        /// - 聚合承伤总量与逐技能承伤（hpLessen 写入）；
-        /// - 不计入队伍/玩家DPS（仅用于受击统计与 UI 展示）；
-        /// - 忽略 0 值。
+        /// Record a taken-damage event:
+        /// - Aggregate total and per-skill taken damage (hpLessen applied);
+        /// - Exclude from team/player DPS (used solely for defensive stats and UI display);
+        /// - Ignore zero values unless hpLessen provides a fallback.
         /// </summary>
         public static void RecordTakenDamage(
             long uid, long skillId, ulong value, bool isCrit, bool isLucky, ulong hpLessen,
             string nickname, int combatPower, string profession,
-            int damageSource = 0, bool isMiss = false, bool isDead = false // ★ 新增
+            int damageSource = 0, bool isMiss = false, bool isDead = false
         )
 
         {
-            if (!IsRecording) return; // 注意：承伤 value 可能为 0（比如被格挡/护盾），不能一刀切 return
+            if (!IsRecording) return; // Note: taken-damage value can be 0 (blocks/shields); do not exit prematurely
             var p = GetOrCreate(uid, nickname, combatPower, profession);
 
-            // 逐技能桶
+            // Per-skill bucket
             var s = p.TakenSkills.TryGetValue(skillId, out var tmp) ? tmp : (p.TakenSkills[skillId] = new StatAcc());
 
-            // ① Miss：只计数，不入数值
+            // ① Miss: increment counters only — no value recorded
             if (isMiss)
             {
                 s.CountMiss++;
                 return;
             }
 
-            // ② Dead：计数 + 若有数值继续入库
+            // ② Dead: count occurrences and continue recording values when present
             if (isDead)
                 s.CountDead++;
 
-            // hpLessen 兜底
+            // hpLessen serves as the fallback magnitude
             var lessen = hpLessen > 0 ? hpLessen : value;
 
-            // 玩家总承伤累计真实扣血
+            // Accumulate actual taken damage at the player level
             p.TakenDamage += lessen;
 
-            // 有效承伤再记数值（value 可能为 0，按你协议实际情况决定是否过滤）
+            // Only persist meaningful taken damage (value may be 0, depending on protocol semantics)
             if (value > 0 || lessen > 0)
             {
-                Accumulate(s, value, isCrit, isLucky, lessen, false /* 因果幸运一般不用于承伤 */);
+                Accumulate(s, value, isCrit, isLucky, lessen, false /* cause-lucky is typically not applied to taken damage */);
             }
 
-            // 承伤不进队伍DPS；仅刷新玩家实时显示（保持你原逻辑）
+            // Taken damage does not enter team DPS; just refresh realtime display for the player
             UpdateRealtimeDps(p, includeHealing: false);
 
         }
 
         /// <summary>
-        /// 更新玩家与队伍的实时 DPS：
-        /// - 玩家侧：Damage/Healing 分别按自身 ActiveSeconds 计算；
-        /// - 技能侧：逐技能 RealtimeDps 按各自 ActiveSeconds；
-        /// - 队伍侧：总伤害 / 全队最大“伤害活跃秒数”。
+        /// Update realtime DPS for players and the team:
+        /// - Player totals: damage/healing each use their own ActiveSeconds;
+        /// - Per-skill: realtime DPS calculated from each skill’s ActiveSeconds;
+        /// - Team: total damage divided by the maximum damage-active seconds across the roster.
         /// </summary>
         private static void UpdateRealtimeDps(PlayerAcc p, bool includeHealing = true)
         {
-            // 玩家聚合：按事件有效时长计算
+            // Player aggregate based on effective event duration
             var dmgSecs = p.Damage.ActiveSeconds;
             p.RealtimeDpsDamage = dmgSecs > 0 ? R2(p.Damage.Total / dmgSecs) : 0;
 
@@ -838,7 +838,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 p.RealtimeDpsHealing = healSecs > 0 ? R2(p.Healing.Total / healSecs) : 0;
             }
 
-            // 逐技能（可选：也按各自有效时长计算）
+            // Per-skill snapshots (optionally using each skill’s active duration)
             foreach (var kv in p.DamageSkills)
             {
                 var s = kv.Value;
@@ -855,7 +855,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 }
             }
 
-            // 队伍实时DPS：用“全队有效时长（取最大）”更贴近“团队在打的时间”
+            // Team realtime DPS: rely on the maximum active duration to reflect actual fight time
             double teamActiveSecs = 0;
             foreach (var pp in _players.Values)
                 teamActiveSecs = Math.Max(teamActiveSecs, pp.Damage.ActiveSeconds);
@@ -870,7 +870,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 
 
         // ======================================================================
-        // # 分类 9.5：NPC 全程统计（会话级，不分技能，只按攻击者聚合）
+        // # Category 9.5: session-wide NPC statistics (aggregated by attacker, not by skill)
         // ======================================================================
         #region NPC (Session-wide)
 
@@ -878,8 +878,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         {
             public long NpcId { get; }
             public string Name { get; set; } = "Unknown NPC";
-            public StatAcc Taken { get; } = new();                       // NPC 总承伤
-            public Dictionary<long, StatAcc> DamageByPlayer { get; } = new(); // 玩家→该NPC 的聚合
+            public StatAcc Taken { get; } = new();                       // Total damage taken by this NPC
+            public Dictionary<long, StatAcc> DamageByPlayer { get; } = new(); // Aggregated attacker → NPC damage
 
             public NpcAcc(long id) { NpcId = id; }
         }
@@ -905,10 +905,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 【全程】记录一条“玩家 → NPC”的伤害（不分技能）：
-        /// - value/hpLessen 按你现有口径；
-        /// - Miss 仅计次数（在玩家→NPC桶里），不进数值；
-        /// - Dead 仅计次（NPC承伤侧 Taken.CountDead++）。
+        /// Session-wide record of “player → NPC” damage (skill-agnostic):
+        /// - value/hpLessen follow the existing pipeline semantics;
+        /// - Miss events only increment counters in the player→NPC bucket (no values stored);
+        /// - Dead events only increment counters on the NPC Taken side.
         /// </summary>
         public static void RecordNpcTakenDamage(
             long npcId,
@@ -929,13 +929,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 
             if (isMiss)
             {
-                // 只在“攻击者→该NPC”的桶里记 Miss 次数
+                // Count misses only within the attacker → NPC bucket
                 GetNpcPlayerAcc(n, attackerUid).CountMiss++;
                 return;
             }
             if (isDead) n.Taken.CountDead++;
 
-            // NPC 承伤聚合
+            // Aggregate NPC taken damage
             Accumulate(n.Taken, value, isCrit, isLucky, lessen, false);
 
             // 攻击者对该 NPC 的聚合（可计算该玩家对该NPC的专属DPS）
@@ -943,19 +943,19 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             Accumulate(ps, value, isCrit, isLucky, lessen, false);
         }
 
-        /// <summary>设置 NPC 名称（可选）。</summary>
+        /// <summary>Assign an optional display name for an NPC.</summary>
         public static void SetNpcName(long npcId, string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return;
             GetOrCreateNpc(npcId).Name = name;
         }
 
-        /// <summary>获取当前会话中出现过的 NPC 列表（ID 集）。</summary>
+        /// <summary>Retrieve the set of NPC IDs encountered during the current session.</summary>
         public static IReadOnlyList<long> GetAllNpcIds() => _npcs.Keys.ToList();
 
         /// <summary>
         /// 读取 NPC 全程承伤概览：总量/每秒/最大最小单次/最后时间。
-        /// PerSec 用 NPC 自身的 ActiveSeconds（由 Accumulate 推进）。
+        /// PerSec relies on the NPC’s own ActiveSeconds (advanced via Accumulate).
         /// </summary>
         public static (ulong Total, double PerSec, ulong MaxHit, ulong MinHit, DateTime? LastTime, string Name)
             GetNpcOverview(long npcId)
@@ -964,13 +964,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             var s = n.Taken;
             var secs = s.ActiveSeconds > 0 ? s.ActiveSeconds : 0;
             var per = secs > 0 ? R2(s.Total / secs) : 0;
-            var min = s.MinSingleHit; // 0=无记录
+            var min = s.MinSingleHit; // 0 indicates no record
             return (s.Total, per, s.MaxSingleHit, min, s.LastAt, n.Name);
         }
 
         /// <summary>
-        /// 对指定 NPC 的“对其伤害排名”（按总伤害降序）。
-        /// 同时返回：玩家全程 DPS（GetPlayerDps）与对该NPC“专属DPS”（玩家→该NPC桶的ActiveSeconds）。
+        /// Produce a ranking of players damaging a specific NPC (sorted by total damage).
+        /// Also returns: player-wide DPS (GetPlayerDps) and NPC-specific DPS (based on that NPC bucket’s ActiveSeconds).
         /// </summary>
         public static List<(long Uid, string Nickname, int CombatPower, string Profession,
                            ulong DamageToNpc, double PlayerDps, double NpcOnlyDps)>
@@ -978,10 +978,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         {
             if (!_npcs.TryGetValue(npcId, out var n) || n.DamageByPlayer.Count == 0) return new();
 
-            // 拍快照，避免遍历期间集合被改动
+            // Snapshot the dictionary to avoid mutations during iteration
             var arr = n.DamageByPlayer.ToArray();
 
-            // 先拿一份玩家基础信息快照
+            // Capture a snapshot of basic player info
             Dictionary<long, (string Nick, int Power, string Prof)> baseInfo;
             lock (_sync)
             {
@@ -1002,7 +1002,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                     var power = baseInfo.TryGetValue(uid, out bi) ? bi.Power : 0;
                     var prof = baseInfo.TryGetValue(uid, out bi) ? bi.Prof : "Unknown";
 
-                    var playerDps = GetPlayerDps(uid); // 全程DPS（伤害侧）
+                    var playerDps = GetPlayerDps(uid); // Session-wide DPS (damage side)
                     var npcOnlyDps = s.ActiveSeconds > 0 ? R2(s.Total / s.ActiveSeconds) : 0;
 
                     return (uid, nick, power, prof, s.Total, playerDps, npcOnlyDps);
@@ -1014,47 +1014,47 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 
 
         // ======================================================================
-        // # 分类 10：快照 & 秒伤（对外接口 / 快照产出）
+        // # Category 10: snapshots & DPS exports (public interfaces for snapshot generation)
         // ======================================================================
 
         /// <summary>
-        /// 生成一次全程快照（当前时刻）：
-        /// - 结束时间使用 EffectiveEndTime()；
-        /// - 汇总队伍总伤害/治疗/承伤；
-        /// - 逐玩家构建 SnapshotPlayer（含按伤害/治疗/承伤降序的技能汇总）。
+        /// Generate a session snapshot for the current moment:
+        /// - Use EffectiveEndTime() for the end timestamp;
+        /// - Aggregate team-wide damage/healing/taken metrics;
+        /// - Build per-player SnapshotPlayer entries (including skill summaries sorted by damage/healing/taken).
         /// </summary>
         public static FullSessionSnapshot TakeSnapshot()
         {
-            // ========= 1) 锁内：只做取值与拷贝，避免在锁内做任何 LINQ/重计算 =========
+            // ========= 1) Inside the lock: read and copy only—avoid LINQ/heavy computation while locked =========
             DateTime end, start;
             PlayerAcc[] playersSnap;
             NpcAcc[] npcSnap;
 
             lock (_sync)
             {
-                end = EffectiveEndTime();                  // 结束时刻（进行中=Now，停止后=EndedAt）
-                start = StartedAt ?? end;                  // 若未启动则视为 0 时长
-                playersSnap = _players.Values.ToArray();   // ★ 关键：把可变集合定格为数组
-                npcSnap = _npcs.Values.ToArray();  // ★ 定格 NPC 集合
+                end = EffectiveEndTime();                  // End timestamp (Now if active, otherwise EndedAt)
+                start = StartedAt ?? end;                  // If never started, treat as zero-duration
+                playersSnap = _players.Values.ToArray();   // Freeze mutable collections as arrays
+                npcSnap = _npcs.Values.ToArray();          // Freeze NPC list likewise
             }
 
-            // ========= 2) 锁外：基于快照做所有 LINQ/聚合，完全不触碰 _players =========
+            // ========= 2) Outside the lock: perform all LINQ/aggregation on the snapshots =========
             var duration = end - start;
             if (duration < TimeSpan.Zero) duration = TimeSpan.Zero;
 
             ulong teamDmg = 0, teamHeal = 0, teamTaken = 0;
 
-            // 注意：这里是“快照字典”，跟 _players 无关
+            // Work with the snapshot dictionary; no references to the live _players map
             var players = new Dictionary<long, SnapshotPlayer>(playersSnap.Length);
 
             foreach (var p in playersSnap)
             {
-                // 顶层合计（基于快照）
+                // Top-level totals derived from the snapshot
                 teamDmg += p.Damage.Total;
                 teamHeal += p.Healing.Total;
                 teamTaken += p.TakenDamage;
 
-                // —— 逐技能：对内部字典也先定格为数组，再做 Select/OrderBy —— //
+                // For per-skill breakdowns, freeze internal dictionaries before transforming
                 var damageSkillsArr = p.DamageSkills.Count > 0 ? p.DamageSkills.ToArray() : Array.Empty<KeyValuePair<long, StatAcc>>();
                 var healingSkillsArr = p.HealingSkills.Count > 0 ? p.HealingSkills.ToArray() : Array.Empty<KeyValuePair<long, StatAcc>>();
                 var takenSkillsArr = p.TakenSkills.Count > 0 ? p.TakenSkills.ToArray() : Array.Empty<KeyValuePair<long, StatAcc>>();
@@ -1074,7 +1074,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                     .OrderByDescending(x => x.Total)
                     .ToList();
 
-                // —— 逐技能实时峰值（需要 p.*Skills 的 RealtimeDps；同样基于快照数组计算）——
+                // Per-skill realtime peaks (reuse the snapshot arrays and cached RealtimeDps values)
                 double dmgRealtimeMax = damageSkillsArr.Length > 0
                     ? damageSkillsArr.Select(s => s.Value.RealtimeDps).DefaultIfEmpty(0).Max()
                     : 0;
@@ -1091,33 +1091,33 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                     Profession = p.Profession,
                     SubProfession = p.SubProfession,
 
-                    // 顶层聚合
+                    // Aggregate totals
                     TotalDamage = p.Damage.Total,
                     TotalHealing = p.Healing.Total,
                     TakenDamage = p.TakenDamage,
 
-                    // 按各自“有效活跃秒数”计算的全程每秒（保持你原口径）
+                    // Session-scale DPS/HPS computed with each track’s active seconds (same formula as live view)
                     TotalDps = p.Damage.ActiveSeconds > 0 ? R2(p.Damage.Total / p.Damage.ActiveSeconds) : 0,
                     TotalHps = p.Healing.ActiveSeconds > 0 ? R2(p.Healing.Total / p.Healing.ActiveSeconds) : 0,
 
-                    LastRecordTime = null, // 如需，可在写入路径维护最后时间
+                    LastRecordTime = null, // Available for future extension if the write path tracks last-seen timestamps
                     ActiveSecondsDamage = p.Damage.ActiveSeconds,
                     ActiveSecondsHealing = p.Healing.ActiveSeconds,
 
-                    // 逐技能列表
+                    // Per-skill lists
                     DamageSkills = damageSkills,
                     HealingSkills = healingSkills,
                     TakenSkills = takenSkills,
 
-                    // 实时指标（来自 FullRecord 的累计实时指标/逐技能窗口）
+                    // Realtime metrics sourced from the FullRecord accumulators
                     RealtimeDps = (ulong)Math.Round(p.RealtimeDpsDamage),
                     HealingRealtime = (ulong)Math.Round(p.RealtimeDpsHealing),
                     RealtimeDpsMax = (ulong)Math.Round(dmgRealtimeMax),
                     HealingRealtimeMax = (ulong)Math.Round(healRealtimeMax),
 
-                    // —— 伤害侧细分与比率 —— 
+                    // Damage-side breakdown and rates
                     CriticalDamage = p.Damage.Critical,
-                    LuckyDamage = p.Damage.Lucky + p.Damage.CritLucky, // ★ 合并
+                    LuckyDamage = p.Damage.Lucky + p.Damage.CritLucky, // Combine lucky and crit-lucky
                     CritLuckyDamage = p.Damage.CritLucky,
                     MaxSingleHit = p.Damage.MaxSingleHit,
                     CritRate = p.Damage.CountTotal > 0 ? R2((double)p.Damage.CountCritical * 100.0 / p.Damage.CountTotal) : 0.0,
@@ -1125,7 +1125,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 };
             }
 
-            // —— NPC 会话快照 —— //
+            // Build NPC session snapshots
             var nps = new Dictionary<long, FullSessionNpc>(npcSnap.Length);
             foreach (var n in npcSnap)
             {
@@ -1134,7 +1134,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 var per = secs > 0 ? R2(s.Total / secs) : 0;
                 var min = s.MinSingleHit;
 
-                // Top 攻击者（只取前 10，可调）
+                // Top attackers (take first 10 by default)
                 var top = n.DamageByPlayer
                     .OrderByDescending(kv => kv.Value.Total)
                     .Take(10)
@@ -1144,7 +1144,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                         var ns = kv.Value;
                         var npcOnlyDps = ns.ActiveSeconds > 0 ? R2(ns.Total / ns.ActiveSeconds) : 0;
 
-                        // 拿昵称：用 playersSnap 的快照映射一次
+                        // Resolve nickname by consulting the player snapshot array
                         var p = playersSnap.FirstOrDefault(pp => pp.Uid == uid);
                         var nick = p != null ? p.Nickname : "Unknown";
 
@@ -1163,7 +1163,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                     TopAttackers = top
                 };
             }
-            // ========= 3) 组装快照对象（仅使用本地快照数据） =========
+            // ========= 3) Assemble the snapshot object using the local snapshot data =========
             return new FullSessionSnapshot
             {
                 StartedAt = start,
@@ -1173,16 +1173,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 TeamTotalHealing = teamHeal,
                 TeamTotalTakenDamage = teamTaken,
                 Players = players,
-                Npcs = nps              // ★ 新增
+                Npcs = nps
 
             };
         }
 
 
         /// <summary>
-        /// 获取队伍当前全程 DPS（只计算伤害）。
-        /// - 取全队最大 Damage.ActiveSeconds 为分母；
-        /// - 汇总总伤害为分子。
+        /// Get the team’s current session DPS (damage only).
+        /// - Denominator: the maximum Damage.ActiveSeconds across the roster;
+        /// - Numerator: total team damage.
         /// </summary>
         public static double GetTeamDps()
         {
@@ -1203,9 +1203,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 获取指定玩家当前全程 DPS（只计算伤害）。
-        /// - 分母：整个会话秒数（SessionSeconds）；
-        /// - 若尚未开始或分母为 0，返回 0。
+        /// Get the current session DPS for a specific player (damage only).
+        /// - Denominator: the entire session duration (SessionSeconds);
+        /// - Returns 0 if the session has not started or duration is zero.
         /// </summary>
         public static double GetPlayerDps(long uid)
         {
@@ -1214,14 +1214,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             return _players.TryGetValue(uid, out var p) ? R2(p.Damage.Total / secs) : 0;
         }
 
-        // using StarResonanceDpsAnalysis.Plugin.DamageStatistics; // 确保命名空间可见
+        // Ensure the namespace is imported when consuming these helpers:
+        // using StarResonanceDpsAnalysis.Plugin.DamageStatistics;
 
         public static (IReadOnlyList<SkillSummary> DamageSkills,
                       IReadOnlyList<SkillSummary> HealingSkills,
                       IReadOnlyList<SkillSummary> TakenSkills)
         GetPlayerSkillsBySnapshotTimeEx(DateTime snapshotStartTime, long uid, double toleranceSeconds = 2.0)
         {
-            // —— 先查【全程历史】——
+            // First check the session-wide history
             var session = SessionHistory?.FirstOrDefault(s =>
                 s.StartedAt == snapshotStartTime ||
                 Math.Abs((s.StartedAt - snapshotStartTime).TotalSeconds) <= toleranceSeconds);
@@ -1234,7 +1235,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                         sp1.TakenSkills ?? new List<SkillSummary>());
             }
 
-            // —— 再查【单场历史】——
+            // Next check individual battle history
             var battles = StatisticData._manager.History;
             var battle = battles?.FirstOrDefault(s =>
                 s.StartedAt == snapshotStartTime ||
@@ -1248,20 +1249,20 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                         sp2.TakenSkills ?? new List<SkillSummary>());
             }
 
-            // —— 都没找到：返回空 —— 
+            // Fall back to empty collections when nothing matches
             return (Array.Empty<SkillSummary>(), Array.Empty<SkillSummary>(), Array.Empty<SkillSummary>());
         }
 
 
 
         // ======================================================================
-        // # 分类 11：快照时间检索（历史查询）
+        // # Category 11: snapshot-time lookups (historical queries)
         // ======================================================================
 
-        #region 查询（按快照时间检索）
+        #region Queries by snapshot timestamp
         /// <summary>
-        /// 按快照的开始时间获取该快照中所有玩家数据。
-        /// - 如果找不到对应快照，返回 null。
+        /// Retrieve all player data for the snapshot that starts at the specified time.
+        /// - Returns null when no matching snapshot exists.
         /// </summary>
         public static IReadOnlyDictionary<long, SnapshotPlayer>? GetAllPlayersDataBySnapshotTime(DateTime snapshotStartTime)
         {
@@ -1286,23 +1287,23 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         #endregion
 
         // ======================================================================
-        // # 分类 12：内部实现工具（时长/取或建/累加/投影）
+        // # Category 12: internal utilities (duration, get-or-create, accumulation, projections)
         // ======================================================================
 
-        #region 内部实现
+        #region Internal helpers
 
         /// <summary>
-        /// 计算会话“有效秒数”：
-        /// - 若尚未开始返回 0；
-        /// - 进行中：StartedAt → Now；
-        /// - 已停止：StartedAt → EndedAt。
+        /// Compute the session’s effective duration in seconds:
+        /// - Returns 0 when the session has not started;
+        /// - While recording: measure from StartedAt to Now;
+        /// - After stopping: measure from StartedAt to EndedAt.
         /// </summary>
         private static double SessionSeconds()
         {
             if (StartedAt is null) return 0;
 
             DateTime end = IsRecording
-                ? DateTime.Now           // 进行中：用 Now 做临时结束点
+                ? DateTime.Now           // Active session: use Now as the temporary endpoint
                 : (EndedAt ?? DateTime.Now);
 
             var sec = (end - StartedAt.Value).TotalSeconds;
@@ -1310,7 +1311,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 获取或创建玩家累计器，并同步基础信息（昵称/战力/职业以最近一次为准）。
+        /// Fetch or create a player accumulator and sync base info (nickname/combat power/profession).
         /// </summary>
         private static PlayerAcc GetOrCreate(long uid, string nickname, int combatPower, string profession, string? subProfession = null)
         {
@@ -1319,7 +1320,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 p = new PlayerAcc(uid);
                 _players[uid] = p;
             }
-            // 以最近一次为准同步基础信息
+            // Keep the most recent basic info
             p.Nickname = nickname;
             p.CombatPower = combatPower;
             p.Profession = profession;
@@ -1333,17 +1334,17 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 将一次数值累加到统计器：
-        /// - 区分普通/暴击/幸运/暴击+幸运；
-        /// - 维护总和、hpLessen、次数与最大/最小单次值；
-        /// - 通过 FirstAt/LastAt 与时间差累加 ActiveSeconds（含空档封顶）。
+        /// Accumulate a single event into the statistics structure:
+        /// - Distinguish normal/critical/lucky/crit-lucky;
+        /// - Maintain totals, hpLessen, counters, and max/min single-hit values;
+        /// - Use FirstAt/LastAt to advance ActiveSeconds with a capped gap.
         /// </summary>
         private static void Accumulate(
             StatAcc acc, ulong value, bool isCrit, bool isLucky, ulong hpLessen,
-            bool isCauseLucky = false // ★ 新增：是否因果幸运
+            bool isCauseLucky = false // Flag to indicate cause-lucky contributions
         )
         {
-            // 原有四象限累计
+            // Quadrant accumulation logic
             if (isCrit && isLucky) acc.CritLucky += value;
             else if (isCrit) acc.Critical += value;
             else if (isLucky) acc.Lucky += value;
@@ -1352,27 +1353,27 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             acc.Total += value;
             acc.HpLessen += hpLessen;
 
-            // 次数
+            // Increment counters
             if (isCrit) acc.CountCritical++;
             if (isLucky) acc.CountLucky++;
             if (!isCrit && !isLucky) acc.CountNormal++;
             acc.CountTotal++;
 
-            // ★ 新增：因果幸运
+            // Cause-lucky tracking
             if (isLucky && isCauseLucky)
             {
                 acc.CauseLucky += value;
                 acc.CountCauseLucky++;
             }
 
-            // 极值...
+            // Extrema
             if (value > 0)
             {
                 if (value > acc.MaxSingleHit) acc.MaxSingleHit = value;
                 if (acc.MinSingleHit == 0 || value < acc.MinSingleHit) acc.MinSingleHit = value;
             }
 
-            // 时序/活跃时长（保持你原逻辑不变）
+            // Timing / active duration (retains original behavior)
             var now = DateTime.Now;
             if (acc.FirstAt is null) { acc.FirstAt = now; }
             else
@@ -1388,8 +1389,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
 
 
         /// <summary>
-        /// 将内部技能统计转为快照中的技能汇总项（含DPS、命中均值、暴击/幸运率等）。
-        /// - Realtime 字段快照中不赋值（保持 0）。
+        /// Convert internal skill statistics into snapshot-facing summaries (DPS, averages, rates, etc.).
+        /// - Realtime fields remain zero within snapshots.
         /// </summary>
         private static SkillSummary ToSkillSummary(long skillId, StatAcc s, TimeSpan duration)
         {
@@ -1405,26 +1406,26 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
                 LuckyRate = s.CountTotal > 0 ? R2((double)s.CountLucky * 100.0 / s.CountTotal) : 0.0,
                 MaxSingleHit = s.MaxSingleHit,
                 MinSingleHit = s.MinSingleHit,
-                RealtimeValue = 0,          // 快照为历史静态值，这里不赋实时
-                RealtimeMax = 0,            // 同上
+                RealtimeValue = 0,          // Snapshots represent historical data; realtime stays zero
+                RealtimeMax = 0,            // Same rationale as above
                 TotalDps = s.ActiveSeconds > 0 ? R2(s.Total / s.ActiveSeconds) : 0,
-                LastTime = null,            // 可按需扩展：记录技能最后出现时间
-                ShareOfTotal = 0,            // 可按需扩展：占比（由外部渲染时计算亦可）
+                LastTime = null,            // Hook for future extension (last occurrence timestamp)
+                ShareOfTotal = 0,           // Placeholder for percentage-of-total calculations
                 LuckyDamage = s.Lucky + s.CritLucky,
                 CritLuckyDamage = s.CritLucky,
-                CauseLuckyDamage = s.CauseLucky, // StatAcc 已含该字段
+                CauseLuckyDamage = s.CauseLucky, // Already tracked within StatAcc
                 CountLucky = s.CountLucky,
 
             };
         }
 
-        // ===== 内部数据结构 =====
+        // ===== Internal data structures =====
 
         /// <summary>
-        /// 玩家聚合器（会话内持续累加）。
-        /// - 含基础信息（昵称/战力/职业）与三类统计（伤害/治疗/承伤）；
-        /// - DamageSkills/HealingSkills/TakenSkills 逐技能累加；
-        /// - RealtimeDps* 用于 UI 实时显示。
+        /// Player accumulator (maintained throughout the session).
+        /// - Stores base info (nickname/combat power/profession) plus damage/healing/taken statistics;
+        /// - Aggregates per-skill data via DamageSkills/HealingSkills/TakenSkills;
+        /// - Publishes realtime metrics for UI display.
         /// </summary>
         private sealed class PlayerAcc
         {
@@ -1432,7 +1433,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             public string Nickname { get; set; } = "Unknown";
             public int CombatPower { get; set; }
             public string Profession { get; set; } = "Unknown";
-            public string? SubProfession { get; set; }//子职业
+            public string? SubProfession { get; set; } // Optional specialization
             public StatAcc Damage { get; } = new();
             public StatAcc Healing { get; } = new();
             public ulong TakenDamage { get; set; }
@@ -1441,13 +1442,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             public Dictionary<long, StatAcc> HealingSkills { get; } = new();
             public Dictionary<long, StatAcc> TakenSkills { get; } = new();
 
-            // —— 新增：实时总DPS（聚合）
+            // Realtime DPS aggregates
             public double RealtimeDpsDamage { get; set; }
             public double RealtimeDpsHealing { get; set; }
 
             public PlayerAcc(long uid) => Uid = uid;
 
-            // ★ 新增：可选的细分维度
+            // Optional extended breakdowns
             public Dictionary<long, Dictionary<string, StatAcc>> DamageSkillsByElement { get; } = new();
             public Dictionary<long, Dictionary<ulong, StatAcc>> HealingSkillsByTarget { get; } = new();
 
@@ -1455,53 +1456,53 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         }
 
         /// <summary>
-        /// 统计累加器（通用结构）：
-        /// - 四象限数值：Normal/Critical/Lucky/CritLucky；
-        /// - 计数：Count*；
-        /// - 极值：MaxSingleHit/MinSingleHit；
-        /// - 时序：FirstAt/LastAt/ActiveSeconds；
-        /// - RealtimeDps：便于 UI 实时显示（逐技能/逐类）。
+        /// Generic statistical accumulator:
+        /// - Quadrant totals: Normal/Critical/Lucky/CritLucky;
+        /// - Counters: Count* fields;
+        /// - Extremes: MaxSingleHit/MinSingleHit;
+        /// - Timing: FirstAt/LastAt/ActiveSeconds;
+        /// - RealtimeDps: enables realtime UI visuals (per skill/per category).
         /// </summary>
         private sealed class StatAcc
         {
             public ulong Normal, Critical, Lucky, CritLucky, HpLessen, Total;
-            public ulong MaxSingleHit, MinSingleHit; // Min=0 表示未赋值
+            public ulong MaxSingleHit, MinSingleHit; // Min=0 indicates no assigned value
             public int CountNormal, CountCritical, CountLucky, CountTotal;
-            public DateTime? FirstAt;     // 第一条记录时间
-            public DateTime? LastAt;      // 最近一条记录时间
-            public double ActiveSeconds;  // 事件间隔累加（单位：秒）
-            // —— 新增：实时DPS（逐技能/逐类）
+            public DateTime? FirstAt;     // Timestamp of the first record
+            public DateTime? LastAt;      // Timestamp of the most recent record
+            public double ActiveSeconds;  // Accumulated span of activity (seconds)
+            // Realtime DPS (per skill / per class)
             public double RealtimeDps { get; set; }
 
-            // ★★★ 新增：全程记录扩展字段
-            public ulong CauseLucky;      // 因果幸运累计数值
-            public int CountCauseLucky; // 因果幸运次数
-            public int CountMiss;       // Miss 次数（多用于承伤）
-            public int CountDead;       // 击杀次数（承伤）
+            // Extended fields for full-session recording
+            public ulong CauseLucky;      // Cause-lucky accumulated value
+            public int CountCauseLucky;   // Cause-lucky occurrence count
+            public int CountMiss;         // Miss count (primarily for taken damage)
+            public int CountDead;         // Death count (taken damage)
         }
         #endregion
     }
 
     // ======================================================================
-    // # 分类 13：快照结构定义（跨战斗的全程快照）
+    // # Category 13: snapshot structure definitions (session-spanning aggregation)
     // ======================================================================
 
-    /// <summary>全程快照结构（与 BattleSnapshot 类似，但跨战斗）。用于历史/统计展示。</summary>
+    /// <summary>Session snapshot structure (similar to BattleSnapshot but spanning multiple battles). Used for historical/statistical displays.</summary>
     public sealed class FullSessionSnapshot
     {
-        public DateTime StartedAt { get; init; }          // 快照起始时间
-        public DateTime EndedAt { get; init; }            // 快照结束时间
-        public TimeSpan Duration { get; init; }           // 持续时长
-        public ulong TeamTotalDamage { get; init; }       // 队伍总伤害
-        public ulong TeamTotalHealing { get; init; }      // 队伍总治疗
-        public Dictionary<long, SnapshotPlayer> Players { get; init; } = new(); // 逐玩家详情
-        public ulong TeamTotalTakenDamage { get; init; }  // ★ 队伍总承伤
+        public DateTime StartedAt { get; init; }          // Snapshot start time
+        public DateTime EndedAt { get; init; }            // Snapshot end time
+        public TimeSpan Duration { get; init; }           // Total duration
+        public ulong TeamTotalDamage { get; init; }       // Total team damage
+        public ulong TeamTotalHealing { get; init; }      // Total team healing
+        public Dictionary<long, SnapshotPlayer> Players { get; init; } = new(); // Per-player breakdown
+        public ulong TeamTotalTakenDamage { get; init; }  // Total team damage taken
 
-        // ★ 新增：会话快照里的 NPC 数据
+        // NPC aggregation captured in the session snapshot
         public Dictionary<long, FullSessionNpc> Npcs { get; init; } = new();
     }
 
-    /// <summary>全程快照里的 NPC 视图（不分技能）。</summary>
+    /// <summary>NPC view stored within a session snapshot (skill-agnostic).</summary>
     public sealed class FullSessionNpc
     {
         public long NpcId { get; init; }
@@ -1511,7 +1512,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         public ulong MaxSingleHit { get; init; }
         public ulong MinSingleHit { get; init; }
 
-        // Top 攻击者（只放最关键的字段；需要更多可自行扩展）
+        // Top attackers (core fields only; extend if needed)
         public List<(long Uid, string Nickname, ulong DamageToNpc, double NpcOnlyDps)> TopAttackers { get; init; } = new();
     }
 }

@@ -6,7 +6,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
     {
         public string Key { get; set; }
         public string Title { get; set; }
-        public bool IsVisible { get; set; } = false; // 默认全部隐藏
+        public bool IsVisible { get; set; } = false; // Hidden by default
         public Func<Column> Builder { get; set; }
     }
 
@@ -14,7 +14,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
     {
         public static Action? RefreshTableAction { get; set; }
 
-        // 可配置的列设置 - 移除了战力，因为它是默认固定显示的
+        // Configurable column definitions – combat power stays always visible
         public static List<ColumnSetting> AllSettings =
         [
             new() {
@@ -91,7 +91,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
         {
             var list = new List<StackedColumn[]>();
 
-            // 与上方 Key 一致的分组
+            // Grouping aligned with the keys above
             string[] group1 = { "TotalDamage", "CriticalDamage", "LuckyDamage", "CritLuckyDamage" };
             string[] group2 = { "InstantDps", "MaxInstantDps", "TotalDps" };
             string[] group3 = { "TotalHealingDone", "CriticalHealingDone", "LuckyHealingDone", "CritLuckyHealingDone" };
@@ -123,15 +123,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                     Render = (value, record, rowIndex) => rowIndex + 1,
                     Fixed = true
                 },
-                // 基础信息列 - 固定显示，不可配置
+                // Base information columns – always visible, not configurable
                 new("Uid", "Player UID",ColumnAlign.Center){ SortOrder = true },
                 new("NickName", "Nickname",ColumnAlign.Center){ SortOrder = true },
                 new("Profession", "Class",ColumnAlign.Center),
-                // 战力 - 固定显示，不在设置中配置
+                // Combat power column – pinned and not configurable
                 new("CombatPower", "Combat Power", ColumnAlign.Center){ SortOrder = true }
             };
 
-            // 添加可配置的列
+            // Append dynamically configurable columns
             columns.AddRange(AllSettings.Where(s => s.IsVisible).Select(s => s.Builder()));
 
             return [.. columns];

@@ -202,7 +202,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //// 测试功能, 已失效
+            //// Test functionality; currently obsolete
             //var id = 8900L;
             //var ticks = 638923753650224636;
 

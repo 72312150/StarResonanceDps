@@ -31,19 +31,19 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 return;
             }
 
-            // ---- 样式主题（可按需微调）----
+            // ---- Theme palette (adjust as needed) ----
             Color colorTime = Color.FromArgb(140, 140, 140);
             Color colorSep = Color.FromArgb(170, 170, 170);
             Color colorName = Color.FromArgb(30, 30, 30);
             Color colorDmg = Color.IndianRed;
             Color colorHeal = Color.SeaGreen;
             Color colorCount = Color.DimGray;
-            Color badgeCritBack = Color.FromArgb(255, 236, 204); // 柔和橙底
+            Color badgeCritBack = Color.FromArgb(255, 236, 204); // Soft orange background
             Color badgeCritFore = Color.FromArgb(178, 99, 0);
-            Color badgeLuckyBack = Color.FromArgb(234, 223, 255); // 柔和紫底
+            Color badgeLuckyBack = Color.FromArgb(234, 223, 255); // Soft purple background
             Color badgeLuckyFore = Color.FromArgb(84, 46, 158);
 
-            // 小工具：普通写入
+            // Helper: write plain text
             void Write(string text, Color? color = null, FontStyle style = FontStyle.Regular)
             {
                 richTextBox1.SelectionStart = richTextBox1.TextLength;
@@ -51,18 +51,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
                 richTextBox1.SelectionColor = color ?? richTextBox1.ForeColor;
                 richTextBox1.SelectionFont = new Font(richTextBox1.Font, style);
-                // 清空背景色（避免继承前一个徽标的底色）
+                // Clear background to avoid inheriting badge backgrounds
                 if (HasSelectionBackColor()) richTextBox1.SelectionBackColor = Color.Transparent;
 
                 richTextBox1.AppendText(text);
 
-                // 还原
+                // Restore selection formatting
                 richTextBox1.SelectionColor = richTextBox1.ForeColor;
                 richTextBox1.SelectionFont = richTextBox1.Font;
                 if (HasSelectionBackColor()) richTextBox1.SelectionBackColor = Color.Transparent;
             }
 
-            // 小工具：胶囊徽标（用背景色 + 前后空格模拟）
+            // Helper: capsule badge (background color + surrounding spaces)
             void Badge(string text, Color back, Color fore, bool bold = false)
             {
                 richTextBox1.SelectionStart = richTextBox1.TextLength;
@@ -72,16 +72,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 richTextBox1.SelectionColor = fore;
                 richTextBox1.SelectionFont = new Font(richTextBox1.Font, bold ? FontStyle.Bold : FontStyle.Regular);
 
-                // 两侧加空格让“徽标”看起来更舒服
+                // Add spaces on both sides to make the badge look balanced
                 richTextBox1.AppendText(" " + text + " ");
 
-                // 还原
+                // Restore selection formatting
                 richTextBox1.SelectionColor = richTextBox1.ForeColor;
                 richTextBox1.SelectionFont = richTextBox1.Font;
                 if (HasSelectionBackColor()) richTextBox1.SelectionBackColor = Color.Transparent;
             }
 
-            // 检查是否支持 SelectionBackColor（旧框架可能没有）
+            // Detect whether SelectionBackColor is supported (older frameworks might not)
             bool HasSelectionBackColor()
             {
                 try
@@ -92,39 +92,39 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 catch { return false; }
             }
 
-            // --------- 解析：[duration] 前缀 ----------
+            // --------- Parse [duration] prefix ----------
             var m = Regex.Match(line, @"^\[(?<dur>[^\]]+)\]\s*(?<rest>.*)$");
             if (m.Success)
             {
-                // 方括号时间块：浅灰
+                // Time segment in brackets displayed in light gray
                 Write("[", colorTime);
                 Write(m.Groups["dur"].Value, colorTime);
                 Write("] ", colorTime);
 
-                line = m.Groups["rest"].Value; // 剩余部分
+                line = m.Groups["rest"].Value; // Remaining content
             }
 
-            // --------- 用 " | " 分段（与你当前的输出格式一致）----------
+            // --------- Split parts using " | " (aligned with existing output format) ----------
             var parts = line.Split(new[] { " | " }, StringSplitOptions.None);
 
             for (int i = 0; i < parts.Length; i++)
             {
                 string part = parts[i].Trim();
 
-                // 第一段通常是技能名
+                // The first segment is typically the skill name
                 if (i == 0)
                 {
-                    // 技能名加粗，略深色
+                    // Render skill names bold with darker color
                     Write(part, colorName, FontStyle.Bold);
                 }
                 else
                 {
-                    // 匹配“伤害:12345” 或 “治疗:54321”
+                    // Match "伤害:12345" or "治疗:54321"
                     var kv = Regex.Match(part, @"^(?<k>伤害|治疗)\s*:\s*(?<v>\d+)$");
                     if (kv.Success)
                     {
                         string k = kv.Groups["k"].Value;
-                        string v = kv.Groups["v"].Value; // 保留完整数字（不做 K/M 简化）
+                        string v = kv.Groups["v"].Value; // Preserve full number (no K/M formatting)
 
                         if (k == "伤害")
                             Write($"Damage:{v}", colorDmg, FontStyle.Regular);
@@ -140,7 +140,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                     }
                     else if (part.StartsWith("暴击"))
                     {
-                        // 支持 “暴击” 或 “暴击:3”
+                        // Supports "暴击" or "暴击:3"
                         var n = Regex.Match(part, @"^暴击(?::\s*(?<n>\d+))?$");
                         if (n.Success)
                         {
@@ -167,16 +167,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                     }
                     else
                     {
-                        // 其他未知片段：保持默认色
+                        // Any other segments keep the default styling
                         Write(part);
                     }
                 }
 
-                // 分隔符（最后一段不加）
+                // Separator between segments (skip after the last one)
                 if (i < parts.Length - 1) Write("  |  ", colorSep);
             }
 
-            // 换行 + 滚动到底部
+            // Append newline and scroll to bottom
             richTextBox1.AppendText(Environment.NewLine);
             richTextBox1.SelectionStart = richTextBox1.Text.Length;
             richTextBox1.ScrollToCaret();
@@ -186,7 +186,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private void SkillDiary_Load(object sender, EventArgs e)
         {
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色
+            FormGui.SetColorMode(this, AppConfig.IsLight); // Apply current theme
         }
 
         private void button3_Click(object sender, EventArgs e)

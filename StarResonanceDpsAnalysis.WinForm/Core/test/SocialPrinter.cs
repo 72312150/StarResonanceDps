@@ -11,20 +11,20 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.test
 {
     public static class SocialPrinter
     {
-        /// <summary>尝试解析并打印社交/团队数据；成功返回 true</summary>
+        /// <summary>Attempt to parse and print social/team data; returns true on success</summary>
         public static bool TryParseAndPrint(byte[] payload)
         {
             if (payload == null || payload.Length == 0) return false;
 
             SocialData social = null;
 
-            // 1) 服务器返回的社交数据
+            // 1) Social payload returned by the server
             if (TryParse<GetSocialDataReply>(payload, out var reply) && reply.Data != null)
             {
                 social = reply.Data;
                 Console.WriteLine("[SocialPrinter] Parsed as GetSocialDataReply → SocialData");
             }
-            // 2) 直接推的 SocialData
+            // 2) Direct SocialData push message
             else if (TryParse<SocialData>(payload, out var direct))
             {
                 social = direct;
@@ -32,7 +32,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.test
             }
             else
             {
-                return false; // 不是社交相关
+                return false; // Payload not related to social data
             }
 
             PrintSocial(social);

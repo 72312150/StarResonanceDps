@@ -28,7 +28,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
         private void RankingsForm_Load(object sender, EventArgs e)
         {
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色
+            FormGui.SetColorMode(this, AppConfig.IsLight); // Apply the configured color theme
         }
 
 
@@ -92,7 +92,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             //int row = e.RowIndex - 1;
             //if (row >= 0)
             //{
-            //    if (e.Btn.Text == "查看技能数据")
+            //    if (e.Btn.Text == "View Skill Data")
             //    {
             //        if (FormManager.skillReferenceForm == null || FormManager.skillReferenceForm.IsDisposed)
             //        {

@@ -38,16 +38,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button_NpcTakeDamage.Font = AppConfig.BoldHarmonyFont;
         }
 
-        #region 加载 网卡 启动设备/初始化 统计数据/ 启动 抓包/停止抓包/清空数据/ 关闭 事件
+        #region Initialization, capture device setup, statistics bootstrap, capture lifecycle, and shutdown hooks
 
-        #region —— 抓包设备/统计 —— 
+        #region —— Capture device / statistics —— 
 
-        public static ICaptureDevice? SelectedDevice { get; set; } = null; // # 抓包设备：程序选中的网卡设备（可能为null，依据设置初始化）
+        public static ICaptureDevice? SelectedDevice { get; set; } = null; // Capture device the app selected (may be null until configured)
 
         /// <summary>
-        /// 分析器
+        /// Analyzer used for incoming packets
         /// </summary>
-        private PacketAnalyzer PacketAnalyzer { get; } = new(); // # 抓包/分析器：每个到达的数据包交由该分析器处理
+        private PacketAnalyzer PacketAnalyzer { get; } = new(); // Each captured packet is processed through this analyzer
         #endregion
 
         private void LoadAppConfig() 
@@ -56,7 +56,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 读取用户缓存
+        /// Load player cache data
         /// </summary>
         private void LoadPlayerCache()
         {
@@ -66,7 +66,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
             catch (FileNotFoundException)
             {
-                // 没有缓存
+                // Cache file not present
             }
             catch (DataTamperedException)
             {
@@ -78,63 +78,62 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 软件开启后读取技能列表
+        /// Load the embedded skill list when the tool starts
         /// </summary>
         private void LoadFromEmbeddedSkillConfig()
         {
-            // 1) 先用 int 键的表（已经解析过字符串）
+            // 1) Consume the int-keyed table first (already parsed)
             foreach (var kv in EmbeddedSkillConfig.AllByInt)
             {
                 var id = (long)kv.Key;
                 var def = kv.Value;
 
-                // 将一条技能元数据（SkillMeta）写入 SkillBook 的全局字典中
-                // 这里用的是整条更新（SetOrUpdate），如果该技能 ID 已存在则覆盖，不存在则添加
+                // Persist each SkillMeta into the global SkillBook dictionary
+                // Using SetOrUpdate ensures existing entries are replaced while new ones are added
                 SkillBook.SetOrUpdate(new SkillMeta
                 {
-                    Id = id,                         // 技能 ID（唯一标识一个技能）
-                    Name = def.Name,                 // 技能名称（字符串，例如 "火球术"）
-                                                     //School = def.Element.ToString(), // 技能所属元素或流派（枚举转字符串）
-                                                     //Type = def.Type,                 // 技能类型（Damage/Heal/其他）——用于区分伤害技能和治疗技能
-                                                     // Element = def.Element            // 技能元素类型（枚举，例如 火/冰/雷）
+                    Id = id,                         // Skill identifier
+                    Name = def.Name,                 // Skill name (string such as "Fireball")
+                                                     //School = def.Element.ToString(), // Element or school
+                                                     //Type = def.Type,                 // Skill type (Damage/Heal/Other)
+                                                     // Element = def.Element            // Skill element enum (Fire/Ice/etc.)
                 });
 
 
             }
 
-            // 2) 有些 ID 可能超出 int 或不在 AllByInt，可以再兜底遍历字符串键
+            // 2) Fallback to the string-key table for values beyond int range
             foreach (var kv in EmbeddedSkillConfig.AllByString)
             {
                 if (kv.Key.TryToInt64(out var id))
                 {
-                    // 如果 int 表已覆盖，这里会覆盖同名；没关系，等价
+                    // Overwrite if already inserted from the int table; that's intentional
                     var def = kv.Value;
-                    // 将一条技能元数据（SkillMeta）写入 SkillBook 的全局字典中
-                    // 这里用的是整条更新（SetOrUpdate），如果该技能 ID 已存在则覆盖，不存在则添加
+                    // Persist each SkillMeta into the global SkillBook dictionary
+                    // Using SetOrUpdate ensures existing entries are replaced while new ones are added
                     SkillBook.SetOrUpdate(new SkillMeta
                     {
-                        Id = id,                         // 技能 ID（唯一标识一个技能）
-                        Name = def.Name,                 // 技能名称（字符串，例如 "火球术"）
-                        //School = def.Element.ToString(), // 技能所属元素或流派（枚举转字符串）
-                        //Type = def.Type,                 // 技能类型（Damage/Heal/其他）——用于区分伤害技能和治疗技能
-                        //Element = def.Element            // 技能元素类型（枚举，例如 火/冰/雷）
+                        Id = id,                         // Skill identifier
+                        Name = def.Name,                 // Skill name (string such as "Fireball")
+                        //School = def.Element.ToString(), // Element or school
+                        //Type = def.Type,                 // Skill type (Damage/Heal/Other)
+                        //Element = def.Element            // Skill element enum (Fire/Ice/etc.)
                     });
 
                 }
             }
 
-            // MonsterNameResolver.Initialize(AppConfig.MonsterNames);//初始化怪物ID与名称的映射关系
+            // MonsterNameResolver.Initialize(AppConfig.MonsterNames); // Establish monster ID ↔ name map
 
 
-
-            // 你也可以在这里写日志：加载了多少条技能
+            // Optional logging for debugging how many skills were loaded
             // Console.WriteLine($"SkillBook loaded {EmbeddedSkillConfig.AllByInt.Count} + {EmbeddedSkillConfig.AllByString.Count} entries.");
         }
 
         public void SetStyle()
         {
-            // # 启动与初始化事件：界面样式与渲染设置（仅 UI 外观，不涉及数据）
-            // ======= 单个进度条（textProgressBar1）的外观设置 =======
+            // UI styling applied during startup; appearance only, no data logic
+            // ======= Appearance for the individual progress bar (textProgressBar1) =======
             sortedProgressBarList_MainList.OrderImageOffset = new RenderContent.ContentOffset { X = 6, Y = 0 };
             sortedProgressBarList_MainList.OrderImageRenderSize = new Size(22, 22);
             sortedProgressBarList_MainList.OrderOffset = new RenderContent.ContentOffset { X = 32, Y = 0 };
@@ -147,17 +146,17 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
             sortedProgressBarList_MainList.OrderFont = AppConfig.SaoFont;
 
-            // ======= 进度条列表（sortedProgressBarList1）的初始化与外观 =======
-            sortedProgressBarList_MainList.ProgressBarHeight = AppConfig.ProgressBarHeight;  // 每行高度
+            // ======= Initialization and appearance for the progress bar list (sortedProgressBarList1) =======
+            sortedProgressBarList_MainList.ProgressBarHeight = AppConfig.ProgressBarHeight;  // Row height
         }
 
         /// <summary>
-        /// 通用提示气泡
+        /// Display a standard tooltip
         /// </summary>
         /// <param name="control"></param>
         /// <param name="text"></param>
         /// <remarks>
-        /// 通用封装：在指定控件上显示提示文本
+        /// Helper wrapper that attaches a tooltip to the requested control
         /// </remarks>
         private void ToolTip(System.Windows.Forms.Control control, string text)
         {
@@ -168,7 +167,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             };
             tooltip.SetTip(control, text);
         }
-        #region StartCapture() 抓包：开始/停止/事件/统计
+        #region StartCapture() - capture lifecycle events and statistics
         /// <summary>
         /// 开始抓包
         /// </summary>
@@ -200,12 +199,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
             else
             {
-                // 已经设置过网卡设备
+                // Adapter already configured previously
                 netcardIndex = AppConfig.GetNetworkCardIndex(devices);
             }
 
-            // 检查网卡设置变动
-            // (首次如果设置失败会 return, 不会走到这里, 这里的再次判断防止网卡设备变动)
+            // Detect adapter changes
+            // (Initial configuration returns early on failure; this guard handles changes afterwards)
             if (netcardIndex < 0)
             {
                 netcardIndex = CaptureDeviceHelper.GetBestNetworkCardIndex(devices);
@@ -220,7 +219,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 }
             }
 
-            // 设置选择的网卡设备
+            // Lock in the chosen adapter
             SelectedDevice = devices[netcardIndex];
             if (SelectedDevice == null)
             {
@@ -228,7 +227,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 return;
             }
 
-            // 打开并启动设备监听 —— 绑定回调、设置过滤器
+            // Open the device and begin capture — configure callbacks and filters
             SelectedDevice.Open(new DeviceConfiguration
             {
                 Mode = DeviceModes.Promiscuous,
@@ -250,7 +249,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             if (!MousePenetrationHelper.IsPenetrating(this.Handle))
             {
-                // 方案 O：AppConfig.Transparency 现在表示“不透明度百分比”
+                // Approach O: AppConfig.Transparency now represents opacity percentage
                 MousePenetrationHelper.SetMousePenetrate(this, enable: true, opacityPercent: AppConfig.Transparency);
             }
             else
