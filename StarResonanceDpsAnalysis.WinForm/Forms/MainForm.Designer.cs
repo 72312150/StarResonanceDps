@@ -43,7 +43,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             pageHeader_MainHeader.DividerShow = true;
             pageHeader_MainHeader.DividerThickness = 2F;
             pageHeader_MainHeader.Dock = DockStyle.Top;
-            pageHeader_MainHeader.Font = new Font("阿里妈妈数黑体", 9F, FontStyle.Bold, GraphicsUnit.Point, 134);
+            pageHeader_MainHeader.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 134);
             pageHeader_MainHeader.Icon = (Image)resources.GetObject("pageHeader_MainHeader.Icon");
             pageHeader_MainHeader.Location = new Point(0, 0);
             pageHeader_MainHeader.Margin = new Padding(2);
@@ -53,7 +53,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             pageHeader_MainHeader.Size = new Size(758, 30);
             pageHeader_MainHeader.SubText = "";
             pageHeader_MainHeader.TabIndex = 8;
-            pageHeader_MainHeader.Text = "别查我DPS";
+            pageHeader_MainHeader.Text = "Don't Check My DPS";
             // 
             // pictureBox_AppIcon
             // 
@@ -91,7 +91,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             groupBox_About.Size = new Size(720, 408);
             groupBox_About.TabIndex = 11;
             groupBox_About.TabStop = false;
-            groupBox_About.Text = "关于";
+            groupBox_About.Text = "About";
             // 
             // linkLabel_QQGroup_2
             // 
@@ -104,7 +104,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             linkLabel_QQGroup_2.Size = new Size(107, 16);
             linkLabel_QQGroup_2.TabIndex = 25;
             linkLabel_QQGroup_2.TabStop = true;
-            linkLabel_QQGroup_2.Text = "1022797551 (2群)";
+            linkLabel_QQGroup_2.Text = "1022797551 (Group 2)";
             linkLabel_QQGroup_2.LinkClicked += linkLabel_QQGroup_2_LinkClicked;
             // 
             // label_ThankHelpFromTip_2
@@ -117,7 +117,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_ThankHelpFromTip_2.Name = "label_ThankHelpFromTip_2";
             label_ThankHelpFromTip_2.Size = new Size(163, 16);
             label_ThankHelpFromTip_2.TabIndex = 24;
-            label_ThankHelpFromTip_2.Text = "项目对于本项目的帮助与支持";
+            label_ThankHelpFromTip_2.Text = "for supporting and assisting this project.";
             // 
             // linkLabel_NodeJsProject
             // 
@@ -143,7 +143,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_ThankHelpFromTip_1.Name = "label_ThankHelpFromTip_1";
             label_ThankHelpFromTip_1.Size = new Size(55, 16);
             label_ThankHelpFromTip_1.TabIndex = 22;
-            label_ThankHelpFromTip_1.Text = "在此感谢";
+            label_ThankHelpFromTip_1.Text = "Special thanks to ";
             // 
             // label_Copyright
             // 
@@ -167,7 +167,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             linkLabel_QQGroup_1.Size = new Size(100, 16);
             linkLabel_QQGroup_1.TabIndex = 20;
             linkLabel_QQGroup_1.TabStop = true;
-            linkLabel_QQGroup_1.Text = "678150498 (1群)";
+            linkLabel_QQGroup_1.Text = "678150498 (Group 1)";
             linkLabel_QQGroup_1.LinkClicked += linkLabel_QQGroup_1_LinkClicked;
             // 
             // label_OpenSourceTip_2
@@ -180,7 +180,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_OpenSourceTip_2.Name = "label_OpenSourceTip_2";
             label_OpenSourceTip_2.Size = new Size(343, 16);
             label_OpenSourceTip_2.TabIndex = 19;
-            label_OpenSourceTip_2.Text = "中开源，如在使用中遇到问题，或是想要寻求游戏伙伴请加群：";
+            label_OpenSourceTip_2.Text = "is open source. For support or teammates, please join:";
             // 
             // label_OpenSourceTip_1
             // 
@@ -192,7 +192,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_OpenSourceTip_1.Name = "label_OpenSourceTip_1";
             label_OpenSourceTip_1.Size = new Size(55, 16);
             label_OpenSourceTip_1.TabIndex = 18;
-            label_OpenSourceTip_1.Text = "本项目于";
+            label_OpenSourceTip_1.Text = "This project is on ";
             // 
             // linkLabel_GitHub
             // 
@@ -216,7 +216,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_SelfIntroduce.Name = "label_SelfIntroduce";
             label_SelfIntroduce.Size = new Size(608, 49);
             label_SelfIntroduce.TabIndex = 16;
-            label_SelfIntroduce.Text = "一款专为《星痕共鸣》玩家打造的战斗数据统计工具。\r\n该工具无需修改游戏客户端，不违反游戏服务条款。该工具旨在帮助玩家更好地理解战斗数据，减少无效提升，提升游戏体验。使用该工具前，请确保不会将数据结果用于战力歧视等破坏游戏社区环境的行为。";
+            label_SelfIntroduce.Text = "A combat analytics toolbox built for Star Resonance players.\r\nIt works without modifying the game client and complies with the terms of service. Use it to understand combat logs, reduce inefficient upgrades, and enhance the experience. Please avoid using the data for damage-based discrimination.";
             // 
             // label_NowVersionDevelopers
             // 
@@ -226,7 +226,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_NowVersionDevelopers.Name = "label_NowVersionDevelopers";
             label_NowVersionDevelopers.Size = new Size(209, 64);
             label_NowVersionDevelopers.TabIndex = 15;
-            label_NowVersionDevelopers.Text = "惊奇猫猫盒 (anying1073: 项目发起者)\r\n露詩 (Rocy-June)\r\n青岚宗王腾\r\n尻鸭 (ihonliu)";
+            label_NowVersionDevelopers.Text = "Surprising Cat Box (anying1073: Project initiator)\r\nLushi (Rocy-June)\r\nQing Lanzong Wang Teng\r\nKaoya (ihonliu)";
             // 
             // label_NowVersionDevelopersTip
             // 
@@ -236,7 +236,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_NowVersionDevelopersTip.Name = "label_NowVersionDevelopersTip";
             label_NowVersionDevelopersTip.Size = new Size(282, 21);
             label_NowVersionDevelopersTip.TabIndex = 14;
-            label_NowVersionDevelopersTip.Text = "当前版本开发者们（排名不分先后）：";
+            label_NowVersionDevelopersTip.Text = "Current contributors (unordered):";
             // 
             // label_NowVersionNumber
             // 
@@ -256,7 +256,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_NowVersionTip.Name = "label_NowVersionTip";
             label_NowVersionTip.Size = new Size(106, 21);
             label_NowVersionTip.TabIndex = 12;
-            label_NowVersionTip.Text = "当前版本号：";
+            label_NowVersionTip.Text = "Current version:";
             // 
             // label_AppName
             // 
@@ -266,7 +266,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_AppName.Name = "label_AppName";
             label_AppName.Size = new Size(89, 21);
             label_AppName.TabIndex = 11;
-            label_AppName.Text = "别查我DPS";
+            label_AppName.Text = "Don't Check My DPS";
             // 
             // MainForm
             // 
@@ -283,7 +283,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             Mode = AntdUI.TAMode.Dark;
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "DPS 统计工具";
+            Text = "DPS Analytics Tool";
             ForeColorChanged += MainForm_ForeColorChanged;
             ((System.ComponentModel.ISupportInitialize)pictureBox_AppIcon).EndInit();
             groupBox_About.ResumeLayout(false);

@@ -137,18 +137,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // select1
             // 
             select1.Font = new Font("HarmonyOS Sans SC", 9F);
-            select1.Items.AddRange(new object[] { "全部", "攻击", "辅助", "守护" });
+            select1.Items.AddRange(new object[] { "All", "Offense", "Support", "Guard" });
             select1.List = true;
             select1.Location = new Point(10, 839);
             select1.Name = "select1";
-            select1.PrefixText = "模组类型：";
+            select1.PrefixText = "Module Type:";
             select1.Radius = 3;
             select1.SelectedIndex = 0;
-            select1.SelectedValue = "全部";
+            select1.SelectedValue = "All";
             select1.SelectionStart = 2;
             select1.Size = new Size(230, 63);
             select1.TabIndex = 35;
-            select1.Text = "全部";
+            select1.Text = "All";
             select1.SelectedIndexChanged += select1_SelectedIndexChanged;
             // 
             // button1
@@ -158,7 +158,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             button1.Name = "button1";
             button1.Size = new Size(456, 63);
             button1.TabIndex = 52;
-            button1.Text = "分析模组";
+            button1.Text = "Analyze Modules";
             button1.Type = AntdUI.TTypeMini.Primary;
             button1.Click += button1_Click;
             // 
@@ -182,7 +182,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             label1.Name = "label1";
             label1.Size = new Size(1586, 34);
             label1.TabIndex = 54;
-            label1.Text = "打开此界面后需要过图或者重新登录一次才能进行分析【右键属性选项为清空当前选择】";
+            label1.Text = "After opening this panel, change zones or relog once before analyzing. (Right-click a trait to clear the selection.)";
             label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // groupBox3
@@ -202,7 +202,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             groupBox3.Size = new Size(465, 371);
             groupBox3.TabIndex = 58;
             groupBox3.TabStop = false;
-            groupBox3.Text = "目标词条和等级（0为默认）[可输入文字索引]";
+            groupBox3.Text = "Target traits and levels (0 = default) [type to search]";
             // 
             // inputNumber5
             // 
@@ -210,7 +210,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             inputNumber5.Maximum = new decimal(new int[] { 6, 0, 0, 0 });
             inputNumber5.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
             inputNumber5.Name = "inputNumber5";
-            inputNumber5.PrefixText = "期望等级：";
+            inputNumber5.PrefixText = "Desired Level:";
             inputNumber5.SelectionStart = 1;
             inputNumber5.Size = new Size(196, 57);
             inputNumber5.TabIndex = 8;
@@ -224,7 +224,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             inputNumber4.Maximum = new decimal(new int[] { 6, 0, 0, 0 });
             inputNumber4.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
             inputNumber4.Name = "inputNumber4";
-            inputNumber4.PrefixText = "期望等级：";
+            inputNumber4.PrefixText = "Desired Level:";
             inputNumber4.SelectionStart = 1;
             inputNumber4.Size = new Size(196, 57);
             inputNumber4.TabIndex = 8;
@@ -238,7 +238,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             inputNumber3.Maximum = new decimal(new int[] { 6, 0, 0, 0 });
             inputNumber3.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
             inputNumber3.Name = "inputNumber3";
-            inputNumber3.PrefixText = "期望等级：";
+            inputNumber3.PrefixText = "Desired Level:";
             inputNumber3.SelectionStart = 1;
             inputNumber3.Size = new Size(196, 57);
             inputNumber3.TabIndex = 7;
@@ -252,7 +252,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             inputNumber2.Maximum = new decimal(new int[] { 6, 0, 0, 0 });
             inputNumber2.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
             inputNumber2.Name = "inputNumber2";
-            inputNumber2.PrefixText = "期望等级：";
+            inputNumber2.PrefixText = "Desired Level:";
             inputNumber2.SelectionStart = 1;
             inputNumber2.Size = new Size(196, 57);
             inputNumber2.TabIndex = 6;
@@ -266,7 +266,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             inputNumber1.Maximum = new decimal(new int[] { 6, 0, 0, 0 });
             inputNumber1.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
             inputNumber1.Name = "inputNumber1";
-            inputNumber1.PrefixText = "期望等级：";
+            inputNumber1.PrefixText = "Desired Level:";
             inputNumber1.SelectionStart = 1;
             inputNumber1.Size = new Size(196, 57);
             inputNumber1.TabIndex = 5;
@@ -276,10 +276,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select7
             // 
-            select7.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select7.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select7.Location = new Point(9, 292);
             select7.Name = "select7";
-            select7.PrefixText = "属性5：";
+            select7.PrefixText = "Trait 5:";
             select7.Size = new Size(235, 57);
             select7.TabIndex = 4;
             select7.Tag = "4";
@@ -288,10 +288,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select6
             // 
-            select6.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select6.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select6.Location = new Point(9, 229);
             select6.Name = "select6";
-            select6.PrefixText = "属性4：";
+            select6.PrefixText = "Trait 4:";
             select6.Size = new Size(235, 57);
             select6.TabIndex = 3;
             select6.Tag = "3";
@@ -300,10 +300,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select5
             // 
-            select5.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select5.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select5.Location = new Point(9, 166);
             select5.Name = "select5";
-            select5.PrefixText = "属性3：";
+            select5.PrefixText = "Trait 3:";
             select5.Size = new Size(235, 57);
             select5.TabIndex = 2;
             select5.Tag = "2";
@@ -312,10 +312,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select4
             // 
-            select4.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select4.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select4.Location = new Point(9, 103);
             select4.Name = "select4";
-            select4.PrefixText = "属性2：";
+            select4.PrefixText = "Trait 2:";
             select4.Size = new Size(235, 57);
             select4.TabIndex = 1;
             select4.Tag = "1";
@@ -324,10 +324,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select2
             // 
-            select2.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select2.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select2.Location = new Point(9, 40);
             select2.Name = "select2";
-            select2.PrefixText = "属性1：";
+            select2.PrefixText = "Trait 1:";
             select2.Size = new Size(235, 57);
             select2.TabIndex = 0;
             select2.Tag = "0";
@@ -347,14 +347,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             groupBox1.Size = new Size(465, 371);
             groupBox1.TabIndex = 59;
             groupBox1.TabStop = false;
-            groupBox1.Text = "排除词条（与目标词条冲突）[可输入文字索引]";
+            groupBox1.Text = "Exclude traits (conflict with targets) [type to search]";
             // 
             // select8
             // 
-            select8.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select8.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select8.Location = new Point(9, 292);
             select8.Name = "select8";
-            select8.PrefixText = "属性5：";
+            select8.PrefixText = "Trait 5:";
             select8.Size = new Size(437, 57);
             select8.TabIndex = 4;
             select8.Tag = "4";
@@ -363,10 +363,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select9
             // 
-            select9.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select9.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select9.Location = new Point(9, 229);
             select9.Name = "select9";
-            select9.PrefixText = "属性4：";
+            select9.PrefixText = "Trait 4:";
             select9.Size = new Size(437, 57);
             select9.TabIndex = 3;
             select9.Tag = "3";
@@ -375,10 +375,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select10
             // 
-            select10.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select10.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select10.Location = new Point(9, 166);
             select10.Name = "select10";
-            select10.PrefixText = "属性3：";
+            select10.PrefixText = "Trait 3:";
             select10.Size = new Size(437, 57);
             select10.TabIndex = 2;
             select10.Tag = "2";
@@ -387,10 +387,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select11
             // 
-            select11.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select11.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select11.Location = new Point(9, 103);
             select11.Name = "select11";
-            select11.PrefixText = "属性2：";
+            select11.PrefixText = "Trait 2:";
             select11.Size = new Size(437, 57);
             select11.TabIndex = 1;
             select11.Tag = "1";
@@ -399,10 +399,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // 
             // select12
             // 
-            select12.Items.AddRange(new object[] { "力量加持", "敏捷加持", "智力加持", "特攻伤害", "精英打击", "特攻治疗加持", "专精治疗加持", "施法专注", "攻速专注", "暴击专注", "幸运专注", "抵御魔法", "抵御物理", "极-伤害叠加", "极-灵活身法", "极-生命凝聚", "极-急救措施", "极-生命波动", "极-生命汲取", "极-全队幸暴", "极-绝境守护" });
+            select12.Items.AddRange(new object[] { "Strength Boost", "Agility Boost", "Intelligence Boost", "Special Attack Damage", "Elite Strike", "Special Healing Boost", "Expert Healing Boost", "Casting Focus", "Attack Speed Focus", "Critical Focus", "Luck Focus", "Resist Magic", "Resist Physical", "Extreme - Damage Stack", "Extreme - Agile Footwork", "Extreme - Life Convergence", "Extreme - Emergency Measures", "Extreme - Life Flux", "Extreme - Life Drain", "Extreme - Team Lucky Crit", "Extreme - Desperate Guardian" });
             select12.Location = new Point(9, 40);
             select12.Name = "select12";
-            select12.PrefixText = "属性1：";
+            select12.PrefixText = "Trait 1:";
             select12.Size = new Size(437, 57);
             select12.TabIndex = 0;
             select12.Tag = "0";
@@ -412,18 +412,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             // select3
             // 
             select3.Font = new Font("HarmonyOS Sans SC", 9F);
-            select3.Items.AddRange(new object[] { "属性优先", "战力优先" });
+            select3.Items.AddRange(new object[] { "Attribute Priority", "Combat Power Priority" });
             select3.List = true;
             select3.Location = new Point(240, 839);
             select3.Name = "select3";
-            select3.PrefixText = "排序方式：";
+            select3.PrefixText = "Sort By:";
             select3.Radius = 3;
             select3.SelectedIndex = 0;
-            select3.SelectedValue = "属性优先";
+            select3.SelectedValue = "Attribute Priority";
             select3.SelectionStart = 4;
             select3.Size = new Size(235, 63);
             select3.TabIndex = 60;
-            select3.Text = "属性优先";
+            select3.Text = "Attribute Priority";
             select3.SelectedIndexChanged += select3_SelectedIndexChanged_1;
             // 
             // ModuleCalculationForm
@@ -444,7 +444,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "ModuleCalculationForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "模组分析";
+            Text = "Module Analysis";
             Load += ModuleCalculationForm_Load;
             ForeColorChanged += ModuleCalculationForm_ForeColorChanged;
             pageHeader1.ResumeLayout(false);

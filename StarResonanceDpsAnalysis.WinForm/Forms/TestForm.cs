@@ -43,7 +43,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             sortedProgressBarList1.OrderOffset = new RenderContent.ContentOffset { X = 45, Y = 0 };
             sortedProgressBarList1.OrderCallback = (i) => $"{i:d2}";
             sortedProgressBarList1.OrderColor = Color.Fuchsia;
-            sortedProgressBarList1.OrderFont = new Font("平方韶华体", 24f, FontStyle.Bold, GraphicsUnit.Pixel);
+            sortedProgressBarList1.OrderFont = new Font("Microsoft YaHei UI", 24f, FontStyle.Bold, GraphicsUnit.Pixel);
             sortedProgressBarList1.OrderImages =
             [
                 HandledAssets.皇冠,
@@ -93,7 +93,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                                 Type = RenderContent.ContentType.Text,
                                 Align = RenderContent.ContentAlign.MiddleRight,
                                 Offset = new RenderContent.ContentOffset { X = -90, Y = 4 },
-                                Text = $"3.0万(1.4w)",
+                                Text = "30k (14k)",
                                 ForeColor = Color.Black,
                                 Font = new Font("Microsoft YaHei UI", 16f, FontStyle.Regular, GraphicsUnit.Pixel),
                             },
@@ -104,7 +104,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                                 Offset = new RenderContent.ContentOffset { X = 0, Y = 0 },
                                 Text = $"{numericUpDown2.Value:f2}%",
                                 ForeColor = Color.Black,
-                                Font = new Font("黑体", 24f, FontStyle.Regular, GraphicsUnit.Pixel),
+                                Font = new Font("Microsoft YaHei UI", 24f, FontStyle.Regular, GraphicsUnit.Pixel),
                             },
                         ],
                     });
@@ -154,7 +154,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                                 Type = RenderContent.ContentType.Text,
                                 Align = RenderContent.ContentAlign.MiddleRight,
                                 Offset = new RenderContent.ContentOffset { X = -90, Y = 4 },
-                                Text = $"3.0万(1.4w)",
+                                Text = "30k (14k)",
                                 ForeColor = Color.Black,
                                 Font = new Font("Microsoft YaHei UI", 16f, FontStyle.Regular, GraphicsUnit.Pixel),
                             },
@@ -165,7 +165,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                                 Offset = new RenderContent.ContentOffset { X = 0, Y = 0 },
                                 Text = $"{numericUpDown2.Value:f2}%",
                                 ForeColor = Color.Black,
-                                Font = new Font("黑体", 24f, FontStyle.Regular, GraphicsUnit.Pixel),
+                                Font = new Font("Microsoft YaHei UI", 24f, FontStyle.Regular, GraphicsUnit.Pixel),
                             },
                         ],
                     });
@@ -188,13 +188,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             var sb = new StringBuilder();
 
-            // 随机长度 2~10
+            // Random length 2~10 using uppercase letters.
             int len = rd.Next(2, 11);
 
             for (int i = 0; i < len; ++i)
             {
-                int code = rd.Next(0x4E00, 0x9FFF + 1);
-                sb.Append((char)code);
+                char letter = (char)rd.Next('A', 'Z' + 1);
+                sb.Append(letter);
             }
 
             return sb.ToString();
@@ -209,7 +209,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             //BattleLogWriter.WriteToFile(Path.Combine(Environment.CurrentDirectory, "Logs"), new() 
             //{
             //    FileVersion = LogsFileVersion.V3_0_0,
-            //    PlayerInfos = [ new PlayerInfo { UID = 123, Name = "惊奇猫猫盒" }, new PlayerInfo { UID = 234, Name = "露詩" } ],
+            //    PlayerInfos = [ new PlayerInfo { UID = 123, Name = "SampleCat" }, new PlayerInfo { UID = 234, Name = "SamplePoet" } ],
             //    BattleLogs = [ new BattleLog { PacketID = id, TimeTicks = ticks, SkillID = 0, AttackerUuid = 123, TargetUuid = 234, Value = 999 } ]
             //});
 

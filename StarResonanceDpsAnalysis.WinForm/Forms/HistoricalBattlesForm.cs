@@ -26,7 +26,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             InitializeComponent();
             Text = FormManager.APP_NAME;
-            FormGui.SetDefaultGUI(this); // 统一设置窗体默认 GUI 风格（字体、间距、阴影等）
+            FormGui.SetDefaultGUI(this); // Apply the default UI styling (fonts, spacing, shadows, etc.)
             ToggleTableView();
 
             label1.Font = AppConfig.TitleFont;
@@ -42,7 +42,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private void HistoricalBattlesForm_Load(object sender, EventArgs e)
         {
-            //FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色 // 根据配置设置窗体的颜色主题（明亮/深色）
+            //FormGui.SetColorMode(this, AppConfig.IsLight); // Apply color theme based on the light/dark setting
 
             //if (FormManager.showTotal)
             //{
@@ -58,7 +58,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 读取 “单场历史（BattleSnapshot）” 下拉
+        /// Populate the dropdown with single-battle snapshots.
         /// </summary>
         private void ReadSnapshotTime()
         {
@@ -67,13 +67,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             if (statsList.Count == 0) return;
             foreach (var snap in statsList)
             {
-                select1.Items.Add(new ComboItemBattle { Snapshot = snap }); // 直接把快照塞到项里
+                select1.Items.Add(new ComboItemBattle { Snapshot = snap }); // Store the snapshot directly in the item
             }
-            select1.SelectedIndex = 0; // 默认选中第一个
+            select1.SelectedIndex = 0; // Default to the first entry
         }
 
         /// <summary>
-        /// 读取 “全程历史（FullSessionSnapshot）” 下拉
+        /// Populate the dropdown with full-session snapshots.
         /// </summary>
         private void ReadFullSessionTime()
         {
@@ -85,29 +85,29 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             {
                 select1.Items.Add(new ComboItemFull { Snapshot = s });
             }
-            select1.SelectedIndex = 0; // 默认选中第一个
+            select1.SelectedIndex = 0; // Default to the first entry
         }
 
 
-        // —— 下拉项类型（单场）
+        // Dropdown item representing a single-battle snapshot
         private sealed class ComboItemBattle
         {
             public BattleSnapshot Snapshot { get; init; }
             public override string ToString()
             {
                 var s = Snapshot;
-                return $"{s.StartedAt:MM-dd HH:mm:ss} ~ {s.EndedAt:HH:mm:ss}（{s.Duration:hh\\:mm\\:ss}）";
+                return $"{s.StartedAt:MM-dd HH:mm:ss} ~ {s.EndedAt:HH:mm:ss} ({s.Duration:hh\\:mm\\:ss})";
             }
         }
 
-        // —— 下拉项类型（全程）
+        // Dropdown item representing a full-session snapshot
         private sealed class ComboItemFull
         {
             public FullSessionSnapshot Snapshot { get; init; }
             public override string ToString()
             {
                 var s = Snapshot;
-                return $"[全程] {s.StartedAt:MM-dd HH:mm:ss} ~ {s.EndedAt:HH:mm:ss}（{s.Duration:hh\\:mm\\:ss}）";
+                return $"[Full Battle] {s.StartedAt:MM-dd HH:mm:ss} ~ {s.EndedAt:HH:mm:ss} ({s.Duration:hh\\:mm\\:ss})";
             }
         }
 
@@ -131,12 +131,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
         }
 
-        // 单场
+        // Render an individual battle snapshot
         private void DumpSnapshot(BattleSnapshot snap)
         {
-            DpsTableDatas.DpsTable.Clear(); // 清空旧数据
+            DpsTableDatas.DpsTable.Clear(); // Clear previous rows
             var sb = new StringBuilder();
-            sb.AppendLine($"[快照] {snap.StartedAt:MM-dd HH:mm:ss} ~ {snap.EndedAt:HH:mm:ss}  时长: {snap.Duration}");
+            sb.AppendLine($"[Snapshot] {snap.StartedAt:MM-dd HH:mm:ss} ~ {snap.EndedAt:HH:mm:ss}  Duration: {snap.Duration}");
             TeamTotalDamageLabel.Text =Common.FormatWithEnglishUnits(snap.TeamTotalDamage.ToString());
             TeamTotalHealingLabel.Text = Common.FormatWithEnglishUnits(snap.TeamTotalHealing.ToString());
             TeamTotalTakenDamageLabel.Text = Common.FormatWithEnglishUnits(snap.TeamTotalTakenDamage.ToString());
@@ -155,58 +155,58 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                    /*  1 */ p.Uid,
             /*  2 */ p.Nickname,
 
-            /*  3 承伤（你实时里第3个就是承伤） */
+            /*  3 Taken damage (matches the live view column order) */
             /*  3 */ p.TakenDamage,
 
-            /*  4~9 = 治疗聚合 + 细分 + 瞬时窗口 */
+            /*  4~9 Healing aggregates and realtime windows */
             /*  4 */ p.TotalHealing,
 
-            /*  5 */ p.HealingCritical,//暴击治疗量
-            /*  6 */ p.HealingLucky,//幸运治疗量
-            /*  7 */ p.HealingCritLucky,//暴击且幸运治疗量
-            /*  8 */ p.HealingRealtime,//实时HPS
-            /*  9 */ p.HealingRealtimeMax,//最大瞬时HPS
+            /*  5 */ p.HealingCritical,// Critical healing
+            /*  6 */ p.HealingLucky,// Lucky healing
+            /*  7 */ p.HealingCritLucky,// Critical + lucky healing
+            /*  8 */ p.HealingRealtime,// Realtime HPS
+            /*  9 */ p.HealingRealtimeMax,// Peak instantaneous HPS
 
-            /* 10 职业 */
-            /* 10 */ p.Profession,//职业
+            /* 10 Profession */
+            /* 10 */ p.Profession,// Profession
 
-            /* 11~14 = 伤害聚合 + 细分 */
-            /* 11 */ p.TotalDamage,//总伤害
-            /* 12 */ p.CriticalDamage,//暴击伤害
-            /* 13 */ p.LuckyDamage,//幸运伤害
+            /* 11~14 Damage aggregates and breakdown */
+            /* 11 */ p.TotalDamage,// Total damage
+            /* 12 */ p.CriticalDamage,// Critical damage
+            /* 13 */ p.LuckyDamage,// Lucky damage
             /* 14 */ p.CritLuckyDamage,
 
-            /* 15~16 = 比率（%）*/
+            /* 15~16 Rate columns (%) */
             /* 15 */ Math.Round(p.CritRate, 1),
             /* 16 */ Math.Round(p.LuckyRate, 1),
 
-            /* 17~18 = 伤害瞬时/峰值 */
-            /* 17 */ p.RealtimeDps,//实时PDS
-            /* 18 */ p.RealtimeDpsMax,//最大瞬时DPS
+            /* 17~18 Realtime/peak damage */
+            /* 17 */ p.RealtimeDps,// Realtime DPS
+            /* 18 */ p.RealtimeDpsMax,// Peak realtime DPS
 
-            /* 19~20 = 平均 DPS/HPS */
-            /* 19 */ Math.Round(p.TotalDps, 1),//总DPS
-            /* 20 */ Math.Round(p.TotalHps, 1),//总HPS
-                    p.CombatPower,//战力
+            /* 19~20 Average DPS/HPS */
+            /* 19 */ Math.Round(p.TotalDps, 1),// Total DPS
+            /* 20 */ Math.Round(p.TotalHps, 1),// Total HPS
+                    p.CombatPower,// Combat power
                     dmgShare
 
 
-                /* 22 = 战力 */
+                /* 22 Combat power */
                 /* 22 */
                 ));
                 //sb.AppendLine(
-                //    $"  UID={p.Uid}  昵称={p.Nickname}  职业={p.Profession}  战力={p.CombatPower}  " +
-                //    $"总伤害={p.TotalDamage}  DPS={p.TotalDps:F1}  总治疗={p.TotalHealing}  HPS={p.TotalHps:F1}  承伤={p.TakenDamage}");
+                //    $"  UID={p.Uid}  Nickname={p.Nickname}  Class={p.Profession}  Power={p.CombatPower}  " +
+                //    $"TotalDamage={p.TotalDamage}  DPS={p.TotalDps:F1}  TotalHealing={p.TotalHealing}  HPS={p.TotalHps:F1}  DamageTaken={p.TakenDamage}");
             }
 
         }
 
-        // 全程
+        // Render a full-session snapshot
         private void DumpFullSnapshot(FullSessionSnapshot snap)
         {
-            DpsTableDatas.DpsTable.Clear(); // 清空旧数据
+            DpsTableDatas.DpsTable.Clear(); // Clear previous rows
             var sb = new StringBuilder();
-            sb.AppendLine($"[全程快照] {snap.StartedAt:MM-dd HH:mm:ss} ~ {snap.EndedAt:HH:mm:ss}  时长: {snap.Duration}");
+            sb.AppendLine($"[Full Snapshot] {snap.StartedAt:MM-dd HH:mm:ss} ~ {snap.EndedAt:HH:mm:ss}  Duration: {snap.Duration}");
             TeamTotalDamageLabel.Text = Common.FormatWithEnglishUnits(snap.TeamTotalDamage.ToString());
             TeamTotalHealingLabel.Text = Common.FormatWithEnglishUnits(snap.TeamTotalHealing.ToString());
             TeamTotalTakenDamageLabel.Text = Common.FormatWithEnglishUnits( snap.TeamTotalTakenDamage.ToString());
@@ -217,45 +217,45 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 double dmgShare = snap.TeamTotalDamage > 0
            ? Math.Round(p.TotalDamage * 100.0 / snap.TeamTotalDamage, 1)
            : 0.0;
-                // 注意：全程快照的 SnapshotPlayer 未提供逐类（暴击/幸运/暴击且幸运）的总量与实时峰值；
-                // 这里这些列用 0 占位；DPS/HPS 使用快照内的 TotalDps/TotalHps。
+                // Full-session snapshots do not expose per-category totals or realtime peaks;
+                // these columns either use the provided values or fall back to zero while DPS/HPS use their aggregates.
                 DpsTableDatas.DpsTable.Add(new DpsTable(
                     /*  1 */ p.Uid,
                     /*  2 */ p.Nickname,
 
-                    /*  3 承伤 */
+                    /*  3 Taken damage */
                     /*  3 */ p.TakenDamage,
 
-                    /*  4~9 治疗相关（部分字段快照未提供 → 用 0 占位） */
+                    /*  4~9 Healing metrics (snapshot fields may be missing → default to zero) */
                     /*  4 */ p.TotalHealing,
-                    /*  5 */ p.HealingCritical,          // HealingCritical (未知)
-                    /*  6 */ p.HealingLucky,          // HealingLucky (未知)
-                    /*  7 */ p.HealingCritLucky,          // HealingCritLucky (未知)
-                    /*  8 */ p.HealingRealtime,          // RealtimeHps (未知)
-                    /*  9 */ p.HealingRealtimeMax,          // MaxInstantHps (未知)
+                    /*  5 */ p.HealingCritical,          // Critical healing (may be zero)
+                    /*  6 */ p.HealingLucky,          // Lucky healing (may be zero)
+                    /*  7 */ p.HealingCritLucky,          // Critical + lucky healing (may be zero)
+                    /*  8 */ p.HealingRealtime,          // Realtime HPS (may be zero)
+                    /*  9 */ p.HealingRealtimeMax,          // Peak instantaneous HPS (may be zero)
 
-                    /* 10 职业 */
+                    /* 10 Profession */
                     /* 10 */ p.Profession,
 
-                    /* 11~14 伤害相关（部分字段快照未提供 → 用 0 占位） */
+                    /* 11~14 Damage metrics (snapshot fields may be missing → default to zero) */
                     /* 11 */ p.TotalDamage,
-                    /* 12 */ p.CriticalDamage,          // CriticalDamage (未知)
-                    /* 13 */ p.LuckyDamage,          // LuckyDamage (未知)
-                    /* 14 */ p.CriticalDamage,          // CritLuckyDamage (未知)
+                    /* 12 */ p.CriticalDamage,          // Critical damage (may be zero)
+                    /* 13 */ p.LuckyDamage,          // Lucky damage (may be zero)
+                    /* 14 */ p.CriticalDamage,          // Crit + lucky damage (may be zero)
 
-                    /* 15~16 = 比率（%）（快照未提供玩家层聚合 → 用 0 占位） */
+                    /* 15~16 Rate columns (%) */
                     /* 15 */ p.CritRate,          // CritRate
                     /* 16 */ p.LuckyRate,          // LuckyRate
 
-                    /* 17~18 实时/峰值（全程历史快照无“实时”概念 → 用 0 占位） */
-                    /* 17 */ p.RealtimeDps,          // RealtimeDps
-                    /* 18 */ p.RealtimeDpsMax,          // RealtimeDpsMax
+                    /* 17~18 Realtime/peak DPS (snapshot aggregates only) */
+                    /* 17 */ p.RealtimeDps,          // Realtime DPS
+                    /* 18 */ p.RealtimeDpsMax,          // Peak realtime DPS
 
-                    /* 19~20 = 平均 DPS/HPS */
+                    /* 19~20 Average DPS/HPS */
                     /* 19 */ Math.Round(p.TotalDps, 1),
                     /* 20 */ Math.Round(p.TotalHps, 1),
 
-                    /* 22 = 战力 */
+                    /* 22 Combat power */
                     /* 22 */ p.CombatPower, dmgShare
                 ));
 
@@ -265,30 +265,30 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         }
 
-        // 放在类内部（如字段区）
+        // Helper types and sorting utilities
         private enum SortMode { ByDamage, ByHealing, ByTaken }
-        private SortMode _sortMode = SortMode.ByDamage; // 默认按伤害
-        // SnapshotPlayer 是你快照里的玩家模型类型，按你项目里的命名替换
+        private SortMode _sortMode = SortMode.ByDamage; // Default sorting: total damage
+        // SnapshotPlayer represents the per-player snapshot data model
         private IEnumerable<SnapshotPlayer> ApplySort(IEnumerable<SnapshotPlayer> players)
         {
             switch (_sortMode)
             {
                 case SortMode.ByHealing:
-                    // 先按总治疗，再按平均HPS、再按瞬时峰值HPS作为次序
+                    // Sort by total healing, then average HPS, then peak HPS
                     return players
                         .OrderByDescending(p => p.TotalHealing)
                         .ThenByDescending(p => p.TotalHps)
                         .ThenByDescending(p => p.HealingRealtimeMax);
 
                 case SortMode.ByTaken:
-                    // 承伤优先，其次用总伤害打破并列（你也可换成 Taken 的峰值等）
+                    // Sort by total damage taken, then use total damage to break ties
                     return players
                         .OrderByDescending(p => p.TakenDamage)
                         .ThenByDescending(p => p.TotalDamage);
 
                 case SortMode.ByDamage:
                 default:
-                    // 伤害优先，其次平均DPS，再次瞬时峰值
+                    // Sort by total damage, then average DPS, then peak single hit
                     return players
                         .OrderByDescending(p => p.TotalDamage)
                         .ThenByDescending(p => p.TotalDps)
@@ -309,11 +309,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             if (segmented1.SelectIndex == 0)
             {
-                ReadSnapshotTime();//刷新下拉项
+                ReadSnapshotTime(); // Refresh the individual snapshot dropdown
             }
             else
             {
-                ReadFullSessionTime();//刷新全程下拉项
+                ReadFullSessionTime(); // Refresh the full-session dropdown
             }
 
         }
@@ -325,7 +325,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private void segmented1_SelectIndexChanged(object sender, IntEventArgs e)
         {
-            DpsTableDatas.DpsTable.Clear(); // 清空旧数据
+            DpsTableDatas.DpsTable.Clear(); // Clear previous rows
             select1.Items.Clear();
             if (segmented1.SelectIndex == 0)
             {
@@ -341,7 +341,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             //if (e.ColumnIndex <= 0) return;
 
-            //// —— 行索引安全校验（AntdUI 表通常是 0-based，这里不再减 1）——
+            //// Row index safety check (AntdUI tables are 0-based, so no adjustment here)
             //int idx = e.RowIndex - 1;
             //if (idx < 0 || idx >= DpsTableDatas.DpsTable.Count) return;
 
@@ -351,7 +351,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             //int power = row.CombatPower;
             //string prof = row.Profession;
 
-            //// —— 详情窗体准备 —— 
+            //// Prepare the detail form
             //if (FormManager.skillDetailForm == null || FormManager.skillDetailForm.IsDisposed)
             //    FormManager.skillDetailForm = new SkillDetailForm();
 
@@ -361,28 +361,28 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             //f.Power = power;
             //f.Profession = prof;
 
-            //// —— 快照上下文 + 时间 —— 
+            //// Snapshot context and timestamps
             //f.ContextType = DetailContextType.Snapshot;
             //f.SnapshotStartTime = GetSelectedSnapshotStartTime();
             //if (f.SnapshotStartTime is null)
             //{
-            //    // 可留着调试
-            //    // MessageBox.Show("未能取得快照时间（下拉未选中？）");
+            //    // Optional: keep for debugging
+            //    // MessageBox.Show("Failed to determine snapshot time (no dropdown selection?)");
             //    return;
             //}
 
-            //// 顶部玩家信息
+            //// Populate top-of-form player information
             //f.GetPlayerInfo(nick, power, prof);
 
-            //// （可选）调试：看快照技能数量是否为 0，快速定位“取不到技能” vs “UI 没渲染”
+            //// Optional debug: check whether skill counts are zero to distinguish missing data from UI issues
             ///*
             //var counts = StarResonanceDpsAnalysis.Plugin.DamageStatistics.FullRecord
             //             .GetPlayerSkillsBySnapshotTimeEx(f.SnapshotStartTime.Value, uid);
             //MessageBox.Show($"Snapshot Skills → D:{counts.DamageSkills.Count} H:{counts.HealingSkills.Count} T:{counts.TakenSkills.Count}");
             //*/
 
-            //// 刷新并显示
-            //f.SelectDataType();   // 这里应当会走 snapshot 分支：UpdateSkillTable_Snapshot(...)
+            //// Refresh and display
+            //f.SelectDataType();   // Should hit the snapshot branch: UpdateSkillTable_Snapshot(...)
             //if (!f.Visible) f.Show(); else f.Activate();
         }
 
@@ -420,12 +420,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             var val = select2?.SelectedValue?.ToString();
             _sortMode = val switch
             {
-                "按治疗排序" => SortMode.ByHealing,
-                "按承伤排序" => SortMode.ByTaken,
+                "Sort by Healing" => SortMode.ByHealing,
+                "Sort by Damage Taken" => SortMode.ByTaken,
                 _ => SortMode.ByDamage
             };
 
-            // 重新渲染当前视图
+            // Re-render the currently-selected view
             if (segmented1.SelectIndex == 0)
             {
                 if (select1.SelectedValue is ComboItemBattle b && b.Snapshot != null)

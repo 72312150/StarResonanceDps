@@ -6,31 +6,32 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
     public static class NpcapInstaller
     {
         /// <summary>
-        /// 仅用于 Npcap 0.96 等支持 /S 的版本。新版社区版(≥0.97)不支持静默安装。
+        /// Only valid for Npcap 0.96 and earlier builds that still accept `/S`.
+        /// Community editions ≥ 0.97 removed silent installation support.
         /// </summary>
         public static async Task<int> InstallNpcapSilentAsync(
             string installerPath,
             string extraArgs = "/winpcap_mode=yes /loopback_support=yes /admin_only=no")
         {
             if (!File.Exists(installerPath))
-                throw new FileNotFoundException("未找到 Npcap 安装包", installerPath);
+                throw new FileNotFoundException("Npcap installer not found.", installerPath);
 
-            // 可选：防呆——检测版本，避免对新版本传 /S 弹窗卡死
+            // Optional guard: detect unsupported versions so `/S` does not hang.
             var ver = TryGetVersion(installerPath);
             if (ver != null && ver > new Version(0, 96))
-                throw new InvalidOperationException($"该安装包版本为 {ver}，社区版不支持静默安装。");
+                throw new InvalidOperationException($"Installer version {ver} does not support silent mode for the community edition.");
 
             var psi = new ProcessStartInfo
             {
                 FileName = installerPath,
                 Arguments = $"/S {extraArgs}",
                 UseShellExecute = true,
-                Verb = "runas" // 需要管理员权限
+                Verb = "runas" // requires elevation
             };
 
             using var p = Process.Start(psi)!;
             await p.WaitForExitAsync();
-            return p.ExitCode; // 通常 0 为成功
+            return p.ExitCode; // 0 = success
         }
 
         public static bool IsNpcapInstalled()

@@ -8,7 +8,7 @@ using SystemPanel = System.Windows.Forms.Panel;
 namespace StarResonanceDpsAnalysis.WinForm.Forms
 {
     /// <summary>
-    /// 实时图表窗口 - 使用扁平化自定义图表控件，自动加载所有图表
+    /// Realtime chart window that wires up the flat charts and keeps them updated.
     /// </summary>
     public partial class RealtimeChartsForm : BorderlessForm
     {
@@ -20,16 +20,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         private FlatBarChart _damageTypeChart;
         private Dropdown _playerSelector;
 
-        // 控制按钮
+        // Control buttons
         private AntdUI.Button _refreshButton;
         private AntdUI.Button _closeButton;
         private AntdUI.Button _autoRefreshToggle;
 
-        // 自动刷新相关
+        // Auto-refresh state
         private System.Windows.Forms.Timer _autoRefreshTimer;
         private bool _autoRefreshEnabled = false;
 
-        // 窗体拖动相关
+        // Dragging support
         private bool _isDragging = false;
         private Point _dragStartPoint;
         private SystemPanel _draggablePanel;
@@ -39,23 +39,23 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             InitializeComponent();
             FormGui.SetDefaultGUI(this);
 
-            Text = "实时图表可视化";
+            Text = "Realtime Chart Visualizer";
             Size = new Size(1000, 700);
             StartPosition = FormStartPosition.CenterScreen;
 
-            // 设置标准字体
+            // Standard font
             Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Regular);
 
             InitializeControls();
             InitializeAutoRefreshTimer();
 
-            // 应用当前主题
+            // Apply current theme
             RefreshChartsTheme();
 
-            // 自动加载所有图表
+            // Load charts
             LoadAllCharts();
 
-            // 默认启用自动刷新
+            // Enable auto refresh by default
             EnableAutoRefreshByDefault();
         }
 
@@ -73,23 +73,23 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private void InitializeControls()
         {
-            // 创建控制按钮面板（可拖动）
+            // Create draggable control panel
             _draggablePanel = new SystemPanel
             {
                 Height = 50,
                 Dock = DockStyle.Top,
                 Padding = new Padding(10, 5, 10, 5),
-                Cursor = Cursors.SizeAll // 显示可移动光标
+                Cursor = Cursors.SizeAll // indicate draggability
             };
 
-            // 为拖动面板添加鼠标事件
+            // Hook drag events
             _draggablePanel.MouseDown += DraggablePanel_MouseDown;
             _draggablePanel.MouseMove += DraggablePanel_MouseMove;
             _draggablePanel.MouseUp += DraggablePanel_MouseUp;
 
             _refreshButton = new AntdUI.Button
             {
-                Text = "手动刷新",
+                Text = "Refresh Now",
                 Type = TTypeMini.Primary,
                 Size = new Size(80, 35),
                 Location = new Point(10, 8),
@@ -99,8 +99,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
             _autoRefreshToggle = new AntdUI.Button
             {
-                Text = "自动刷新: 开", // 默认显示为开启状态
-                Type = TTypeMini.Primary, // 默认使用Primary样式
+                Text = "Auto Refresh: On", // default to enabled
+                Type = TTypeMini.Primary, // primary style when enabled
                 Size = new Size(100, 35),
                 Location = new Point(100, 8),
                 Font = Font
@@ -109,7 +109,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
             _closeButton = new AntdUI.Button
             {
-                Text = "关闭",
+                Text = "Close",
                 Type = TTypeMini.Default,
                 Size = new Size(60, 35),
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
@@ -122,41 +122,41 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             _draggablePanel.Controls.Add(_autoRefreshToggle);
             _draggablePanel.Controls.Add(_closeButton);
 
-            // 创建选项卡控件
+            // Tab container
             _tabControl = new Tabs
             {
                 Dock = DockStyle.Fill,
                 Font = Font
             };
 
-            // 添加TabPage - 纯文本标题
+            // Add tab pages
             _tabControl.Pages.Add(new AntdUI.TabPage
             {
-                Text = "DPS趋势图",
+                Text = "DPS Trend",
                 Font = Font
             });
             _tabControl.Pages.Add(new AntdUI.TabPage
             {
-                Text = "技能占比图",
+                Text = "Skill Share",
                 Font = Font
             });
             _tabControl.Pages.Add(new AntdUI.TabPage
             {
-                Text = "团队DPS对比",
+                Text = "Team DPS",
                 Font = Font
             });
             _tabControl.Pages.Add(new AntdUI.TabPage
             {
-                Text = "多维度对比",
+                Text = "Multi-metric",
                 Font = Font
             });
             _tabControl.Pages.Add(new AntdUI.TabPage
             {
-                Text = "伤害分布图",
+                Text = "Damage Breakdown",
                 Font = Font
             });
 
-            // 准备各页面容器
+            // Prepare page containers
             for (int i = 0; i < 5; i++)
             {
                 var panel = new SystemPanel
@@ -167,7 +167,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 _tabControl.Pages[i].Controls.Add(panel);
             }
 
-            // 为技能占比图页面添加玩家选择器
+            // Add player selector to the skill share tab
             var skillChartPage = _tabControl.Pages[1];
             var skillChartPanel = skillChartPage.Controls[0] as SystemPanel;
 
@@ -180,7 +180,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
             var playerLabel = new AntdUI.Label
             {
-                Text = "选择玩家：",
+                Text = "Select Player:",
                 Location = new Point(10, 15),
                 AutoSize = true,
                 Font = Font
@@ -202,7 +202,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             Controls.Add(_draggablePanel);
         }
 
-        #region 窗体拖动事件处理
+        #region Drag Handling
 
         private void DraggablePanel_MouseDown(object sender, MouseEventArgs e)
         {
@@ -218,11 +218,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             if (_isDragging && e.Button == MouseButtons.Left)
             {
-                // 计算移动距离
+                // Calculate delta
                 var deltaX = e.Location.X - _dragStartPoint.X;
                 var deltaY = e.Location.Y - _dragStartPoint.Y;
 
-                // 移动窗体
+                // Move window
                 this.Location = new Point(this.Location.X + deltaX, this.Location.Y + deltaY);
             }
         }
@@ -238,30 +238,24 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         #endregion
 
-        /// <summary>
-        /// 默认启用自动刷新
-        /// </summary>
         private void EnableAutoRefreshByDefault()
         {
             _autoRefreshEnabled = true;
             _autoRefreshTimer.Enabled = true;
-            _autoRefreshToggle.Text = "自动刷新: 开";
+            _autoRefreshToggle.Text = "Auto Refresh: On";
             _autoRefreshToggle.Type = TTypeMini.Primary;
         }
 
-        /// <summary>
-        /// 自动加载所有图表
-        /// </summary>
         private void LoadAllCharts()
         {
             try
             {
-                // 加载DPS趋势图（移除滑块控制）
+                // DPS trend chart
                 var dpsTrendPanel = _tabControl.Pages[0].Controls[0] as SystemPanel;
                 _dpsTrendChart = ChartVisualizationService.CreateDpsTrendChart();
                 dpsTrendPanel.Controls.Add(_dpsTrendChart);
 
-                // 加载技能占比图
+                // Skill share chart
                 var skillChartPanel = _tabControl.Pages[1].Controls[0] as SystemPanel;
                 UpdatePlayerSelector();
                 var selectedPlayer = _playerSelector.SelectedValue as PlayerSelectorItem;
@@ -269,28 +263,28 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 _skillPieChart = ChartVisualizationService.CreateSkillDamagePieChart(playerId);
                 skillChartPanel.Controls.Add(_skillPieChart);
 
-                // 加载团队DPS对比图
+                // Team DPS chart
                 var teamDpsPanel = _tabControl.Pages[2].Controls[0] as SystemPanel;
                 _teamDpsChart = ChartVisualizationService.CreateTeamDpsBarChart();
                 teamDpsPanel.Controls.Add(_teamDpsChart);
 
-                // 加载多维度对比图
+                // Multi metric chart
                 var multiDimensionPanel = _tabControl.Pages[3].Controls[0] as SystemPanel;
                 _multiDimensionChart = ChartVisualizationService.CreateDpsRadarChart();
                 multiDimensionPanel.Controls.Add(_multiDimensionChart);
 
-                // 加载伤害分布图
+                // Damage breakdown chart
                 var damageTypePanel = _tabControl.Pages[4].Controls[0] as SystemPanel;
                 _damageTypeChart = ChartVisualizationService.CreateDamageTypeStackedChart();
                 damageTypePanel.Controls.Add(_damageTypeChart);
 
-                // 初始刷新所有图表数据
+                // Initial refresh
                 RefreshAllCharts();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"加载图表时出错: {ex.Message}");
-                MessageBox.Show($"加载图表时出错: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Console.WriteLine($"Failed to load charts: {ex.Message}");
+                MessageBox.Show($"Failed to load charts:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -298,26 +292,26 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             _autoRefreshTimer = new System.Windows.Forms.Timer
             {
-                Interval = 100, // 0.1秒 (100毫秒) 高频刷新
+                Interval = 100, // 100 ms default refresh cadence
                 Enabled = false
             };
             _autoRefreshTimer.Tick += AutoRefreshTimer_Tick;
         }
 
-        #region 事件处理
+        #region Event Handlers
 
         private void RefreshButton_Click(object sender, EventArgs e)
         {
             RefreshAllCharts();
 
-            // 显示刷新状态
-            _refreshButton.Text = "刷新中...";
+            // Indicate refresh state
+            _refreshButton.Text = "Refreshing...";
             _refreshButton.Enabled = false;
 
             var resetTimer = new System.Windows.Forms.Timer { Interval = 300 };
             resetTimer.Tick += (s, args) =>
             {
-                _refreshButton.Text = "手动刷新";
+                _refreshButton.Text = "Refresh Now";
                 _refreshButton.Enabled = true;
                 resetTimer.Stop();
                 resetTimer.Dispose();
@@ -330,7 +324,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             _autoRefreshEnabled = !_autoRefreshEnabled;
             _autoRefreshTimer.Enabled = _autoRefreshEnabled;
 
-            _autoRefreshToggle.Text = $"自动刷新: {(_autoRefreshEnabled ? "开" : "关")}";
+            _autoRefreshToggle.Text = $"Auto Refresh: {(_autoRefreshEnabled ? "On" : "Off")}";
             _autoRefreshToggle.Type = _autoRefreshEnabled ? TTypeMini.Primary : TTypeMini.Default;
         }
 
@@ -358,14 +352,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             try
             {
-                // 更新数据点
+                // Update source data
                 ChartVisualizationService.UpdateAllDataPoints();
 
-                // 刷新所有图表，避免用户记录丢失
+                // Refresh charts without losing cached state
                 if (_dpsTrendChart != null)
                 {
                     ChartVisualizationService.RefreshDpsTrendChart(_dpsTrendChart, null, ChartDataType.Damage);
-                    _dpsTrendChart.ReloadPersistentData(); // 重新加载数据防止丢失
+                    _dpsTrendChart.ReloadPersistentData(); // reload to avoid data loss
                 }
 
                 if (_skillPieChart != null)
@@ -383,12 +377,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 if (_damageTypeChart != null)
                     ChartVisualizationService.RefreshDamageTypeStackedChart(_damageTypeChart);
 
-                // 更新玩家选择器
+                // Refresh player dropdown
                 UpdatePlayerSelector();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"刷新图表时出错: {ex.Message}");
+                Console.WriteLine($"Failed to refresh charts: {ex.Message}");
             }
         }
 
@@ -396,18 +390,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             var players = StatisticData._manager.GetPlayersWithCombatData().ToList();
 
-            // 保存当前选择
+            // Preserve current selection
             var currentSelection = _playerSelector.SelectedValue as PlayerSelectorItem;
 
             _playerSelector.Items.Clear();
 
             foreach (var player in players)
             {
-                var displayName = string.IsNullOrEmpty(player.Nickname) ? $"玩家{player.Uid}" : player.Nickname;
+                var displayName = string.IsNullOrEmpty(player.Nickname) ? $"Player {player.Uid}" : player.Nickname;
                 var item = new PlayerSelectorItem { Uid = player.Uid, DisplayName = displayName };
                 _playerSelector.Items.Add(item);
 
-                // 恢复选择或默认选择第一个
+                // Restore selection or default to the first entry
                 if ((currentSelection != null && currentSelection.Uid == player.Uid) ||
                     (currentSelection == null && _playerSelector.Items.Count == 1))
                 {
@@ -416,17 +410,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
         }
 
-        /// <summary>
-        /// 刷新图表主题
-        /// </summary>
         public void RefreshChartsTheme()
         {
             var isDark = !AppConfig.IsLight;
 
-            // 设置窗口主题
+            // Apply window theme
             FormGui.SetColorMode(this, AppConfig.IsLight);
 
-            // 更新所有图表主题
+            // Update chart theming
             if (_dpsTrendChart != null)
                 _dpsTrendChart.IsDarkTheme = isDark;
 
@@ -443,9 +434,6 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 _damageTypeChart.IsDarkTheme = isDark;
         }
 
-        /// <summary>
-        /// 清空所有图表数据
-        /// </summary>
         public void ClearAllChartData()
         {
             _dpsTrendChart?.ClearSeries();
@@ -456,33 +444,21 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             _playerSelector?.Items.Clear();
         }
 
-        /// <summary>
-        /// 手动刷新所有图表
-        /// </summary>
         public void ManualRefreshCharts()
         {
             RefreshAllCharts();
         }
 
-        /// <summary>
-        /// 设置自动刷新间隔
-        /// </summary>
         public void SetAutoRefreshInterval(int milliseconds)
         {
             if (_autoRefreshTimer != null)
             {
-                _autoRefreshTimer.Interval = Math.Max(50, milliseconds); // 最小50毫秒，支持更高频率
+                _autoRefreshTimer.Interval = Math.Max(50, milliseconds); // floor at 50 ms
             }
         }
 
-        /// <summary>
-        /// 获取当前自动刷新状态
-        /// </summary>
         public bool IsAutoRefreshEnabled => _autoRefreshEnabled;
 
-        /// <summary>
-        /// 获取当前刷新间隔
-        /// </summary>
         public int GetRefreshInterval => _autoRefreshTimer?.Interval ?? 100;
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -495,7 +471,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            // 窗口加载后自动刷新一次图表
+            // Trigger an initial refresh once the window is ready
             if (_dpsTrendChart != null)
             {
                 RefreshAllCharts();
@@ -509,7 +485,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
     }
 
     /// <summary>
-    /// 玩家选择器项
+    /// Value object for the player dropdown.
     /// </summary>
     public class PlayerSelectorItem
     {

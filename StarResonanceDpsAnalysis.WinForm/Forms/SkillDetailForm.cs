@@ -12,26 +12,26 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
     public partial class SkillDetailForm : BorderlessForm
     {
 
-        // 新增：上下文类型（默认保持你原来的行为 = 当前战斗）
+        // Context selection (defaults to the previous behavior: current battle)
         public DetailContextType ContextType { get; set; } = DetailContextType.Current;
 
-        // 新增：快照模式下的起始时间（用 StartedAt 精确定位快照）
+        // Snapshot start time (uses StartedAt to locate the snapshot precisely)
         public DateTime? SnapshotStartTime { get; set; } = null;
 
 
-        // 添加折线图成员变量
+        // Trend chart member fields
         private FlatLineChart _dpsTrendChart;
-        // 添加条形图和饼图成员变量
+        // Bar and pie chart member fields
         private FlatBarChart _skillDistributionChart;
         private FlatPieChart _critLuckyChart;
 
-        // 添加缺失的isSelect变量
+        // Selection guard flag
         bool isSelect = false;
 
-        // 添加分割器动态调整相关变量
-        private int _lastSplitterPosition = 350; // 记录上次分割器位置，与Designer中的默认值保持一致
-        private const int SPLITTER_STEP_PIXELS = 30; // 每30像素触发一次调整
-        private const int PADDING_ADJUSTMENT = 15;   // 每次调整PaddingRight的数值
+        // Splitter adjustment state
+        private int _lastSplitterPosition = 350; // Track the previous splitter position (matches designer default)
+        private const int SPLITTER_STEP_PIXELS = 30; // Trigger adjustments every 30 pixels
+        private const int PADDING_ADJUSTMENT = 15;   // Amount to tweak PaddingRight per step
 
         private void SetDefaultFontFromResources()
         {
@@ -80,53 +80,53 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             ToggleTableView();
         }
 
-        private int fixedWidth = 1911;//窗体宽度
+        private int fixedWidth = 1911; // Form width
         private void SkillDetailForm_Load(object sender, EventArgs e)
         {
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色
+            FormGui.SetColorMode(this, AppConfig.IsLight); // Apply the configured theme colors
 
             isSelect = true;
-            select1.Items = new AntdUI.BaseCollection() { "按伤害排序", "按秒伤排序", "按命中次数排序", "按暴击率排序" };
+            select1.Items = new AntdUI.BaseCollection() { "Sort by Damage", "Sort by DPS", "Sort by Hits", "Sort by Critical Rate" };
             select1.SelectedIndex = 0;
             isSelect = false;
 
-            // 初始化并添加折线图到panel7
+            // Initialize and add the line chart to the collapse item
             InitializeDpsTrendChart();
 
-            // 初始化并添加条形图和饼图
+            // Initialize and add the bar and pie charts
             InitializeSkillDistributionChart();
             InitializeCritLuckyChart();
 
-            // 订阅panel7的Resize事件以确保图表正确调整大小
+            // Subscribe to the collapse item resize event to keep the chart sized correctly
             collapseItem1.Resize += Panel7_Resize;
 
-            // 手动绑定splitter1事件，确保事件处理正确
+            // Attach splitter1 events explicitly to ensure handlers fire
             splitter1.SplitterMoving += splitter1_SplitterMoving;
             splitter1.SplitterMoved += splitter1_SplitterMoved;
 
-            // 设置分割器的最小位置为350，防止向左拖动
+            // Set a minimum of 350 on the splitter to prevent dragging too far left
             splitter1.Panel1MinSize = 350;
 
-            // 初始化分割器位置跟踪，确保与实际位置同步
+            // Initialize splitter position tracking so it stays in sync
             _lastSplitterPosition = splitter1.SplitterDistance;
 
-            // 确保图表初始状态正确 - 基准位置350时，PaddingRight=160，垂直线条=5
+            // Ensure the chart starts with the correct baseline (350px => PaddingRight=160, 5 grid lines)
             if (_dpsTrendChart != null)
             {
                 var offsetFrom350 = splitter1.SplitterDistance - 350;
                 var steps = offsetFrom350 / SPLITTER_STEP_PIXELS;
                 var initialPadding = Math.Max(10, Math.Min(300, 160 - steps * PADDING_ADJUSTMENT));
-                var initialGridLines = Math.Max(3, Math.Min(10, 5 + steps)); // 修改：将最大值从20改为10
+                var initialGridLines = Math.Max(3, Math.Min(10, 5 + steps)); // Adjusted maximum from 20 to 10
 
                 _dpsTrendChart.SetPaddingRight(initialPadding);
                 _dpsTrendChart.SetVerticalGridLines(initialGridLines);
 
-                //Console.WriteLine($"初始化图表 - 分割器位置: {splitter1.SplitterDistance}, PaddingRight: {initialPadding}, 垂直线条: {initialGridLines}");
+                //Console.WriteLine($"Chart init — splitter: {splitter1.SplitterDistance}, padding: {initialPadding}, vertical lines: {initialGridLines}");
             }
         }
 
         /// <summary>
-        /// 设置折线图刷新回调（避免重复代码）
+        /// Configure the trend chart refresh callback (avoid duplicate logic).
         /// </summary>
         private void SetupTrendChartRefreshCallback()
         {
@@ -149,13 +149,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //    }
             //    catch (Exception ex)
             //    {
-            //        Console.WriteLine($"图表刷新回调出错: {ex.Message}");
+            //        Console.WriteLine($"Failed to refresh chart callback: {ex.Message}");
             //    }
             //});
         }
 
         /// <summary>
-        /// panel7大小变化时的处理
+        /// Handle collapse item size changes.
         /// </summary>
         private void Panel7_Resize(object sender, EventArgs e)
         {
@@ -163,8 +163,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             {
                 try
                 {
-                    // 由于使用了Dock.Fill，图表会自动调整大小
-                    // 这里只需要延迟重绘以确保布局完成后再刷新
+                    // Dock.Fill keeps the chart sized automatically
+                    // We only need to delay the redraw until after layout settles
                     var resizeTimer = new System.Windows.Forms.Timer { Interval = 100 };
                     resizeTimer.Tick += (s, args) =>
                     {
@@ -180,49 +180,49 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"调整图表大小时出错: {ex.Message}");
+                    Console.WriteLine($"Error while resizing chart: {ex.Message}");
                 }
             }
         }
 
         /// <summary>
-        /// 初始化DPS趋势图表
+        /// Initialize the DPS trend chart.
         /// </summary>
         private void InitializeDpsTrendChart()
         {
             try
             {
-                // 清空panel7现有控件
+                // Clear existing controls from the collapse item
                 collapseItem1.Controls.Clear();
 
-                // 确保panel7大小正确设置并支持自动调整
+                // Ensure the collapse item has the correct min size and auto-resize settings
                 collapseItem1.MinimumSize = new Size(ChartConfigManager.MIN_WIDTH, ChartConfigManager.MIN_HEIGHT);
                 collapseItem1.Anchor = AnchorStyles.Top | AnchorStyles.Left;
 
-                // 创建DPS趋势折线图，使用统一的配置管理（默认跟随全局数据源）
+                // Create the DPS trend chart using the shared configuration (defaults follow the global source)
                 _dpsTrendChart = ChartVisualizationService.CreateDpsTrendChart(specificPlayerId: Uid);
 
-                // 设置图表为自适应大小，与其他两个图表保持一致
+                // Make the chart dock-fill so it matches the other charts
                 _dpsTrendChart.Dock = DockStyle.Fill;
 
-                // 设置实时刷新回调，传入当前玩家ID
+                // Hook up the realtime refresh callback for the current player
                 SetupTrendChartRefreshCallback();
 
-                // 添加到panel7
+                // Add the chart to the collapse item
                 collapseItem1.Controls.Add(_dpsTrendChart);
 
-                // 确保图表被正确添加后再刷新数据
-                Application.DoEvents(); // 让UI更新完成
+                // Ensure the control is added before refreshing data
+                Application.DoEvents(); // Flush UI updates before refreshing data
 
-                // 初始刷新图表数据
+                // Initial data refresh
                 RefreshDpsTrendChart();
             }
             catch (Exception ex)
             {
-                // 如果图表初始化失败，显示错误信息
+                // If initialization fails, render an error label
                 var errorLabel = new AntdUI.Label
                 {
-                    Text = $"图表初始化失败: {ex.Message}",
+                    Text = $"Failed to initialize chart: {ex.Message}",
                     Dock = DockStyle.Fill,
                     TextAlign = ContentAlignment.MiddleCenter,
                     ForeColor = Color.Red,
@@ -230,12 +230,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                 };
                 collapseItem1.Controls.Add(errorLabel);
 
-                Console.WriteLine($"图表初始化失败: {ex}");
+                Console.WriteLine($"Failed to initialize chart: {ex}");
             }
         }
 
         /// <summary>
-        /// 刷新DPS趋势图表数据
+        /// Refresh the DPS trend chart data.
         /// </summary>
         private void RefreshDpsTrendChart()
         {
@@ -245,10 +245,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //    {
             //        var dataType = segmented1.SelectIndex switch
             //        {
-            //            0 => ChartDataType.Damage,      // 伤害
-            //            1 => ChartDataType.Healing,     // 治疗
-            //            2 => ChartDataType.TakenDamage, // 承伤
-            //            _ => ChartDataType.Damage       // 默认伤害
+            //            0 => ChartDataType.Damage,      // Damage
+            //            1 => ChartDataType.Healing,     // Healing
+            //            2 => ChartDataType.TakenDamage, // Damage taken
+            //            _ => ChartDataType.Damage       // Default to damage
             //        };
 
             //        var source = FormManager.showTotal ? ChartDataSource.FullRecord : ChartDataSource.Current;
@@ -256,7 +256,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //    }
             //    catch (Exception ex)
             //    {
-            //        Console.WriteLine($"刷新DPS趋势图表时出错: {ex.Message}");
+            //        Console.WriteLine($"Failed to refresh DPS trend chart: {ex.Message}");
             //    }
             //}
         }
@@ -269,62 +269,62 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
 
             SelectDataType();
 
-            // 图表现在有自己的实时刷新机制，这里只做必要的数据更新检查
-            // RefreshDpsTrendChart(); // 移除手动刷新，由图表内部处理
+            // Charts now refresh themselves; only perform essential data checks here
+            // RefreshDpsTrendChart(); // Manual refresh removed; chart handles this internally
         }
 
         private void segmented1_SelectIndexChanged(object sender, IntEventArgs e)
         {
             select1.Items.Clear();
             isSelect = true;
-            label3.Text = "伤害信息";
-            label1.Text = "总伤害";
-            label2.Text = "秒伤";
-            label4.Text = "暴击率";
-            label5.Text = "幸运率";
+            label3.Text = "Damage Summary";
+            label1.Text = "Total Damage";
+            label2.Text = "DPS";
+            label4.Text = "Critical Rate";
+            label5.Text = "Lucky Rate";
             switch (e.Value)
             {
                 case 0:
-                    select1.Items = new AntdUI.BaseCollection() { "按伤害排序", "按秒伤排序", "按命中次数排序", "按暴击率排序" };
+                    select1.Items = new AntdUI.BaseCollection() { "Sort by Damage", "Sort by DPS", "Sort by Hits", "Sort by Critical Rate" };
                     break;
                 case 1:
-                    select1.Items = new AntdUI.BaseCollection() { "按治疗量排序", "按HPS排序", "按命中次数排序", "按暴击率排序" };
-                    label3.Text = "治疗信息";
-                    label1.Text = "总治疗";
-                    label2.Text = "秒治疗";
-                    label4.Text = "暴击率";
-                    label5.Text = "幸运率";
+                    select1.Items = new AntdUI.BaseCollection() { "Sort by Healing", "Sort by HPS", "Sort by Hits", "Sort by Critical Rate" };
+                    label3.Text = "Healing Summary";
+                    label1.Text = "Total Healing";
+                    label2.Text = "HPS";
+                    label4.Text = "Critical Rate";
+                    label5.Text = "Lucky Rate";
                     break;
                 case 2:
-                    select1.Items = new AntdUI.BaseCollection() { "按承伤排序", "按秒承伤排序", "按受击次数排序", "按暴击率排序" };
-                    label3.Text = "承伤信息";
-                    label1.Text = "总承伤";
-                    label2.Text = "秒承伤";
-                    label4.Text = "最大承伤";
-                    label5.Text = "最小承伤";
+                    select1.Items = new AntdUI.BaseCollection() { "Sort by Damage Taken", "Sort by Damage Taken per Second", "Sort by Hits Taken", "Sort by Critical Rate" };
+                    label3.Text = "Damage Taken Summary";
+                    label1.Text = "Total Damage Taken";
+                    label2.Text = "Damage Taken / s";
+                    label4.Text = "Highest Hit Taken";
+                    label5.Text = "Lowest Hit Taken";
                     break;
             }
 
             select1.SelectedValue = select1.Items[0];
-            // 手动刷新 UI
+            // Manually refresh the UI
 
 
             isSelect = false;
-            // 暂停一次刷新
+            // Suspend updates once
             _suspendUiUpdate = true;
 
-            // 切换时清一次技能表，避免残留
+            // Clear the skill table when switching to avoid stale data
             SkillTableDatas.SkillTable.Clear();
 
-            // 立刻按新模式刷新一次
+            // Refresh immediately using the new mode
             bool isHeal = segmented1.SelectIndex != 0;
             SelectDataType();
 
-            // 更新图表数据
+            // Update chart data
             UpdateSkillDistributionChart();
             UpdateCritLuckyChart();
 
-            // 下一轮计时器再恢复
+            // Resume on the next timer tick
             _suspendUiUpdate = false;
 
         }
@@ -333,7 +333,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
         {
             //if (isSelect) return;
 
-            //// 1) 确定指标（segmented1: 0=伤害 1=治疗 2=承伤）
+            //// 1) Determine the metric (segmented1: 0=Damage 1=Healing 2=Taken)
             //MetricType metric = segmented1.SelectIndex switch
             //{
             //    1 => MetricType.Healing,
@@ -341,24 +341,24 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //    _ => MetricType.Damage
             //};
 
-            //// 2) 设置排序（统一返回 double，避免泛型不变性/类型不一致）
+            //// 2) Set up sorting (returns double to avoid variance issues)
             //SkillOrderBySelector = e.Value switch
             //{
-            //    0 => s => s.Total,       // 总量
-            //    1 => s => s.TotalDps,    // 秒伤
-            //    2 => s => s.HitCount,    // 次数
-            //    3 => s => s.CritRate,    // 暴击率
+            //    0 => s => s.Total,       // Total amount
+            //    1 => s => s.TotalDps,    // DPS
+            //    2 => s => s.HitCount,    // Hit count
+            //    3 => s => s.CritRate,    // Critical rate
             //    _ => s => s.Total
             //};
 
-            //// 3) 确定数据源（单次/全程）
+            //// 3) Determine the data source (single fight vs full session)
             //SourceType source = FormManager.showTotal ? SourceType.FullRecord : SourceType.Current;
 
-            //// 4) 刷新技能表（内部会按 SkillOrderBySelector 排序）
+            //// 4) Refresh the skill table (internally uses SkillOrderBySelector)
             //UpdateSkillTable(Uid, source, metric);
 
-            //// （可选）如果需要同时更新右侧图表：
-            //try { RefreshDpsTrendChart(); } catch { /* 忽略绘图异常 */ }
+            //// (Optional) Update the charts on the right as well:
+            //try { RefreshDpsTrendChart(); } catch { /* Ignore rendering exceptions */ }
             //UpdateSkillDistributionChart();
             //UpdateCritLuckyChart();
         }
@@ -366,13 +366,21 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
         private static readonly Dictionary<string, Image> _professionImages = new()
         {
             { "冰魔导师", HandledAssets.冰魔导师_Opacity10 },
+            { "Frost Mage", HandledAssets.冰魔导师_Opacity10 },
             { "巨刃守护者", HandledAssets.巨刃守护者_Opacity10 },
+            { "Heavy Guardian", HandledAssets.巨刃守护者_Opacity10 },
             { "森语者", HandledAssets.森语者_Opacity10 },
+            { "Verdant Oracle", HandledAssets.森语者_Opacity10 },
             { "灵魂乐手", HandledAssets.灵魂乐手_Opacity10 },
+            { "Soul Musician", HandledAssets.灵魂乐手_Opacity10 },
             { "神射手", HandledAssets.神射手_Opacity10 },
+            { "Marksman", HandledAssets.神射手_Opacity10 },
             { "神盾骑士", HandledAssets.神盾骑士_Opacity10 },
+            { "Shield Knight", HandledAssets.神盾骑士_Opacity10 },
             { "雷影剑士", HandledAssets.雷影剑士_Opacity10 },
+            { "Stormblade", HandledAssets.雷影剑士_Opacity10 },
             { "青岚骑士", HandledAssets.青岚骑士_Opacity10 },
+            { "Wind Knight", HandledAssets.青岚骑士_Opacity10 },
         };
 
         public void GetPlayerInfo(string nickname, int power, string profession)
@@ -389,7 +397,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             if (_dpsTrendChart != null)
             {
                 SetupTrendChartRefreshCallback();
-                // 立即刷新图表数据
+                // Immediately refresh the chart data
                 RefreshDpsTrendChart();
             }
         }
@@ -410,7 +418,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"重置DPS趋势图表时出错: {ex.Message}");
+                    Console.WriteLine($"Failed to reset DPS trend chart: {ex.Message}");
                 }
             }
         }
@@ -424,7 +432,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             }
 
             var offsetFrom350 = e.SplitX - 350;
-            var steps = offsetFrom350 / SPLITTER_STEP_PIXELS; // 计算移动了多少个30px步长
+            var steps = offsetFrom350 / SPLITTER_STEP_PIXELS; // Determine how many 30px steps were moved
 
             var newPadding = Math.Max(10, Math.Min(300, 160 - steps * PADDING_ADJUSTMENT));
             var newGridLines = Math.Max(3, Math.Min(10, 5 + steps));
@@ -535,7 +543,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"暴击率与幸运率图表初始化失败: {ex.Message}");
+                Console.WriteLine($"Failed to initialize crit/luck chart: {ex.Message}");
             }
         }
 
@@ -557,7 +565,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"技能占比图表初始化失败: {ex.Message}");
+                Console.WriteLine($"Failed to initialize skill share chart: {ex.Message}");
             }
         }
     }

@@ -1,37 +1,36 @@
-# 星痕共鸣工具箱
+# Star Resonance Toolbox
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-brightgreen.svg)](https://www.gnu.org/licenses/agpl-3.0.txt)
 
-本项目关键数据抓取与分析部分基于 [StarResonanceDamageCounter](https://github.com/dmlgzs/StarResonanceDamageCounter) 项目移植而来，感谢原作者对于本项目的帮助。
+Key data capture and analytics in this project are ported from [StarResonanceDamageCounter](https://github.com/dmlgzs/StarResonanceDamageCounter). Many thanks to the original author for the guidance and support.
 
-该工具无需修改游戏客户端，不违反游戏服务条款。该工具旨在帮助玩家更好地理解战斗数据，减少无效提升，提升游戏体验。使用该工具前，请确保不会将数据结果用于战力歧视等破坏游戏社区环境的行为。
+The toolbox works without modifying the game client and stays within the game’s terms of service. It helps players understand combat data, avoid inefficient upgrades, and improve overall gameplay. Please refrain from weaponizing any analytics output—for example, using it for damage-based discrimination that harms the community.
 
 ![Moe-counter](https://ipacel.cc/+/MoeCounter2/?name=StarResonanceToolBox)
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 前置要求
+### Requirements
 
 - .NET 8.0
 
-## 📄 许可证
+## 📄 License
 
 [![AGPLv3](https://www.gnu.org/graphics/agplv3-with-text-162x68.png)](LICENSE.txt)
 
-本项目采用 [GNU AFFERO GENERAL PUBLIC LICENSE version 3](LICENSE.txt) 许可证。
+This project is released under the [GNU AFFERO GENERAL PUBLIC LICENSE version 3](LICENSE.txt).  
+By using the project you agree to comply with the license terms.
 
-使用本项目即表示您同意遵守该许可证的条款。
+We do not welcome individuals who disregard the license—for example, those who modify or translate open-source code and then close-source it, or who repeatedly mirror updates while keeping their own code proprietary.
 
-不欢迎某些不遵守本许可证的人。不欢迎某些修改或翻译了开源代码却做闭源、开源一更新闭源就跟进的人。
+## 👥 Contributing
 
-## 👥 贡献
+Issues and pull requests are welcome—help us make the project better!
 
-欢迎提交 Issue 和 Pull Request 来改进项目！
+## ⭐ Support
 
-## ⭐ 支持
-
-如果这个项目对您有帮助，请给它一个 Star ⭐
+If the toolbox helps you, please consider leaving a ⭐.
 
 ---
 
-**免责声明**：本工具仅用于游戏数据分析学习目的，不得用于任何违反游戏服务条款的行为。使用者需自行承担相关风险。项目开发者不对任何他人使用本工具的恶意战力歧视行为负责。请在使用前确保遵守游戏社区的相关规定和道德标准。
+**Disclaimer:** This tool exists purely for learning and analyzing game data. Do not use it in any way that violates the game’s terms of service. You are responsible for any risks associated with its usage. The maintainers are not liable for discriminatory behavior powered by the analytics provided here. Always follow the community guidelines and uphold ethical standards.

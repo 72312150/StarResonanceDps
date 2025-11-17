@@ -159,9 +159,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             segmented1.Font = new Font("HarmonyOS Sans SC", 9F, FontStyle.Bold, GraphicsUnit.Point, 134);
             segmented1.Full = true;
             segmented1.IconGap = 0F;
-            segmentedItem1.Text = "技能伤害分析";
-            segmentedItem2.Text = "技能治疗分析";
-            segmentedItem3.Text = "人物承伤分析";
+            segmentedItem1.Text = "Skill Damage Analysis";
+            segmentedItem2.Text = "Skill Healing Analysis";
+            segmentedItem3.Text = "Damage Taken Analysis";
             segmented1.Items.Add(segmentedItem1);
             segmented1.Items.Add(segmentedItem2);
             segmented1.Items.Add(segmentedItem3);
@@ -182,7 +182,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             NickNameText.Name = "NickNameText";
             NickNameText.Size = new Size(181, 45);
             NickNameText.TabIndex = 17;
-            NickNameText.Text = "惊奇猫猫盒";
+            NickNameText.Text = "Sample Player";
             // 
             // divider1
             // 
@@ -285,7 +285,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label5.Name = "label5";
             label5.Size = new Size(72, 45);
             label5.TabIndex = 24;
-            label5.Text = "幸运率";
+            label5.Text = "Luck Rate";
             // 
             // NumberCriticalHitsText
             // 
@@ -297,7 +297,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             NumberCriticalHitsText.Name = "NumberCriticalHitsText";
             NumberCriticalHitsText.Size = new Size(86, 45);
             NumberCriticalHitsText.TabIndex = 22;
-            NumberCriticalHitsText.Text = "暴击次数";
+            NumberCriticalHitsText.Text = "Critical Hits";
             // 
             // NumberHitsLabel
             // 
@@ -320,7 +320,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label2.Name = "label2";
             label2.Size = new Size(72, 45);
             label2.TabIndex = 24;
-            label2.Text = "秒伤";
+            label2.Text = "DPS";
             // 
             // TotalDamageText
             // 
@@ -343,7 +343,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label17.Name = "label17";
             label17.Size = new Size(91, 45);
             label17.TabIndex = 22;
-            label17.Text = "命中次数";
+            label17.Text = "Hits";
             // 
             // label4
             // 
@@ -355,7 +355,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label4.Name = "label4";
             label4.Size = new Size(72, 45);
             label4.TabIndex = 22;
-            label4.Text = "暴击率";
+            label4.Text = "Critical Rate";
             // 
             // label1
             // 
@@ -366,7 +366,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label1.Name = "label1";
             label1.Size = new Size(72, 45);
             label1.TabIndex = 22;
-            label1.Text = "总伤害";
+            label1.Text = "Total Damage";
             // 
             // label3
             // 
@@ -378,7 +378,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label3.Name = "label3";
             label3.Size = new Size(182, 30);
             label3.TabIndex = 22;
-            label3.Text = "伤害信息";
+            label3.Text = "Damage Info";
             label3.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // panel2
@@ -429,7 +429,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label13.Name = "label13";
             label13.Size = new Size(91, 45);
             label13.TabIndex = 26;
-            label13.Text = "挨打次数";
+            label13.Text = "Times Hit";
             // 
             // AvgDamageText
             // 
@@ -477,7 +477,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label14.Name = "label14";
             label14.Size = new Size(91, 45);
             label14.TabIndex = 24;
-            label14.Text = "幸运次数";
+            label14.Text = "Lucky Hits";
             // 
             // LuckyDamageText
             // 
@@ -502,7 +502,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label9.Name = "label9";
             label9.Size = new Size(86, 45);
             label9.TabIndex = 24;
-            label9.Text = "平均伤害";
+            label9.Text = "Average Damage";
             // 
             // label7
             // 
@@ -513,7 +513,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label7.Name = "label7";
             label7.Size = new Size(91, 45);
             label7.TabIndex = 24;
-            label7.Text = "暴击伤害";
+            label7.Text = "Critical Damage";
             // 
             // NormalDamageText
             // 
@@ -537,7 +537,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label8.Name = "label8";
             label8.Size = new Size(86, 45);
             label8.TabIndex = 22;
-            label8.Text = "幸运伤害";
+            label8.Text = "Lucky Damage";
             // 
             // label6
             // 
@@ -548,7 +548,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label6.Name = "label6";
             label6.Size = new Size(91, 45);
             label6.TabIndex = 22;
-            label6.Text = "普通伤害";
+            label6.Text = "Normal Damage";
             // 
             // divider2
             // 
@@ -574,7 +574,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label19.Name = "label19";
             label19.Size = new Size(182, 30);
             label19.TabIndex = 22;
-            label19.Text = "伤害分布";
+            label19.Text = "Damage Breakdown";
             label19.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // timer1
@@ -600,7 +600,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             PowerText.Font = new Font("HarmonyOS Sans SC", 9F);
             PowerText.Location = new Point(376, 33);
             PowerText.Name = "PowerText";
-            PowerText.Prefix = "战力：";
+            PowerText.Prefix = "Combat Power: ";
             PowerText.Size = new Size(168, 45);
             PowerText.TabIndex = 24;
             PowerText.Text = "123";
@@ -644,7 +644,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             Rank_levelLabel.Font = new Font("HarmonyOS Sans SC", 9F);
             Rank_levelLabel.Location = new Point(724, 34);
             Rank_levelLabel.Name = "Rank_levelLabel";
-            Rank_levelLabel.Prefix = "臂章：";
+            Rank_levelLabel.Prefix = "Badge: ";
             Rank_levelLabel.Size = new Size(168, 45);
             Rank_levelLabel.TabIndex = 28;
             Rank_levelLabel.Text = "";
@@ -655,7 +655,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             LevelLabel.Font = new Font("HarmonyOS Sans SC", 9F);
             LevelLabel.Location = new Point(550, 33);
             LevelLabel.Name = "LevelLabel";
-            LevelLabel.Prefix = "等级：";
+            LevelLabel.Prefix = "Level: ";
             LevelLabel.Size = new Size(168, 45);
             LevelLabel.TabIndex = 27;
             LevelLabel.Text = "";
@@ -760,7 +760,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             collapseItem1.Name = "collapseItem1";
             collapseItem1.Size = new Size(417, 300);
             collapseItem1.TabIndex = 0;
-            collapseItem1.Text = "Dps/Hps/DTps实时曲线图";
+            collapseItem1.Text = "DPS/HPS/DTPS Live Trend";
             // 
             // collapseItem2
             // 
@@ -769,7 +769,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             collapseItem2.Name = "collapseItem2";
             collapseItem2.Size = new Size(417, 300);
             collapseItem2.TabIndex = 1;
-            collapseItem2.Text = "技能占比分布图";
+            collapseItem2.Text = "Skill Share Chart";
             // 
             // collapseItem3
             // 
@@ -779,7 +779,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             collapseItem3.Name = "collapseItem3";
             collapseItem3.Size = new Size(417, 300);
             collapseItem3.TabIndex = 2;
-            collapseItem3.Text = "伤害分布";
+            collapseItem3.Text = "Damage Breakdown";
             // 
             // splitter2
             // 
@@ -812,10 +812,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             label10.Font = new Font("HarmonyOS Sans SC", 9F);
             label10.Location = new Point(0, 917);
             label10.Name = "label10";
-            label10.Prefix = "温馨提示：";
+            label10.Prefix = "Reminder: ";
             label10.Size = new Size(1284, 46);
             label10.TabIndex = 25;
-            label10.Text = "快照模式下曲线图 占比图 分布图将失效";
+            label10.Text = "Snapshot mode disables trend, share, and distribution charts.";
             label10.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // SkillDetailForm
@@ -834,7 +834,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             Name = "SkillDetailForm";
             Opacity = 0.95D;
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "技能详情";
+            Text = "Skill Details";
             Load += SkillDetailForm_Load;
             ForeColorChanged += SkillDetailForm_ForeColorChanged;
             pageHeader1.ResumeLayout(false);

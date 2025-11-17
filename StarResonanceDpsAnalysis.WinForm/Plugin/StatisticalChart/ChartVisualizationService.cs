@@ -22,7 +22,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
         public const int MIN_WIDTH = 450;
         public const int MIN_HEIGHT = 150;
 
-        public static readonly Font DefaultFont = new("微软雅黑", 10, FontStyle.Regular);
+        public static readonly Font DefaultFont = new("Microsoft YaHei", 10, FontStyle.Regular);
 
         /// <summary>
         /// 统一应用图表默认配置
@@ -655,7 +655,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"刷新技能伤害饼图时出错: {ex.Message}");
+                Console.WriteLine($"Failed to refresh skill damage pie chart: {ex.Message}");
             }
         }
 
@@ -775,7 +775,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                     if (weakRef.IsAlive && weakRef.Target is FlatLineChart chart)
                     {
                         try { action(chart); }
-                        catch (Exception ex) { Console.WriteLine($"图表管理执行出错: {ex.Message}"); }
+                        catch (Exception ex) { Console.WriteLine($"Chart manager execution failed: {ex.Message}"); }
                     }
                 }
                 _registeredCharts.RemoveAll(wr => !wr.IsAlive);

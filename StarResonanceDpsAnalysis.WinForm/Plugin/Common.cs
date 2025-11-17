@@ -358,7 +358,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 {
                     if (!skillToProfession.TryAdd(skill, kvp.Key))
                     {
-                        Console.WriteLine($"[重复技能] {skill} 已存在于 {skillToProfession[skill]}，试图加入 {kvp.Key}");
+                        Console.WriteLine($"[Duplicate Skill] {skill} already mapped to {skillToProfession[skill]}, attempted to assign to {kvp.Key}");
                     }
                 }
             }
@@ -371,7 +371,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 return profession;
             }
 
-            //Console.WriteLine($"[未识别技能] {skillId} 不在映射中！");
+            //Console.WriteLine($"[Unrecognized Skill] {skillId} not found in mapping!");
             return "";
         }
 
@@ -526,7 +526,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 return x.ToString("0." + new string('#', Math.Max(0, maxDecimals)));
             }
 
-            string core = abs < 10_000m ? fmt(abs) : fmt(abs / 10_000m) + "万";
+            string core = abs < 10_000m ? fmt(abs) : fmt(abs / 10_000m) + "W";
             return neg ? "-" + core : core;
         }
 
@@ -535,7 +535,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
         /// </summary>
         public static async Task<bool> AddUserDps(BattleSnapshot snapshot)
         {
-            throw new NotImplementedException("在 WinForm 项目中的该功能已下架不再使用");
+            throw new NotImplementedException("This feature is no longer available in the WinForm project.");
 
             //if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
 

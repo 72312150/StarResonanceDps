@@ -7,7 +7,7 @@ using WinFormsPanel = System.Windows.Forms.Panel;
 
 namespace StarResonanceDpsAnalysis.WinForm.Forms
 {
-    // 仅显示一行技能卡片的简洁窗口（仅展示 AppConfig.Uid 的数据）
+    // Compact window that shows a single row of skill cards (for AppConfig.Uid only)
     public class SkillCardStripForm : BorderlessForm
     {
         private readonly System.Windows.Forms.Timer _refreshTimer;
@@ -15,12 +15,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         private readonly List<SkillRotationData> _history = new();
         private readonly Dictionary<long, DateTime> _lastUsage = new();
 
-        // 原始卡片尺寸
+        // Base card size
         private const int BASE_CARD_WIDTH = 120;
         private const int BASE_CARD_HEIGHT = 80;
-        private const float SCALE = 0.75f; // 缩小 25%
+        private const float SCALE = 0.75f; // Scale down by 25%
 
-        // 计算后尺寸与容器内边距
+        // Derived size helpers and container padding
         private static int CARD_WIDTH => (int)Math.Round(BASE_CARD_WIDTH * SCALE);
         private static int CARD_HEIGHT => (int)Math.Round(BASE_CARD_HEIGHT * SCALE);
         private static int PX(int v) => Math.Max(1, (int)Math.Round(v * SCALE));
@@ -31,21 +31,21 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         public SkillCardStripForm()
         {
-            // 初始化基础 UI
+            // Initialize base UI elements
             FormGui.SetDefaultGUI(this);
-            Text = "技能卡片";
+            Text = "Skill Card Strip";
             ShowInTaskbar = true;
             MinimizeBox = false;
             MaximizeBox = false;
 
-            // 扩大一点窗体高度，预留水平滚动条高度，避免压住卡片
+            // Increase height slightly to reserve space for the horizontal scrollbar
             int extraH = SystemInformation.HorizontalScrollBarHeight + 4;
             ClientSize = new Size(800, CARD_HEIGHT + PAD_T + PAD_B + 2 + extraH);
 
-            // 样式（跟随主界面）
+            // Theme styling (follow the main window)
             FormGui.SetColorMode(this, AppConfig.IsLight);
 
-            // 容器：一行展示、不换行；启用自动滚动（仅显示水平滚动条）
+            // Container: single-line display with horizontal scrolling only
             _flow = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -55,18 +55,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 Padding = new Padding(PAD_L, PAD_T, PAD_R, PAD_B),
                 BackColor = Color.Transparent
             };
-            // 通过设置高度和单行布局，避免垂直滚动条出现
+            // Prevent vertical scrollbars by using a single-line layout
             _flow.AutoScrollMargin = new Size(0, 0);
 
-            // 启用双缓冲，降低闪烁
+            // Enable double-buffering to reduce flicker
             TryEnableDoubleBuffer(_flow);
 
             Controls.Add(_flow);
 
-            // 允许任意区域拖动窗口
+            // Allow dragging from any area
             AttachDragHandlers(this);
 
-            // 定时刷新（自动开启监控）
+            // Timer-driven refresh (auto-start monitoring)
             _refreshTimer = new System.Windows.Forms.Timer { Interval = 500, Enabled = false };
             _refreshTimer.Tick += RefreshTimer_Tick;
 
@@ -76,21 +76,21 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private void SkillCardStripForm_Load(object? sender, EventArgs e)
         {
-            _uid = AppConfig.Uid; // 仅显示此 UID 的技能
+            _uid = AppConfig.Uid; // Track only this UID's skills
             ResetStateAndUi();
-            _refreshTimer.Start(); // 自动开启监控
+            _refreshTimer.Start(); // Start monitoring automatically
         }
 
         private void RefreshTimer_Tick(object? sender, EventArgs e)
         {
-            // 跟随 AppConfig.Uid 动态切换（例如进入角色后才拿到UID）
+            // Follow AppConfig.Uid dynamically (UID may arrive after entering character)
             if (_uid != AppConfig.Uid)
             {
                 _uid = AppConfig.Uid;
                 ResetStateAndUi();
             }
 
-            if (_uid == 0) return; // 未设置 UID 则不更新
+            if (_uid == 0) return; // Skip updates until a UID is set
 
             try
             {
@@ -126,7 +126,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                     }
                 }
 
-                // 控制历史长度，避免过多卡片
+                // Limit history length to avoid excessive cards
                 const int MAX_HISTORY = 200;
                 while (_history.Count > MAX_HISTORY && _flow.Controls.Count > 0)
                 {
@@ -140,7 +140,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"SkillCardStrip 刷新异常: {ex.Message}");
+                Console.WriteLine($"SkillCardStrip refresh failed: {ex.Message}");
             }
         }
 
@@ -186,7 +186,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             BeginInvoke(new Action(() =>
             {
                 _flow.Controls.Add(card);
-                ScrollToEnd(); // 总是自动滚到最新
+                ScrollToEnd(); // Auto-scroll to the latest card
             }));
         }
 
@@ -194,7 +194,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             try
             {
-                // 通过设置 AutoScrollPosition 或 HorizontalScroll.Value 到达末尾
+                // Jump to the end via AutoScrollPosition or HorizontalScroll.Value
                 var h = _flow.HorizontalScroll;
                 int target = Math.Max(h.Minimum, h.Maximum - h.LargeChange + 1);
                 if (target < h.Minimum) target = h.Minimum;
@@ -268,7 +268,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 }
             }
 
-            // 允许在卡片和其子控件上拖动窗口
+            // Allow dragging when interacting with the card or its children
             AttachDragHandlers(card);
 
             return card;
@@ -302,7 +302,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             catch { }
         }
 
-        // ======== 拖动窗口支持 ========
+        // ======== Drag support ========
         private void AttachDragHandlers(WinFormsControl ctrl)
         {
             if (ctrl == null) return;

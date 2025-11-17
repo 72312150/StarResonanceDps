@@ -13,48 +13,48 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
 {
     public partial class SkillDetailForm
     {
-        #region 区块：上下文类型（决定数据来源）
-        // 用于决定当前技能明细查看的是：当前战斗 / 全程累计 / 历史快照
+        #region Section: Context types (determine data source)
+        // Determines whether the detail view targets the current battle, full session, or a snapshot
         public enum DetailContextType
         {
-            Current,     // 当前战斗（默认）
-            FullRecord,  // 全程（累计值）
-            Snapshot     // 历史快照（按某一战斗片段的固化数据）
+            Current,     // Current battle (default)
+            FullRecord,  // Full session (cumulative)
+            Snapshot     // Historical snapshot (fixed slice of combat data)
         }
         #endregion
 
-        #region 区块：列表表头配置（仅负责表格列定义与绑定）
+        #region Section: Table column configuration (definitions and binding only)
         public void ToggleTableView()
         {
             table_DpsDetailDataTable.Columns.Clear();
 
             table_DpsDetailDataTable.Columns = new AntdUI.ColumnCollection
             {
-                new AntdUI.Column("Name","技能名"){},
-                new AntdUI.Column("Damage","伤害"),
-                new AntdUI.Column("TotalDps","DPS/秒"),
-                new AntdUI.Column("HitCount","命中次数"),
-                new AntdUI.Column("CritRate","暴击率"),
-                new AntdUI.Column("AvgPerHit","平均伤害"),
-                new AntdUI.Column("Percentage","百分比"),
+                new AntdUI.Column("Name","Skill"){},
+                new AntdUI.Column("Damage","Damage"),
+                new AntdUI.Column("TotalDps","DPS/s"),
+                new AntdUI.Column("HitCount","Hits"),
+                new AntdUI.Column("CritRate","Critical Rate"),
+                new AntdUI.Column("AvgPerHit","Average Damage"),
+                new AntdUI.Column("Percentage","Percent"),
             };
 
-            // 绑定数据源：SkillTableDatas.SkillTable（外部维护的数据集合）
+            // Bind to SkillTableDatas.SkillTable (the data collection maintained externally)
             table_DpsDetailDataTable.Binding(SkillTableDatas.SkillTable);
         }
         #endregion
 
-        #region 区块：实例级字段（由外层窗体/调用方注入）
-        public long Uid;           // 当前查看的玩家 UID
-        public string Nickname;     // 玩家昵称（展示用）
-        public int Power;           // 玩家战力（展示用）
-        public string Profession;   // 玩家职业（展示用）
+        #region Section: Instance-level fields (assigned by the caller)
+        public long Uid;           // Player UID currently being inspected
+        public string Nickname;     // Player nickname for display
+        public int Power;           // Player combat power for display
+        public string Profession;   // Player class for display
 
-        // 技能排序选择器：默认按 Total 倒序；可通过外部替换该委托实现“改排序规则不改代码”
+        // Sorting selector: defaults to descending Total; replace externally to change ordering without modifying this class
         public Func<SkillSummary, double> SkillOrderBySelector = s => s.Total;
         #endregion
 
-        #region 私有小工具（为了替换 Linq，全部用最朴素写法）
+        #region Section: Private helpers (simple implementations in place of LINQ)
         private SkillData FindRowBySkillId(long skillId)
         {
             for (int i = 0; i < SkillTableDatas.SkillTable.Count; i++)
@@ -77,12 +77,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
 
         private void SortSkillsDesc(List<SkillSummary> list)
         {
-            // 按 SkillOrderBySelector 降序
+            // Sort descending using the SkillOrderBySelector
             list.Sort(delegate (SkillSummary a, SkillSummary b)
             {
                 double va = SkillOrderBySelector != null ? SkillOrderBySelector(a) : a.Total;
                 double vb = SkillOrderBySelector != null ? SkillOrderBySelector(b) : b.Total;
-                if (va < vb) return 1;   // 降序
+                if (va < vb) return 1;   // Descending order
                 if (va > vb) return -1;
                 return 0;
             });
@@ -97,19 +97,19 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
         }
         #endregion
 
-        #region 区块：表格数据刷新（单次/全程入口）
+        #region Section: Table data refresh (current vs full-session entry point)
         public enum SourceType { Current, FullRecord }
         public enum MetricType { Damage, Healing, Taken, NpcTaken }
         /// <summary>
-        /// 刷新并填充玩家技能表格
-        /// 根据 source（Current/FullRecord）与 metric（Damage/Healing/Taken）决定取数口径。
-        /// 统一把返回的技能清单映射为 SkillData 并写入 SkillTableDatas.SkillTable。
+        /// Refresh and populate the player skill table.
+        /// The source (Current/FullRecord) and metric (Damage/Healing/Taken/NpcTaken) determine the data source.
+        /// Map skills to SkillData rows and push them into SkillTableDatas.SkillTable.
         /// </summary>
         public void UpdateSkillTable(long uid, SourceType source, MetricType metric)
         {
             SkillTableDatas.SkillTable.Clear();
 
-            // 取技能清单（统一成同样的结构）
+            // Normalize the skill list into a consistent structure
             List<SkillSummary> skills;
             if (source == SourceType.Current)
             {
@@ -132,7 +132,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             }
             else
             {
-                // 全程累计：从 FullRecord 读取（damage/heal/taken 三类分开取）
+                // Full-session totals: read from FullRecord (damage/heal/taken retrieved separately)
                 var triple = FullRecord.GetPlayerSkills(uid);
                 if (metric == MetricType.Healing)
                 {
@@ -151,7 +151,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                 }
             }
 
-            // 计算各技能在本次清单中的占比（ShareOfTotal）
+            // Compute each skill's share of the total for this list
             double grandTotal = SumTotal(skills);
 
             for (int i = 0; i < skills.Count; i++)
@@ -162,7 +162,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                 string critRateStr = item.CritRate.ToString() + "%";
                 string luckyRateStr = item.LuckyRate.ToString() + "%";
 
-                // 查找是否已有相同行
+                // Check if a matching row already exists
                 var existing = FindRowBySkillId(item.SkillId);
                 if (existing == null)
                 {
@@ -204,15 +204,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
         }
         #endregion
 
-        #region 区块：数据类型切换（入口调度：顶部汇总 + 表格 + 图表）
+        #region Section: Data-type selection (dispatch header + table + charts)
         /// <summary>
-        /// 根据 UI 状态（ContextType、segmented1）选择数据类型并刷新：
-        /// - 快照：直接用快照数据渲染顶部与表格（不拉实时曲线）
-        /// - 非快照：根据 showTotal / ContextType 选择 Current 或 FullRecord
+        /// Choose the dataset based on UI state (ContextType, segmented1) and refresh:
+        /// - Snapshot: render header and table directly from snapshot data (no realtime charts)
+        /// - Non-snapshot: choose Current or FullRecord based on showTotal/ContextType
         /// </summary>
         public void SelectDataType()
         {
-            //// 1) 根据 segmented1 决定当前查看指标（伤害/治疗/承伤）
+            //// 1) Determine which metric (Damage/Healing/Taken) segmented1 currently selects
             //MetricType metric;
             //if (segmented1.SelectIndex == 1) metric = MetricType.Healing;
             //else if (segmented1.SelectIndex == 2)
@@ -221,14 +221,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //}
             //else metric = MetricType.Damage;
 
-            //// 2) 快照模式：不刷新实时曲线，只渲染顶部与表格、静态图
+            //// 2) Snapshot mode: render header/table/static charts only (skip realtime graphs)
             //if (ContextType == DetailContextType.Snapshot && SnapshotStartTime is DateTime)
             //{
             //    DateTime snapTime = (DateTime)SnapshotStartTime;
             //    try
             //    {
-            //        FillHeader(metric);                    // 顶部汇总（快照口径）
-            //        UpdateSkillTable_Snapshot(Uid, snapTime, metric); // 表格（快照口径）
+            //        FillHeader(metric);                    // Header totals (snapshot scope)
+            //        UpdateSkillTable_Snapshot(Uid, snapTime, metric); // Table data (snapshot scope)
             //    }
             //    catch { }
 
@@ -237,28 +237,28 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //    return;
             //}
 
-            //// 3) 非快照：按 Current / FullRecord 渲染
+            //// 3) Non-snapshot mode: render using Current or FullRecord data
             //SourceType source;
             //if (ContextType == DetailContextType.FullRecord || FormManager.showTotal) source = SourceType.FullRecord;
             //else source = SourceType.Current;
 
-            //FillHeader(metric); // 顶部汇总（Current/FullRecord）
+            //FillHeader(metric); // Header totals (Current/FullRecord)
 
             //try
             //{
-            //    UpdateSkillTable(Uid, source, metric);   // 列表
-            //    RefreshDpsTrendChart();                  // 趋势图（仅非快照）
-            //    UpdateCritLuckyChart();                  // 技能占比图
-            //    UpdateSkillDistributionChart();          // 普通/暴击/幸运分布图
+            //    UpdateSkillTable(Uid, source, metric);   // Table view
+            //    RefreshDpsTrendChart();                  // Trend chart (only non-snapshot)
+            //    UpdateCritLuckyChart();                  // Crit/Lucky share chart
+            //    UpdateSkillDistributionChart();          // Normal/Crit/Lucky distribution chart
             //}
             //catch { }
         }
         #endregion
 
-        #region 区块：顶部汇总渲染（快照 / 当前 / 全程）
+        #region Section: Header rendering (snapshot / current / full session)
         private void FillHeader(MetricType metric)
         {
-            //// ======== 快照模式（历史）========
+            //// ======== Snapshot mode (historical) ========
             //if (ContextType == DetailContextType.Snapshot && SnapshotStartTime is DateTime)
             //{
             //    DateTime snapTime = (DateTime)SnapshotStartTime;
@@ -274,7 +274,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
 
             //    if (sp == null)
             //    {
-            //        // 在 _manager.History 中寻找开始时间相等或 ±2 秒内的战斗
+            //        // Search _manager.History for a fight with matching start time (±2 seconds)
             //        BattleSnapshot battle = null;
             //        var history = StatisticData._manager.History;
             //        if (history != null)
@@ -314,7 +314,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //        return;
             //    }
 
-            //    // —— 工具函数（快照模式内部估算用）
+            //    // Helper functions used for snapshot estimates
             //    static int SumHits(IReadOnlyList<SkillSummary> list)
             //    {
             //        if (list == null) return 0;
@@ -432,9 +432,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //    {
             //        ulong total = sp.TakenDamage;
             //        int hits = SumHits(takenSkills);
-            //        double perSecond = 0.0; // 如需可用快照时长计算
+            //        double perSecond = 0.0; // Use snapshot duration if needed
 
-            //        // 最大/最小承伤（>0 的最小）
+            //        // Max/min taken damage (minimum > 0)
             //        ulong maxSingle = 0UL;
             //        ulong minSingle = 0UL;
             //        if (takenSkills != null && takenSkills.Count > 0)
@@ -468,8 +468,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
 
             //        TotalDamageText.Text = Common.FormatWithEnglishUnits(total);
             //        TotalDpsText.Text = Common.FormatWithEnglishUnits(perSecond);
-            //        CritRateText.Text = Common.FormatWithEnglishUnits(maxSingle);   // UI 约定：最大承伤
-            //        CritDamageText.Text = Common.FormatWithEnglishUnits(minSingle); // UI 约定：最小承伤
+            //        CritRateText.Text = Common.FormatWithEnglishUnits(maxSingle);   // UI contract: maximum taken damage
+            //        CritDamageText.Text = Common.FormatWithEnglishUnits(minSingle); // UI contract: minimum taken damage
             //        LuckyRate.Text = "0";
 
             //        NormalDamageText.Text = Common.FormatWithEnglishUnits(total);
@@ -483,10 +483,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //        BeatenLabel.Text = Common.FormatWithEnglishUnits(hits);
             //    }
 
-            //    return; // 快照分支结束
+            //    return; // End of snapshot branch
             //}
 
-            //// ======== 非快照（单次 / 全程）========
+            //// ======== Non-snapshot (single fight / full session) ========
             //SourceType src;
             //if (ContextType == DetailContextType.FullRecord || FormManager.showTotal) src = SourceType.FullRecord;
             //else src = SourceType.Current;
@@ -534,8 +534,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //        var taken = StatisticData._manager.GetPlayerTakenOverview(Uid);
             //        TotalDamageText.Text = Common.FormatWithEnglishUnits(taken.Total);
             //        TotalDpsText.Text = Common.FormatWithEnglishUnits(taken.AvgTakenPerSec);
-            //        CritRateText.Text = Common.FormatWithEnglishUnits(taken.MaxSingleHit); // 最大承伤
-            //        CritDamageText.Text = Common.FormatWithEnglishUnits(taken.MinSingleHit); // 最小承伤
+            //        CritRateText.Text = Common.FormatWithEnglishUnits(taken.MaxSingleHit); // Maximum taken damage
+            //        CritDamageText.Text = Common.FormatWithEnglishUnits(taken.MinSingleHit); // Minimum taken damage
             //        LuckyRate.Text = "0";
 
             //        NormalDamageText.Text = Common.FormatWithEnglishUnits(p.TakenStats.Total);
@@ -610,10 +610,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
         }
         #endregion
 
-        #region 区块：图表—普通/暴击/幸运分布（柱状）
+        #region Section: Charts — normal/critical/lucky distribution (bar chart)
         /// <summary>
-        /// 更新普通/暴击/幸运比例的柱状分布图。
-        /// 数据来源：Current 或 FullRecord 的 Damage/Healing/Taken 统计对象。
+        /// Update the bar chart showing normal/critical/lucky ratios.
+        /// Source: Damage/Healing/Taken statistics from Current or FullRecord.
         /// </summary>
         private void UpdateSkillDistributionChart()
         {
@@ -675,23 +675,23 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //    if (normalRate < 0) normalRate = 0;
 
             //    var chartData = new List<(string, double)>();
-            //    if (normalRate > 0) chartData.Add(("普通", normalRate));
-            //    if (critRate > 0) chartData.Add(("暴击", critRate));
-            //    if (luckyRate > 0) chartData.Add(("幸运", luckyRate));
+            //    if (normalRate > 0) chartData.Add(("Normal", normalRate));
+            //    if (critRate > 0) chartData.Add(("Critical", critRate));
+            //    if (luckyRate > 0) chartData.Add(("Lucky", luckyRate));
 
             //    _skillDistributionChart.SetData(chartData);
             //}
             //catch (Exception ex)
             //{
-            //    Console.WriteLine("更新暴击率与幸运率图表时出错: " + ex.Message);
+            //    Console.WriteLine("Failed to update crit/lucky chart: " + ex.Message);
             //}
         }
         #endregion
 
-        #region 区块：图表—技能占比（饼图/环图）
+        #region Section: Charts — skill share (pie/donut)
         /// <summary>
-        /// 更新技能占比图（取 Top10 技能，总量作为扇区值）。
-        /// 数据来源：Current 或 FullRecord；指标与 segmented1 一致。
+        /// Update the skill share chart (top 10 skills by total value).
+        /// Source: Current or FullRecord; metric selection follows segmented1.
         /// </summary>
         private void UpdateCritLuckyChart()
         {
@@ -727,7 +727,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //            var tmp = StatisticData._manager.GetPlayerSkillSummaries(Uid, 10, true, Core.SkillType.Damage);
             //            skills = ToListOrEmpty(tmp);
             //        }
-            //        // 保险：再按排序器排序一遍，截前10
+            //        // Safety: resort using the current selector and take the top 10
             //        SortSkillsDesc(skills);
             //        if (skills.Count > 10) skills = skills.GetRange(0, 10);
             //    }
@@ -754,16 +754,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
             //}
             //catch (Exception ex)
             //{
-            //    Console.WriteLine("更新技能占比图时出错: " + ex.Message);
+            //    Console.WriteLine("Failed to update skill share chart: " + ex.Message);
             //}
         }
         #endregion
 
-        #region 区块：快照表格填充（独立数据口径）
+        #region Section: Snapshot table population (distinct data pathway)
         /// <summary>
-        /// 基于快照时间与 UID，填充技能表格：
-        /// - 通过 FullRecord.GetPlayerSkillsBySnapshotTimeEx 获取三类技能列表
-        /// - 仅渲染表格，不拉实时曲线
+        /// Populate the skill table based on snapshot time and UID:
+        /// - Fetch the three skill lists via FullRecord.GetPlayerSkillsBySnapshotTimeEx
+        /// - Render only the table; realtime charts are skipped
         /// </summary>
         private void UpdateSkillTable_Snapshot(long uid, DateTime startedAt, MetricType metric)
         {
@@ -781,7 +781,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
 
             SortSkillsDesc(skills);
 
-            // 计算占比并生成行
+            // Compute share and produce rows
             double grandTotal = 0;
             for (int i = 0; i < skills.Count; i++) grandTotal += skills[i].Total;
 
@@ -809,10 +809,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                 SkillTableDatas.SkillTable.Add(row);
             }
 
-            // 如需排查快照无数据问题，可临时打开以下弹窗确认数据来源是否为空
+            // For debugging missing snapshot data, temporarily enable the following dialog to verify the source
             // if (SkillTableDatas.SkillTable.Count == 0)
             // {
-            //     MessageBox.Show("快照技能为空：请检查 GetPlayerSkillsBySnapshotTimeEx 是否返回了空列表。");
+            //     MessageBox.Show("Snapshot skill list is empty; verify GetPlayerSkillsBySnapshotTimeEx did not return null.");
             // }
         }
         #endregion

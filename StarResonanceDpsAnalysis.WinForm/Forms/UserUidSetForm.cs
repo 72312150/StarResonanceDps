@@ -1,5 +1,6 @@
 using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Linq;
 
 using AntdUI;
 using StarResonanceDpsAnalysis.WinForm.Plugin;
@@ -9,6 +10,22 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 {
     public partial class UserUidSetForm : BorderlessForm
     {
+        private static readonly Dictionary<string, string> ProfessionDisplayToInternal = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Marksman"] = "神射手",
+            ["Shield Knight"] = "神盾骑士",
+            ["Stormblade"] = "雷影剑士",
+            ["Frost Mage"] = "冰魔导师",
+            ["Wind Knight"] = "青岚骑士",
+            ["Verdant Oracle"] = "森语者",
+            ["Heavy Guardian"] = "巨刃守护者",
+            ["Soul Musician"] = "灵魂乐手",
+            ["Unknown"] = "未知职业"
+        };
+
+        private static readonly Dictionary<string, string> ProfessionInternalToDisplay =
+            ProfessionDisplayToInternal.ToDictionary(kvp => kvp.Value, kvp => kvp.Key, StringComparer.OrdinalIgnoreCase);
+
         public UserUidSetForm()
         {
             InitializeComponent();
@@ -38,7 +55,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             try
             {
                 // 加载昵称设置
-                string savedNickname = AppConfig.GetValue("UserConfig", "NickName", "未知昵称");
+                string savedNickname = AppConfig.GetValue("UserConfig", "NickName", "Unknown nickname");
+                if (string.Equals(savedNickname, "未知昵称", StringComparison.OrdinalIgnoreCase))
+                {
+                    savedNickname = "Unknown nickname";
+                }
                 input2.Text = savedNickname;
 
                 // 安全地加载UID设置
@@ -46,31 +67,35 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 if (ulong.TryParse(savedUidStr, out ulong savedUid))
                 {
                     inputNumber1.Value = savedUid;
-                    Console.WriteLine($"已加载保存的设置 - UID: {savedUid}, 昵称: {savedNickname}");
+                    Console.WriteLine($"Loaded saved settings - UID: {savedUid}, Nickname: {savedNickname}");
                 }
                 else
                 {
                     inputNumber1.Value = 0;
-                    Console.WriteLine($"UID配置格式错误: {savedUidStr}，已重置为0");
+                    Console.WriteLine($"UID configuration is invalid: {savedUidStr}. Reset to 0.");
 
                     // 修复损坏的配置
                     AppConfig.SetValue("UserConfig", "Uid", "0");
                 }
-                select1.SelectedValue = AppConfig.GetValue("UserConfig", "Profession", "未知职业");
-
-
+                var savedProfession = AppConfig.GetValue("UserConfig", "Profession", "未知职业");
+                if (!ProfessionInternalToDisplay.TryGetValue(savedProfession, out var professionDisplay))
+                {
+                    professionDisplay = "Unknown";
+                }
+                select1.SelectedValue = professionDisplay;
 
                 // 确保AppConfig的全局属性与界面同步
                 AppConfig.Uid = (long)inputNumber1.Value;
                 AppConfig.NickName = input2.Text;
+                AppConfig.Profession = savedProfession;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"加载用户设置时出错: {ex.Message}");
+                Console.WriteLine($"Failed to load user settings: {ex.Message}");
 
                 // 出错时设置默认值
                 inputNumber1.Value = 0;
-                input2.Text = "未知昵称";
+                input2.Text = "Unknown nickname";
             }
         }
 
@@ -85,7 +110,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 if (inputNumber1.Value > ulong.MaxValue || inputNumber1.Value < 0)
                 {
                     inputNumber1.Value = 0;
-                    MessageBox.Show("UID必须是0到" + ulong.MaxValue + "之间的数字", "输入错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show($"UID must be between 0 and {ulong.MaxValue}.", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             };
 
@@ -97,7 +122,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 {
                     input2.Text = nickname.Substring(0, 20);
                     input2.SelectionStart = input2.Text.Length;
-                    MessageBox.Show("昵称长度不能超过20个字符", "输入提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Nickname cannot exceed 20 characters.", "Input Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             };
         }
@@ -113,7 +138,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 var (nickname, combatPower, profession) = StatisticData._manager.GetPlayerBasicInfo(currentUid);
 
                 // 可以添加一个信息显示区域
-                Console.WriteLine($"当前用户信息 - UID: {currentUid}, 昵称: {nickname}, 战力: {combatPower}, 职业: {profession}");
+                Console.WriteLine($"Current user - UID: {currentUid}, Nickname: {nickname}, Power: {combatPower}, Profession: {profession}");
 
                 // 如果有UI标签可以显示这些信息
                 // lblCurrentInfo.Text = $"当前: {nickname} (战力: {combatPower})";
@@ -134,22 +159,27 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // 从界面获取当前输入的值
             var newUid = (long)inputNumber1.Value;
             string newNickname = input2.Text.Trim();
-            string profession = select1.SelectedValue?.ToString()?.Trim() ?? string.Empty;
+            string professionDisplay = select1.SelectedValue?.ToString()?.Trim() ?? string.Empty;
+            string professionInternal = GetProfessionInternal(professionDisplay);
 
             // 获取原始配置值用于比较
             string oldUidStr = AppConfig.GetValue("UserConfig", "Uid", "0");
-            string oldNickname = AppConfig.GetValue("UserConfig", "NickName", "未知昵称");
+            string oldNickname = AppConfig.GetValue("UserConfig", "NickName", "Unknown nickname");
+            if (string.Equals(oldNickname, "未知昵称", StringComparison.OrdinalIgnoreCase))
+            {
+                oldNickname = "Unknown nickname";
+            }
             string oldProfession = AppConfig.GetValue("UserConfig", "Profession", "未知职业");
 
 
             bool uidChanged = !long.TryParse(oldUidStr, out long oldUid) || oldUid != newUid;
             bool nicknameChanged = oldNickname != newNickname;
-            bool professionChanged = oldProfession != profession;
+            bool professionChanged = !string.Equals(oldProfession, professionInternal, StringComparison.Ordinal);
 
             // 只有当值真正发生变化时才保存
             if (!uidChanged && !nicknameChanged && !professionChanged)
             {
-                Console.WriteLine("用户信息没有变化，无需保存");
+                Console.WriteLine("No changes detected; skipping save.");
                 return;
             }
 
@@ -157,50 +187,50 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             if (uidChanged)
             {
                 AppConfig.SetValue("UserConfig", "Uid", newUid.ToString());
-                Console.WriteLine($"UID已更新: {oldUid} → {newUid}");
+                Console.WriteLine($"UID updated: {oldUid} → {newUid}");
             }
 
             if (nicknameChanged)
             {
                 AppConfig.SetValue("UserConfig", "NickName", newNickname);
-                Console.WriteLine($"昵称已更新: {oldNickname} → {newNickname}");
+                Console.WriteLine($"Nickname updated: {oldNickname} → {newNickname}");
             }
 
             if (professionChanged)
             {
-                AppConfig.SetValue("UserConfig", "Profession", profession);
-                Console.WriteLine($"职业已更新: {oldProfession} → {profession}");
+                AppConfig.SetValue("UserConfig", "Profession", professionInternal);
+                Console.WriteLine($"Profession updated: {oldProfession} → {professionInternal}");
             }
 
             // 更新全局AppConfig属性以保持一致性
             AppConfig.Uid = newUid;
             AppConfig.NickName = newNickname;
-            AppConfig.Profession = profession;
+            AppConfig.Profession = professionInternal;
 
             // 同步到统计数据管理器
             StatisticData._manager.SetNickname(newUid, newNickname);
-            StatisticData._manager.SetProfession(newUid, profession);
+            StatisticData._manager.SetProfession(newUid, professionInternal);
 
             // 如果UID发生变化，询问用户是否清空统计数据
             if (uidChanged && oldUid != 0)
             {
                 var result = MessageBox.Show(
-                    $"检测到UID从 {oldUid} 更改为 {newUid}\n" +
-                    "这可能会影响当前的统计数据关联。\n" +
-                    "是否需要清空当前统计数据以避免混淆？",
-                    "UID变更提醒",
+                    $"UID changed from {oldUid} to {newUid}.\n" +
+                    "This may affect how statistics are associated.\n" +
+                    "Would you like to clear current statistics to avoid confusion?",
+                    "UID Change Notice",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
 
                 if (result == DialogResult.Yes)
                 {
                     StatisticData._manager.ClearAll(false);
-                    Console.WriteLine("因UID变更已清空统计数据");
+                    Console.WriteLine("Statistics cleared because UID changed.");
                 }
             }
 
             // 显示保存成功的反馈
-            Console.WriteLine($"界面设置已成功保存 - UID: {newUid}, 昵称: {newNickname}");
+            Console.WriteLine($"Settings saved successfully - UID: {newUid}, Nickname: {newNickname}, Profession: {professionInternal}");
         }
 
         /// <summary>
@@ -213,7 +243,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // 验证UID
             if (inputNumber1.Value <= 0)
             {
-                errorMessage = "UID必须大于0";
+                errorMessage = "UID must be greater than 0.";
                 return false;
             }
 
@@ -221,20 +251,20 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             string nickname = input2.Text.Trim();
             if (string.IsNullOrEmpty(nickname))
             {
-                errorMessage = "昵称不能为空";
+                errorMessage = "Nickname cannot be empty.";
                 return false;
             }
 
             if (nickname.Length > 20)
             {
-                errorMessage = "昵称长度不能超过20个字符";
+                errorMessage = "Nickname cannot exceed 20 characters.";
                 return false;
             }
 
             // 可以添加更多验证规则，如特殊字符检查
             if (nickname.Contains("<") || nickname.Contains(">") || nickname.Contains("&"))
             {
-                errorMessage = "昵称不能包含特殊字符 < > &";
+                errorMessage = "Nickname cannot contain special characters < > &.";
                 return false;
             }
 
@@ -253,8 +283,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"保存用户设置时发生错误：{ex.Message}", "保存失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Console.WriteLine($"保存用户设置异常: {ex}");
+                MessageBox.Show($"Failed to save user settings: {ex.Message}", "Save Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine($"Error saving user settings: {ex}");
             }
         }
 
@@ -283,5 +313,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
         }
 
+        private static string GetProfessionInternal(string displayName)
+        {
+            if (string.IsNullOrWhiteSpace(displayName))
+            {
+                return ProfessionDisplayToInternal["Unknown"];
+            }
+
+            return ProfessionDisplayToInternal.TryGetValue(displayName, out var internalName)
+                ? internalName
+                : displayName;
+        }
     }
 }

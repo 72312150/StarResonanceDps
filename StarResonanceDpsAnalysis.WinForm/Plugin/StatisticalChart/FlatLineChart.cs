@@ -374,7 +374,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"图表自动刷新时出错: {ex.Message}");
+                Console.WriteLine($"Chart auto-refresh failed: {ex.Message}");
             }
         }
 
@@ -817,7 +817,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                         minDistance = distance;
                         var timeText = FormatTimeLabel(point.X);
                         var dpsText = Common.FormatWithEnglishUnits(point.Y);
-                        bestTooltip = $"{series.Name}\n时间: {timeText}\nDPS: {dpsText}";
+                        bestTooltip = $"{series.Name}\nTime: {timeText}\nDPS: {dpsText}";
                         found = true;
                     }
                 }
@@ -937,7 +937,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         private void DrawNoDataMessage(Graphics g)
         {
-            var message = "暂无数据\n\n使用方法：\n? Ctrl + 鼠标滚轮：缩放时间轴\n? 左键拖动：平移视图\n? R键：重置视图\n? 鼠标悬停：查看数据";
+            var message = "No data available\n\nTips:\n- Ctrl + Mouse Wheel: zoom timeline\n- Left drag: pan view\n- R key: reset view\n- Hover: inspect values";
             using var font = CreateScaledFont("Microsoft YaHei", BaseNoDataFontSize, FontStyle.Regular);
             using var brush = new SolidBrush(_isDarkTheme ? Color.Gray : Color.DarkGray);
 
@@ -1130,7 +1130,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         private void DrawViewInfo(Graphics g)
         {
-            var info = $"缩放: {_timeScale:F1}x | 当前时间: {FormatTimeLabel(_currentTimeSeconds)}";
+            var info = $"Zoom: {_timeScale:F1}x | Current time: {FormatTimeLabel(_currentTimeSeconds)}";
 
             using var font = CreateScaledFont("Microsoft YaHei", BaseAxisValueFontSize);
             using var brush = new SolidBrush(_isDarkTheme ? Color.LightGray : Color.DarkGray);

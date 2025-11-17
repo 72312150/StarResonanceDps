@@ -18,68 +18,68 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
         public static List<ColumnSetting> AllSettings =
         [
             new() {
-                Key = "TotalDamage", Title = "总伤害", IsVisible = true,
-                Builder = () =>  new AntdUI.Column("TotalDamage", "总伤害",ColumnAlign.Center)
+                Key = "TotalDamage", Title = "Total Damage", IsVisible = true,
+                Builder = () =>  new AntdUI.Column("TotalDamage", "Total Damage",ColumnAlign.Center)
             },
             new() {
-                Key = "DamageTaken", Title = "承伤", IsVisible = true,
-                Builder = () => new Column("DamageTaken", "承伤", ColumnAlign.Center)
+                Key = "DamageTaken", Title = "Damage Taken", IsVisible = true,
+                Builder = () => new Column("DamageTaken", "Damage Taken", ColumnAlign.Center)
             },
             new() {
-                Key = "CriticalDamage", Title = "纯暴击", IsVisible = true,
-                Builder = () => new Column("CriticalDamage", "纯暴击")
+                Key = "CriticalDamage", Title = "Critical Damage", IsVisible = true,
+                Builder = () => new Column("CriticalDamage", "Critical Damage")
             },
             new() {
-                Key = "LuckyDamage", Title = "纯幸运", IsVisible = true,
-                Builder = () => new Column("LuckyDamage", "纯幸运")
+                Key = "LuckyDamage", Title = "Lucky Damage", IsVisible = true,
+                Builder = () => new Column("LuckyDamage", "Lucky Damage")
             },
             new() {
-                Key = "CritLuckyDamage", Title = "暴击幸运", IsVisible = true,
-                Builder = () => new Column("CritLuckyDamage", "暴击幸运")
+                Key = "CritLuckyDamage", Title = "Critical + Lucky Damage", IsVisible = true,
+                Builder = () => new Column("CritLuckyDamage", "Critical + Lucky Damage")
             },
             new() {
-                Key = "InstantDps", Title = "瞬时Dps", IsVisible = true,
-                Builder = () => new Column("InstantDps", "瞬时Dps")
+                Key = "InstantDps", Title = "Instant DPS", IsVisible = true,
+                Builder = () => new Column("InstantDps", "Instant DPS")
             },
             new() {
-                Key = "MaxInstantDps", Title = "最大瞬时Dps", IsVisible = true,
-                Builder = () => new Column("MaxInstantDps", "最大瞬时Dps")
+                Key = "MaxInstantDps", Title = "Peak Instant DPS", IsVisible = true,
+                Builder = () => new Column("MaxInstantDps", "Peak Instant DPS")
             },
             new() {
                 Key = "TotalDps", Title = "DPS", IsVisible = true,
                 Builder = () => new Column("TotalDps", "DPS", ColumnAlign.Center)
             },
             new() {
-                Key = "CritRate", Title = "暴击率", IsVisible = true,
-                Builder = () => new Column("CritRate", "暴击率")
+                Key = "CritRate", Title = "Critical Rate", IsVisible = true,
+                Builder = () => new Column("CritRate", "Critical Rate")
             },
             new() {
-                Key = "LuckyRate", Title = "幸运率", IsVisible = true,
-                Builder = () => new Column("LuckyRate", "幸运率")
+                Key = "LuckyRate", Title = "Lucky Rate", IsVisible = true,
+                Builder = () => new Column("LuckyRate", "Lucky Rate")
             },
             new() {
-                Key = "TotalHealingDone", Title = "总治疗", IsVisible = true,
-                Builder = () => new Column("TotalHealingDone", "总治疗", ColumnAlign.Center)
+                Key = "TotalHealingDone", Title = "Total Healing", IsVisible = true,
+                Builder = () => new Column("TotalHealingDone", "Total Healing", ColumnAlign.Center)
             },
             new() {
-                Key = "CriticalHealingDone", Title = "治疗暴击", IsVisible = true,
-                Builder = () => new Column("CriticalHealingDone", "治疗暴击")
+                Key = "CriticalHealingDone", Title = "Critical Healing", IsVisible = true,
+                Builder = () => new Column("CriticalHealingDone", "Critical Healing")
             },
             new() {
-                Key = "LuckyHealingDone", Title = "治疗幸运", IsVisible = true,
-                Builder = () => new Column("LuckyHealingDone", "治疗幸运")
+                Key = "LuckyHealingDone", Title = "Lucky Healing", IsVisible = true,
+                Builder = () => new Column("LuckyHealingDone", "Lucky Healing")
             },
             new() {
-                Key = "CritLuckyHealingDone", Title = "治疗暴击幸运", IsVisible = true,
-                Builder = () => new Column("CritLuckyHealingDone", "治疗暴击幸运")
+                Key = "CritLuckyHealingDone", Title = "Critical + Lucky Healing", IsVisible = true,
+                Builder = () => new Column("CritLuckyHealingDone", "Critical + Lucky Healing")
             },
             new() {
-                Key = "InstantHps", Title = "瞬时Hps", IsVisible = true,
-                Builder = () => new Column("InstantHps", "瞬时Hps")
+                Key = "InstantHps", Title = "Instant HPS", IsVisible = true,
+                Builder = () => new Column("InstantHps", "Instant HPS")
             },
             new() {
-                Key = "MaxInstantHps", Title = "最大瞬时Hps", IsVisible = true,
-                Builder = () => new Column("MaxInstantHps", "最大瞬时Hps")
+                Key = "MaxInstantHps", Title = "Peak Instant HPS", IsVisible = true,
+                Builder = () => new Column("MaxInstantHps", "Peak Instant HPS")
             },
             new() {
                 Key = "TotalHps", Title = "HPS", IsVisible = true,
@@ -97,9 +97,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
             string[] group3 = { "TotalHealingDone", "CriticalHealingDone", "LuckyHealingDone", "CritLuckyHealingDone" };
             string[] group4 = { "InstantHps", "MaxInstantHps", "TotalHps" };
 
-            list.Add(BuildGroup(group1, "总伤害"));
+            list.Add(BuildGroup(group1, "Total Damage"));
             list.Add(BuildGroup(group2, "DPS"));
-            list.Add(BuildGroup(group3, "总治疗"));
+            list.Add(BuildGroup(group3, "Total Healing"));
             list.Add(BuildGroup(group4, "HPS"));
 
             return [new StackedHeaderRow([.. list.SelectMany(x => x)])];
@@ -117,18 +117,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
         {
             var columns = new List<Column>
             {
-                new("", "序号")
+                new("", "Index")
                 {
                     Width = "50",
                     Render = (value, record, rowIndex) => rowIndex + 1,
                     Fixed = true
                 },
                 // 基础信息列 - 固定显示，不可配置
-                new("Uid", "角色ID",ColumnAlign.Center){ SortOrder = true },
-                new("NickName", "角色昵称",ColumnAlign.Center){ SortOrder = true },
-                new("Profession", "职业",ColumnAlign.Center),
+                new("Uid", "Player UID",ColumnAlign.Center){ SortOrder = true },
+                new("NickName", "Nickname",ColumnAlign.Center){ SortOrder = true },
+                new("Profession", "Class",ColumnAlign.Center),
                 // 战力 - 固定显示，不在设置中配置
-                new("CombatPower", "战力", ColumnAlign.Center){ SortOrder = true }
+                new("CombatPower", "Combat Power", ColumnAlign.Center){ SortOrder = true }
             };
 
             // 添加可配置的列

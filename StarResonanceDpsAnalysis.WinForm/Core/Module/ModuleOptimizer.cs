@@ -615,7 +615,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             Console.WriteLine($"战斗力: {solution.Score:F2}");
             LogResult($"战斗力: {solution.Score:F2}");
 
-            Console.WriteLine("\n模组列表:");
+            Console.WriteLine("\nModule list:");
             LogResult("\n模组列表:");
             for (int i = 0; i < solution.Modules.Count; i++)
             {
@@ -625,7 +625,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
                 LogResult($"  {i + 1}. {m.Name} (品质{m.Quality}) - {partsStr}");
             }
 
-            Console.WriteLine("\n属性分布:");
+            Console.WriteLine("\nAttribute distribution:");
             LogResult("\n属性分布:");
             foreach (var kv in solution.AttrBreakdown.OrderBy(k => k.Key))
             {
@@ -642,8 +642,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             Console.WriteLine(new string('=', 50));
             LogResult(new string('=', 50));
 
-            Console.WriteLine($"模组搭配优化 - {category}");
-            LogResult($"模组搭配优化 - {category}");
+            Console.WriteLine($"Module combination optimization - {category}");
+            LogResult($"Module combination optimization - {category}");
 
             Console.WriteLine(new string('=', 50));
             LogResult(new string('=', 50));
@@ -652,13 +652,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
 
             if (optimal.Count == 0)
             {
-                Console.WriteLine($"未找到{category}类型的有效搭配");
-                LogResult($"未找到{category}类型的有效搭配");
+                Console.WriteLine($"No valid combinations found for {category}");
+                LogResult($"No valid combinations found for {category}");
                 return;
             }
 
-            Console.WriteLine($"\n找到{optimal.Count}个最优搭配:");
-            LogResult($"\n找到{optimal.Count}个最优搭配:");
+            Console.WriteLine($"\nFound {optimal.Count} optimal combinations:");
+            LogResult($"\nFound {optimal.Count} optimal combinations:");
 
             for (int i = 0; i < optimal.Count; i++)
                 PrintSolutionDetails(optimal[i], i + 1);
@@ -666,18 +666,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.Module
             Console.WriteLine($"\n{new string('=', 50)}");
             LogResult($"\n{new string('=', 50)}");
 
-            Console.WriteLine("统计信息:");
-            LogResult("统计信息:");
+            Console.WriteLine("Statistics:");
+            LogResult("Statistics:");
 
-            Console.WriteLine($"总模组数量: {modules.Count}");
-            LogResult($"总模组数量: {modules.Count}");
+            Console.WriteLine($"Total modules: {modules.Count}");
+            LogResult($"Total modules: {modules.Count}");
 
             int typeCount = modules.Count(m => GetModuleCategory(m) == category);
-            Console.WriteLine($"{category} 类型模组: {typeCount}");
-            LogResult($"{category} 类型模组: {typeCount}");
+            Console.WriteLine($"{category} modules: {typeCount}");
+            LogResult($"{category} modules: {typeCount}");
 
-            Console.WriteLine($"最高战斗力: {optimal[0].Score:F2}");
-            LogResult($"最高战斗力: {optimal[0].Score:F2}");
+            Console.WriteLine($"Highest combat power: {optimal[0].Score:F2}");
+            LogResult($"Highest combat power: {optimal[0].Score:F2}");
 
             Console.WriteLine(new string('=', 50));
             LogResult(new string('=', 50));

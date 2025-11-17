@@ -3,11 +3,11 @@ using System.Drawing.Drawing2D;
 namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 {
     /// <summary>
-    /// 扁平化散点图控件
+    /// Flat scatter chart control.
     /// </summary>
     public class FlatScatterChart : UserControl
     {
-        #region 字段和属性
+        #region Fields and Properties
 
         private readonly List<ScatterChartSeries> _series = new();
         private bool _isDarkTheme = false;
@@ -17,24 +17,24 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
         private bool _showLegend = true;
         private bool _showGrid = true;
 
-        // 边距设置
+        // Layout padding
         private const int PaddingLeft = 60;
         private const int PaddingRight = 20;
         private const int PaddingTop = 40;
         private const int PaddingBottom = 80;
 
-        // 颜色主题
+        // Palette
         private readonly Color[] _colors = {
-            Color.FromArgb(255, 99, 132),   // 红
-            Color.FromArgb(54, 162, 235),   // 蓝
-            Color.FromArgb(255, 206, 86),   // 黄
-            Color.FromArgb(75, 192, 192),   // 青
-            Color.FromArgb(153, 102, 255),  // 紫
-            Color.FromArgb(255, 159, 64),   // 橙
-            Color.FromArgb(199, 199, 199),  // 灰
-            Color.FromArgb(83, 102, 255),   // 靛青
-            Color.FromArgb(255, 99, 255),   // 品红
-            Color.FromArgb(99, 255, 132),   // 绿
+            Color.FromArgb(255, 99, 132),   // red
+            Color.FromArgb(54, 162, 235),   // blue
+            Color.FromArgb(255, 206, 86),   // yellow
+            Color.FromArgb(75, 192, 192),   // teal
+            Color.FromArgb(153, 102, 255),  // purple
+            Color.FromArgb(255, 159, 64),   // orange
+            Color.FromArgb(199, 199, 199),  // gray
+            Color.FromArgb(83, 102, 255),   // indigo
+            Color.FromArgb(255, 99, 255),   // magenta
+            Color.FromArgb(99, 255, 132),   // green
         };
 
         public bool IsDarkTheme
@@ -100,7 +100,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 构造函数
+        #region Constructors
 
         public FlatScatterChart()
         {
@@ -112,7 +112,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 数据管理
+        #region Data Management
 
         public void AddSeries(string name, List<PointF> points)
         {
@@ -136,7 +136,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 主题设置
+        #region Theming
 
         private void ApplyTheme()
         {
@@ -154,7 +154,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 绘制方法
+        #region Rendering
 
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -164,7 +164,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            // 清除背景
+            // Clear background
             g.Clear(BackColor);
 
             if (_series.Count == 0 || !_series.Any(s => s.Points.Count > 0))
@@ -173,31 +173,31 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                 return;
             }
 
-            // 计算数据范围
+            // Determine bounds
             var dataRange = CalculateDataRange();
             if (dataRange.IsEmpty) return;
 
-            // 计算绘图区域
+            // Compute chart rectangle
             var chartRect = new Rectangle(PaddingLeft, PaddingTop,
                                         Width - PaddingLeft - PaddingRight,
                                         Height - PaddingTop - PaddingBottom);
 
-            // 绘制网格
+            // Grid
             if (_showGrid)
             {
                 DrawGrid(g, chartRect, dataRange);
             }
 
-            // 绘制轴
+            // Axes
             DrawAxes(g, chartRect, dataRange);
 
-            // 绘制散点
+            // Points
             DrawScatterPoints(g, chartRect, dataRange);
 
-            // 绘制标题
+            // Title
             DrawTitle(g);
 
-            // 绘制图例
+            // Legend
             if (_showLegend && _series.Count > 0)
             {
                 DrawLegend(g);
@@ -206,7 +206,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         private void DrawNoDataMessage(Graphics g)
         {
-            var message = "暂无数据";
+            var message = "No data available";
             var font = new Font("Microsoft YaHei", 12, FontStyle.Regular);
             var brush = new SolidBrush(_isDarkTheme ? Color.Gray : Color.DarkGray);
 
@@ -225,17 +225,17 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             var allPoints = _series.SelectMany(s => s.Points);
             if (!allPoints.Any()) return RectangleF.Empty;
 
-            var minX = 0f; // X轴从0开始
+            var minX = 0f; // start axes at zero
             var maxX = allPoints.Max(p => p.X);
-            var minY = 0f; // Y轴从0开始
+            var minY = 0f;
             var maxY = allPoints.Max(p => p.Y);
 
-            // 添加一些边距
+            // Add margin
             var rangeX = maxX - minX;
             var rangeY = maxY - minY;
 
-            if (rangeX == 0) rangeX = 100; // 默认X轴范围
-            if (rangeY == 0) rangeY = 1000; // 默认Y轴范围
+            if (rangeX == 0) rangeX = 100; // default X range
+            if (rangeY == 0) rangeY = 1000; // default Y range
 
             return new RectangleF(minX, minY, rangeX * 1.1f, rangeY * 1.1f);
         }
@@ -245,14 +245,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             var gridColor = _isDarkTheme ? Color.FromArgb(64, 64, 64) : Color.FromArgb(230, 230, 230);
             using var gridPen = new Pen(gridColor, 1);
 
-            // 绘制垂直网格线
+            // Vertical grid lines
             for (int i = 0; i <= 10; i++)
             {
                 var x = chartRect.X + (float)chartRect.Width * i / 10;
                 g.DrawLine(gridPen, x, chartRect.Y, x, chartRect.Bottom);
             }
 
-            // 绘制水平网格线
+            // Horizontal grid lines
             for (int i = 0; i <= 10; i++)
             {
                 var y = chartRect.Y + (float)chartRect.Height * i / 10;
@@ -267,13 +267,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             using var textBrush = new SolidBrush(ForeColor);
             using var font = new Font("Microsoft YaHei", 9);
 
-            // 绘制X轴
+            // X axis
             g.DrawLine(axisPen, chartRect.X, chartRect.Bottom, chartRect.Right, chartRect.Bottom);
 
-            // 绘制Y轴
+            // Y axis
             g.DrawLine(axisPen, chartRect.X, chartRect.Y, chartRect.X, chartRect.Bottom);
 
-            // X轴标签
+            // X tick labels
             for (int i = 0; i <= 10; i++)
             {
                 var x = chartRect.X + (float)chartRect.Width * i / 10;
@@ -284,7 +284,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                 g.DrawString(text, font, textBrush, x - size.Width / 2, chartRect.Bottom + 5);
             }
 
-            // Y轴标签
+            // Y tick labels
             for (int i = 0; i <= 10; i++)
             {
                 var y = chartRect.Bottom - (float)chartRect.Height * i / 10;
@@ -295,7 +295,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                 g.DrawString(text, font, textBrush, chartRect.X - size.Width - 5, y - size.Height / 2);
             }
 
-            // 轴标签
+            // Axis labels
             if (!string.IsNullOrEmpty(_xAxisLabel))
             {
                 var size = g.MeasureString(_xAxisLabel, font);
@@ -333,7 +333,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                         series.MarkerSize
                     );
 
-                    // 绘制圆形标记点
+                    // Draw marker
                     g.FillEllipse(brush, markerRect);
                 }
             }
@@ -363,22 +363,22 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             var legendX = Width - legendWidth - 10;
             var legendY = PaddingTop + 10;
 
-            // 绘制图例背景
+            // Legend background
             var legendBg = _isDarkTheme ? Color.FromArgb(40, 40, 40) : Color.FromArgb(250, 250, 250);
             using var bgBrush = new SolidBrush(legendBg);
             g.FillRectangle(bgBrush, legendX - 5, legendY - 5, legendWidth, legendHeight);
 
-            // 绘制图例项
+            // Legend entries
             for (int i = 0; i < _series.Count; i++)
             {
                 var series = _series[i];
                 var y = legendY + i * 20;
 
-                // 绘制颜色标记（圆形）
+                // Color marker
                 using var colorBrush = new SolidBrush(series.Color);
                 g.FillEllipse(colorBrush, legendX, y + 4, 12, 12);
 
-                // 绘制文本
+                // Label
                 g.DrawString(series.Name, font, textBrush, legendX + 18, y);
             }
         }
@@ -387,7 +387,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
     }
 
     /// <summary>
-    /// 散点图数据系列
+    /// Scatter chart data series.
     /// </summary>
     public class ScatterChartSeries
     {

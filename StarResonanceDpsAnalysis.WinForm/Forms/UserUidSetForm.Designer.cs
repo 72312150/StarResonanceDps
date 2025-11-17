@@ -43,10 +43,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // 
             // input2
             // 
-            input2.Font = new Font("阿里妈妈数黑体", 8F, FontStyle.Bold);
+            input2.Font = new Font("Microsoft YaHei UI", 8F, FontStyle.Bold);
             input2.Location = new Point(72, 204);
             input2.Name = "input2";
-            input2.PrefixText = "Name：";
+            input2.PrefixText = "Name:";
             input2.Radius = 3;
             input2.SelectionColor = Color.FromArgb(143, 176, 229);
             input2.Size = new Size(327, 78);
@@ -58,7 +58,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             inputNumber1.Location = new Point(72, 104);
             inputNumber1.MaxLength = 9999999;
             inputNumber1.Name = "inputNumber1";
-            inputNumber1.PrefixText = "UID：";
+            inputNumber1.PrefixText = "UID:";
             inputNumber1.Radius = 3;
             inputNumber1.SelectionColor = Color.FromArgb(143, 176, 229);
             inputNumber1.SelectionStart = 1;
@@ -68,10 +68,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // 
             // input1
             // 
-            input1.Font = new Font("阿里妈妈数黑体", 8F, FontStyle.Bold);
+            input1.Font = new Font("Microsoft YaHei UI", 8F, FontStyle.Bold);
             input1.Location = new Point(72, 308);
             input1.Name = "input1";
-            input1.PrefixText = "职业：";
+            input1.PrefixText = "Class:";
             input1.Radius = 3;
             input1.SelectionColor = Color.FromArgb(143, 176, 229);
             input1.SelectionStart = 1;
@@ -153,12 +153,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // 
             // select1
             // 
-            select1.Font = new Font("阿里妈妈数黑体", 8F, FontStyle.Bold);
-            select1.Items.AddRange(new object[] { "神射手", "神盾骑士", "雷影剑士", "冰魔导师", "青岚骑士", "森语者", "巨刃守护者", "灵魂乐手", "未知职业" });
+            select1.Font = new Font("Microsoft YaHei UI", 8F, FontStyle.Bold);
+            select1.Items.AddRange(new object[] { "Marksman", "Shield Knight", "Stormblade", "Frost Mage", "Wind Knight", "Verdant Oracle", "Heavy Guardian", "Soul Musician", "Unknown" });
             select1.List = true;
             select1.Location = new Point(72, 304);
             select1.Name = "select1";
-            select1.PrefixText = "职业：";
+            select1.PrefixText = "Class:";
             select1.Size = new Size(327, 78);
             select1.TabIndex = 32;
             // 

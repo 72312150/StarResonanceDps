@@ -9,17 +9,17 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
 
         public static void SetDefaultGUI(BorderlessForm BorderlessForm, bool AutoHandDpi = false)
         {
-            BorderlessForm.Radius = 6; //圆角
-            BorderlessForm.Shadow = 10; //阴影大小
-            BorderlessForm.BorderWidth = 0; //边框宽度
-            BorderlessForm.UseDwm = false; //关闭系统窗口预览
+            BorderlessForm.Radius = 6; // rounded corners
+            BorderlessForm.Shadow = 10; // drop-shadow size
+            BorderlessForm.BorderWidth = 0; // border width
+            BorderlessForm.UseDwm = false; // disable system preview
         }
 
         /// <summary>
-        /// 设置明暗颜色
+        /// Apply light or dark color theme.
         /// </summary>
-        /// <param name="window">父窗口</param>
-        /// <param name="isLight">是否亮色</param>
+        /// <param name="window">Parent window.</param>
+        /// <param name="isLight">Light theme flag.</param>
         public static void SetColorMode(AntdUI.BorderlessForm window, bool isLight)
         {
             if (window == null || window.IsDisposed) return;
@@ -39,13 +39,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
         }
 
         /// <summary>
-        /// 弹窗提示
+        /// Display a modal prompt.
         /// </summary>
         /// <param name="from"></param>
         /// <param name="title"></param>
         /// <param name="content"></param>
         /// <param name="type"></param>
-        public static DialogResult Modal(Form from, string title, string content, string okText = "确定", string cancelText = "取消", TType type = TType.Info)
+        public static DialogResult Modal(Form from, string title, string content, string okText = "OK", string cancelText = "Cancel", TType type = TType.Info)
         {
             return AntdUI.Modal.open(new Modal.Config(from, title, content)
             {

@@ -22,13 +22,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.test
             if (TryParse<GetSocialDataReply>(payload, out var reply) && reply.Data != null)
             {
                 social = reply.Data;
-                Console.WriteLine("[SocialPrinter] 解析为 GetSocialDataReply → SocialData");
+                Console.WriteLine("[SocialPrinter] Parsed as GetSocialDataReply → SocialData");
             }
             // 2) 直接推的 SocialData
             else if (TryParse<SocialData>(payload, out var direct))
             {
                 social = direct;
-                Console.WriteLine("[SocialPrinter] 解析为 SocialData");
+                Console.WriteLine("[SocialPrinter] Parsed as SocialData");
             }
             else
             {
@@ -44,20 +44,20 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.test
             Console.WriteLine("====== SocialData ======");
 
             if (social.TeamData != null) PrintTeam(social.TeamData);
-            else Console.WriteLine("[Team] 无团队数据");
+            else Console.WriteLine("[Team] No team data");
 
             if (social.UnionData != null) PrintUnion(social.UnionData);
-            else Console.WriteLine("[Union] 无工会/联盟数据");
+            else Console.WriteLine("[Union] No guild/alliance data");
 
             if (social.CommunityData != null) PrintCommunity(social.CommunityData);
-            else Console.WriteLine("[Community] 无社区/家园数据");
+            else Console.WriteLine("[Community] No community/home data");
 
             Console.WriteLine("========================");
         }
 
         private static void PrintTeam(CharTeam team)
         {
-            Console.WriteLine("---- [Team] 基本信息 ----");
+            Console.WriteLine("---- [Team] Overview ----");
             Console.WriteLine($"TeamId         : {team.TeamId}");
             Console.WriteLine($"LeaderId       : {team.LeaderId}");
             Console.WriteLine($"TeamTargetId   : {team.TeamTargetId}");
@@ -70,7 +70,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.test
 
             if (team.TeamMemberData != null && team.TeamMemberData.Count > 0)
             {
-                Console.WriteLine("---- [Team] 成员明细 ----");
+                Console.WriteLine("---- [Team] Member Details ----");
                 foreach (var kv in team.TeamMemberData.OrderBy(k => k.Key))
                 {
                     var m = kv.Value;
@@ -81,18 +81,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.test
                     Console.WriteLine($"         TalentId      : {m.TalentId}");
                     Console.WriteLine($"         VoiceIsOpen   : {m.VoiceIsOpen}");
                     Console.WriteLine($"         GroupId       : {m.GroupId}");
-                    if (m.SocialData != null) Console.WriteLine("         [Member.SocialData] 存在");
+                    if (m.SocialData != null) Console.WriteLine("         [Member.SocialData] Present");
                 }
             }
             else
             {
-                Console.WriteLine("[Team] 无成员明细");
+                Console.WriteLine("[Team] No member details");
             }
         }
 
         private static void PrintUnion(UnionData union)
         {
-            Console.WriteLine("---- [Union] 基本信息 ----");
+            Console.WriteLine("---- [Union] Overview ----");
             Console.WriteLine($"UnionId   : {union.UnionId}");
             Console.WriteLine($"Name      : {union.Name}");
             Console.WriteLine($"HuntRank  : {union.UnionHuntRank}");
@@ -100,7 +100,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Core.test
 
         private static void PrintCommunity(CommunityData com)
         {
-            Console.WriteLine("---- [Community] 基本信息 ----");
+            Console.WriteLine("---- [Community] Overview ----");
             Console.WriteLine($"CommunityId            : {com.CommunityId}");
             Console.WriteLine($"HomelandId             : {com.HomelandId}");
             Console.WriteLine($"CohabitantIds (count)  : {com.CohabitantIds?.Count ?? 0}");

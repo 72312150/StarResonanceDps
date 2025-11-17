@@ -77,7 +77,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             pageHeader_MainHeader.Size = new Size(526, 25);
             pageHeader_MainHeader.SubFont = new Font("HarmonyOS Sans SC Medium", 9F, FontStyle.Bold, GraphicsUnit.Point, 134);
             pageHeader_MainHeader.SubGap = 0;
-            pageHeader_MainHeader.SubText = "当前 · 伤害";
+            pageHeader_MainHeader.SubText = "Current · Damage";
             pageHeader_MainHeader.TabIndex = 0;
             pageHeader_MainHeader.Text = "DPS Damage Statistics Table  ";
             // 
@@ -215,7 +215,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_BattleTimeText.Name = "label_BattleTimeText";
             label_BattleTimeText.Size = new Size(239, 31);
             label_BattleTimeText.TabIndex = 1;
-            label_BattleTimeText.Text = "请稍等，正在准备监听服务器...";
+            label_BattleTimeText.Text = "Please wait, preparing to listen for the server...";
             // 
             // label_CurrentOrder
             // 
@@ -260,7 +260,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button_NpcTakeDamage.Size = new Size(111, 38);
             button_NpcTakeDamage.TabIndex = 3;
             button_NpcTakeDamage.Tag = "3";
-            button_NpcTakeDamage.Text = "承伤";
+            button_NpcTakeDamage.Text = "Damage Taken";
             button_NpcTakeDamage.Click += TypeButtons_Click;
             // 
             // button_AlwaysInjured
@@ -277,7 +277,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button_AlwaysInjured.Size = new Size(111, 38);
             button_AlwaysInjured.TabIndex = 2;
             button_AlwaysInjured.Tag = "2";
-            button_AlwaysInjured.Text = "总承伤";
+            button_AlwaysInjured.Text = "Total Damage Taken";
             button_AlwaysInjured.Click += TypeButtons_Click;
             // 
             // button_TotalTreatment
@@ -293,7 +293,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button_TotalTreatment.Size = new Size(111, 38);
             button_TotalTreatment.TabIndex = 1;
             button_TotalTreatment.Tag = "1";
-            button_TotalTreatment.Text = "总治疗";
+            button_TotalTreatment.Text = "Total Healing";
             button_TotalTreatment.Click += TypeButtons_Click;
             // 
             // button_TotalDamage
@@ -309,7 +309,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button_TotalDamage.Size = new Size(111, 38);
             button_TotalDamage.TabIndex = 0;
             button_TotalDamage.Tag = "0";
-            button_TotalDamage.Text = "总伤害";
+            button_TotalDamage.Text = "Total Damage";
             button_TotalDamage.Click += TypeButtons_Click;
             // 
             // sortedProgressBarList_MainList
@@ -350,7 +350,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             Name = "DpsStatisticsForm";
             Radius = 3;
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "别查我DPS";
+            Text = "Don't Check My DPS";
             FormClosing += DpsStatisticsForm_FormClosing;
             Load += DpsStatistics_Load;
             Shown += DpsStatisticsForm_Shown;

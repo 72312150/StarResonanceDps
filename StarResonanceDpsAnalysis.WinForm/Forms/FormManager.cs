@@ -9,7 +9,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 {
     public class FormManager
     {
-        public const string APP_NAME = "别查我DPS";
+        public const string APP_NAME = "Don't Check My DPS";
         public static string AppVersion { get => $"v{Application.ProductVersion.Split('+')[0]}"; }
 
         public static bool IsMouseThrough { get; set; } = false;

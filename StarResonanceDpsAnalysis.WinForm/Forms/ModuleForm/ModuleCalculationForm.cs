@@ -30,7 +30,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
         private void ModuleCalculationForm_Load(object sender, EventArgs e)
         {
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色
+            FormGui.SetColorMode(this, AppConfig.IsLight);// Apply the configured theme colors
             if (Config.IsLight)
             {
                 groupBox1.ForeColor = groupBox3.ForeColor = Color.Black;
@@ -91,14 +91,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
         private void button1_Click(object sender, EventArgs e)
         {
-            // TODO: 重构逻辑
+            // TODO: Refactor logic
 
             throw new NotImplementedException();
 
             //if (MessageAnalyzer.PayloadBuffer.Length == 0)
             //{
             //    var result = AppMessageBox.ShowMessage("""
-            //        请先过图一次在点此按钮
+            //        Please run a stage once before clicking this button
             //        """, this);
             //    return;
             //}
@@ -108,10 +108,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
 
 
-            virtualPanel1.Waterfall = false;      // 行优先（有 Align 的话设 Start）
+            virtualPanel1.Waterfall = false;      // Row-first layout (set Align to Start if available)
             virtualPanel1.Items.Clear();
 
-            // 取数据并先实例化所有卡（还不加到 panel）
+            // Build all cards first without adding them to the panel
             var cards = new List<ModuleCardDisplay.ResultCardSimpleItem>();
             foreach (var dto in ModuleCardDisplay.ModuleResultMemory.GetSnapshot())
             {
@@ -119,25 +119,25 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
                 {
                     RankText = dto.RankText,
                     HighestLevel = dto.HighestLevel,
-                    Score = dto.Score,        // 你现在是 string
+                    Score = dto.Score,        // Currently a string
                     ModuleRows = dto.ModuleRows,
                     AttrLines = dto.AttrLines
                 });
             }
 
-            // ========== 第一步：统一列宽 ==========
+            // ========== Step 1: normalize card width ==========
             float dpi = AntdUI.Config.Dpi;
-            int gutterPx = (int)MathF.Round(12 * dpi);     // 列间距
-            int minCardW = (int)MathF.Round(240 * dpi);    // 最小卡宽
-            int maxCols = 3;                              // 最多列
+            int gutterPx = (int)MathF.Round(12 * dpi);     // Column gap
+            int minCardW = (int)MathF.Round(240 * dpi);    // Minimum card width
+            int maxCols = 3;                              // Maximum number of columns
             int panelW = Math.Max(1, virtualPanel1.ClientSize.Width);
 
-            // 用与卡片一致的字体
+            // Match the fonts used inside the cards
             var baseFont = virtualPanel1.Font ?? SystemFonts.DefaultFont;
             using var fontBody = new Font(baseFont, baseFont.Style);
             using var fontTitle = new Font(baseFont, FontStyle.Bold);
 
-            // 计算每张卡“期望宽度”：左右 Padding + 模组列表里“最长一行（左+gap+右）”
+            // Compute preferred width: padding plus the longest row (left + gap + right)
             int ComputePreferredCardWidth(ModuleCardDisplay.ResultCardSimpleItem card)
             {
                 int padL = (int)MathF.Round(card.ContentPadding.Left * dpi);
@@ -161,16 +161,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
             int preferredMaxW = cards.Count == 0 ? minCardW : cards.Max(ComputePreferredCardWidth);
 
-            // 算能排几列，并反推统一卡宽
+            // Determine how many columns fit and derive a unified card width
             int cols = Math.Max(1, Math.Min(maxCols, (panelW + gutterPx) / (preferredMaxW + gutterPx)));
             int unifiedCardW = (panelW - gutterPx * (cols - 1)) / cols;
             unifiedCardW = Math.Max(1, Math.Min(unifiedCardW, panelW));
 
-            // 把统一宽写到每张卡
+            // Apply the unified width to every card
             foreach (var c in cards) c.ForceCardWidthPx = unifiedCardW;
 
-            // ========== 第二步：统一高度 ==========
-            // 用统一宽度测每张卡高度，取最大值
+            // ========== Step 2: normalize card height ==========
+            // Measure each card with the unified width and keep the tallest
             int MeasureCardHeight(ModuleCardDisplay.ResultCardSimpleItem card)
             {
                 int padL = (int)MathF.Round(card.ContentPadding.Left * dpi);
@@ -182,24 +182,24 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
                 int contentW = Math.Max(1, unifiedCardW - padL - padR);
                 int y = 0;
 
-                // 标题
+                // Title
                 y += TextRenderer.MeasureText(card.RankText ?? "", fontTitle,
                       new Size(contentW, int.MaxValue), TextFormatFlags.WordBreak).Height + card.LineGap;
 
-                // 最高属性等级
-                y += TextRenderer.MeasureText($"最高属性等级 {card.HighestLevel}", fontBody,
+                // Highest trait level
+                y += TextRenderer.MeasureText($"Highest trait level {card.HighestLevel}", fontBody,
                       new Size(contentW, int.MaxValue), TextFormatFlags.WordBreak).Height + card.LineGap;
 
-                // 综合评分（两段同一行，测一整段足够）
+                // Overall score (single line measurement is sufficient)
                 string scoreText = string.IsNullOrEmpty(card.Score) ? "—" : card.Score;
-                y += TextRenderer.MeasureText($"综合评分：{scoreText}", fontBody,
+                y += TextRenderer.MeasureText($"Overall score: {scoreText}", fontBody,
                       new Size(contentW, int.MaxValue), TextFormatFlags.WordBreak).Height + card.SectionGap;
 
-                // 列表标题
-                y += TextRenderer.MeasureText("模组列表：", fontBody,
+                // List heading
+                y += TextRenderer.MeasureText("Module list:", fontBody,
                       new Size(contentW, int.MaxValue), TextFormatFlags.WordBreak).Height + card.LineGap;
 
-                // 列表每行（左列宽 = contentW - 右列自然宽 - gap；右列自然宽不换行）
+                // Each list row (left width = contentW - right natural width - gap; right column doesn't wrap)
                 foreach (var row in card.ModuleRows ?? Enumerable.Empty<(string Left, string Right)>())
                 {
                     var left = row.Left ?? string.Empty;
@@ -216,14 +216,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
                 y += card.SectionGap;
 
-                // 属性分布标题
-                y += TextRenderer.MeasureText("属性分布：", fontBody,
+                // Trait distribution heading
+                y += TextRenderer.MeasureText("Trait spread:", fontBody,
                       new Size(contentW, int.MaxValue), TextFormatFlags.WordBreak).Height + card.LineGap;
 
-                // 属性分布每行
+                // Trait distribution rows
                 foreach (var (name, val) in card.AttrLines ?? Enumerable.Empty<(string Name, int Value)>())
                 {
-                    string line = $"{name}：+{val}";
+                    string line = $"{name}:+{val}";
                     y += TextRenderer.MeasureText(line, fontBody,
                          new Size(contentW, int.MaxValue), TextFormatFlags.WordBreak).Height + 4;
                 }
@@ -235,11 +235,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             int unifiedCardH = cards.Count == 0 ? (int)(160 * dpi) : cards.Max(MeasureCardHeight);
             foreach (var c in cards) c.ForceCardHeightPx = unifiedCardH;
 
-            // ========== 第三步：一次性加入并刷新 ==========
+            // ========== Step 3: add and refresh once ==========
             virtualPanel1.SuspendLayout();
             foreach (var c in cards) virtualPanel1.Items.Add(c);
             virtualPanel1.ResumeLayout();
-            virtualPanel1.Refresh();              // 一次刷新即可看到统一宽高效果
+            virtualPanel1.Refresh();              // Single refresh to apply size changes
 
 
         }
@@ -271,7 +271,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
         private void button4_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("装饰用");
+            MessageBox.Show("For decoration only.");
         }
 
         private void ModuleCalculationForm_ForeColorChanged(object sender, EventArgs e)
@@ -302,52 +302,52 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
         private void select2_SelectedIndexChanged(object sender, IntEventArgs e)
         {
-            // 通用：5 个下拉都可指向这个事件，靠 Tag 区分第几行
+            // Shared handler: all five dropdowns route here; use Tag to identify the row
             if (sender is Select combo)
             {
                 var rowIndex = combo.Tag.ToInt();
 
                 string selectedAttr = combo.SelectedValue?.ToString() ?? string.Empty;
 
-                // 旧的该行词条（若存在，等会要从 Attributes/DesiredLevels 里移干净）
+                // Track the previous attribute for this row so we can clean up state
                 string? old = null;
                 if (BuildEliteCandidatePool.WhitelistPickByRow.TryGetValue(rowIndex, out var oldName))
                     old = oldName;
 
-                // 写入“按行”映射
+                // Update the per-row mapping
                 if (!string.IsNullOrEmpty(selectedAttr))
                     BuildEliteCandidatePool.WhitelistPickByRow[rowIndex] = selectedAttr;
                 else
                     BuildEliteCandidatePool.WhitelistPickByRow.Remove(rowIndex);
 
-                // 维护 Attributes（白名单集合）：= 所有行里挑出的非空属性去重集合
+                // Rebuild Attributes (whitelist) from all non-empty row selections
                 var newWhitelist = BuildEliteCandidatePool.WhitelistPickByRow.Values
                     .Where(s => !string.IsNullOrEmpty(s))
                     .Distinct(StringComparer.Ordinal)
                     .ToList();
 
                 BuildEliteCandidatePool.Attributes.Clear();
-                BuildEliteCandidatePool.Attributes.AddRange(newWhitelist);  // 供 UI 最高等级展示与优先判定
+                BuildEliteCandidatePool.Attributes.AddRange(newWhitelist);  // Used for highest-level display and priority checks
 
-                // 如果换了词条，把旧词条的期望等级也删掉，避免残留
+                // Remove desired level for the old attribute to avoid stale data
                 if (!string.IsNullOrEmpty(old) && old != selectedAttr)
                 {
                     BuildEliteCandidatePool.DesiredLevels.Remove(old);
                 }
-                // —— 互斥：若所选属性在“排除集合”里，自动撤销排除并清掉排除UI
+                // Conflict guard: if the attribute was excluded, remove it from that set and clear the UI
                 if (!string.IsNullOrEmpty(selectedAttr)
                     && BuildEliteCandidatePool.ExcludedAttributes.Contains(selectedAttr))
                 {
-                    // 1) 集合中移除
+                    // 1) Remove it from the exclusion set
                     BuildEliteCandidatePool.ExcludedAttributes.Remove(selectedAttr);
 
-                    // 2) 清空排除区所有等于 selectedAttr 的下拉
+                    // 2) Clear any exclusion dropdown currently showing this attribute
                     foreach (var exSel in GetAllExcludeSelects())
                     {
                         if (exSel?.SelectedValue?.ToString() == selectedAttr)
                         {
                             exSel.SelectedIndex = -1;
-                            exSel.Tag = null; // 你之前在排除事件里用 Tag 记旧值，这里同步清掉
+                            exSel.Tag = null; // Reset Tag since the exclusion handler stored the previous value here
                         }
                     }
                 }
@@ -360,14 +360,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             {
                 int rowIndex = num.Tag.ToInt();
 
-                // 找这一行当前绑定的白名单属性
+                // Locate the whitelist attribute currently bound to this row
                 if (!BuildEliteCandidatePool.WhitelistPickByRow.TryGetValue(rowIndex, out var attrName)
                     || string.IsNullOrEmpty(attrName))
                 {
-                    return; // 行未选属性，忽略
+                    return; // Ignore rows without a selected attribute
                 }
 
-                // 直接读取 Value（decimal 类型）
+                // Read the decimal Value directly
                 int desiredLevel = Convert.ToInt32(num.Value);
                 desiredLevel = Math.Max(0, Math.Min(6, desiredLevel));
 
@@ -382,22 +382,22 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
         {
             if (sender is AntdUI.Select combo)
             {
-                // 先清除旧的（避免重复/冲突）
+                // Remove the previous exclusion value to avoid duplicates
                 BuildEliteCandidatePool.ExcludedAttributes.RemoveWhere(x => x == (string)(combo.Tag ?? string.Empty));
 
-                // 新选项
+                // Apply the new selection
                 var selectedAttr = combo.SelectedValue?.ToString() ?? string.Empty;
 
                 if (!string.IsNullOrEmpty(selectedAttr))
                 {
-                    // 用 Tag 标识是第几个下拉，避免重复覆盖
+                    // Use Tag to note which dropdown this is to avoid overwriting
                     combo.Tag = selectedAttr;
                     BuildEliteCandidatePool.ExcludedAttributes.Add(selectedAttr);
                 }
-                // —— 互斥：若排除了 selectedAttr，就把目标白名单里所有等于它的行清掉（不动期望等级）
+                // Conflict guard: if excluded, clear matching whitelist rows (leave desired levels untouched)
                 if (!string.IsNullOrEmpty(selectedAttr))
                 {
-                    // 找到所有匹配的行（可能多行选了同一属性）
+                    // Find every row that selected the same attribute
                     var hitRows = BuildEliteCandidatePool.WhitelistPickByRow
                         .Where(kv => string.Equals(kv.Value, selectedAttr, StringComparison.Ordinal))
                         .Select(kv => kv.Key)
@@ -405,18 +405,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
                     if (hitRows.Count > 0)
                     {
-                        // 1) 从“行→属性”的映射中移除这些行（不删 DesiredLevels，保留用户设定）
+                        // 1) Remove those rows from the row-to-attribute map (keep DesiredLevels)
                         foreach (var r in hitRows)
                         {
                             BuildEliteCandidatePool.WhitelistPickByRow.Remove(r);
 
-                            // 2) 清空这些行的目标下拉 UI
+                            // 2) Clear the target-dropdown UI for those rows
                             var wlSel = GetWhitelistSelectByRow(r);
                             if (wlSel != null) wlSel.SelectedIndex = -1;
-                            // 注意：不去改对应的 InputNumber，等级保留
+                            // Leave the associated InputNumber as-is so user levels remain
                         }
 
-                        // 3) 重建 Attributes（白名单集合）
+                        // 3) Rebuild the whitelist Attributes collection
                         var newWhitelist = BuildEliteCandidatePool.WhitelistPickByRow.Values
                             .Where(s => !string.IsNullOrEmpty(s))
                             .Distinct(StringComparer.Ordinal)
@@ -440,7 +440,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
         }
 
         /// <summary>
-        /// 右键清除排除属性
+        /// Clear an exclusion entry via right-click
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -450,22 +450,22 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
             if (sender is AntdUI.Select combo)
             {
-                // 移除掉之前存进去的排除属性
+                // Remove the previously stored excluded attribute
                 if (combo.Tag is string old && !string.IsNullOrEmpty(old))
                 {
                     BuildEliteCandidatePool.ExcludedAttributes.Remove(old);
                 }
 
-                // 清空下拉显示（如果 AntdUI.Select 支持）
+                // Clear the dropdown display (if supported by AntdUI.Select)
                 combo.SelectedIndex = -1;
 
-                // 清空 Tag
+                // Reset the Tag
                 combo.Tag = null;
             }
         }
 
         /// <summary>
-        /// 清除所有行的属性选择
+        /// Clear attributes for every row
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -476,18 +476,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             {
                 if (!(combo.Tag is string tagStr) || !int.TryParse(tagStr, out int row)) return;
 
-                // 1) 找到这行当前绑定的白名单属性
+                // 1) Find the whitelist attribute bound to this row
                 if (BuildEliteCandidatePool.WhitelistPickByRow.TryGetValue(row, out var attrName)
                     && !string.IsNullOrEmpty(attrName))
                 {
-                    // 2) 删期望等级
+                    // 2) Remove the desired level entry
                     BuildEliteCandidatePool.DesiredLevels.Remove(attrName);
 
-                    // 3) 删“按行绑定”
+                    // 3) Remove the row binding
                     BuildEliteCandidatePool.WhitelistPickByRow.Remove(row);
                 }
 
-                // 4) 重建 Attributes（= 所有行的非空属性去重集合）
+                // 4) Rebuild Attributes from all non-empty row selections
                 var newWhitelist = BuildEliteCandidatePool.WhitelistPickByRow.Values
                     .Where(s => !string.IsNullOrEmpty(s))
                     .Distinct(StringComparer.Ordinal)
@@ -495,7 +495,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
                 BuildEliteCandidatePool.Attributes.Clear();
                 BuildEliteCandidatePool.Attributes.AddRange(newWhitelist);
 
-                // 5) 清空 UI：本行下拉和该行的期望等级数值框
+                // 5) Reset the dropdown and numeric input for this row
                 combo.SelectedIndex = -1;
                 var inputNumber = GetDesiredLevelControlByRow(row);
                 if (inputNumber != null)
@@ -503,7 +503,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
                     inputNumber.Value = 0;
                 }
 
-                // （不改 combo.Tag，Tag 保持“行号”，方便继续用）
+                // (Keep combo.Tag as the row index for continued use)
             }
         }
         private InputNumber? GetDesiredLevelControlByRow(int row)
@@ -534,7 +534,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
         private IEnumerable<AntdUI.Select> GetAllExcludeSelects()
         {
-            // 你的排除下拉（按你实际命名补全）
+            // Hook up your exclusion dropdowns (adjust names as needed)
             yield return select8;
             yield return select9;
             yield return select10;
@@ -544,25 +544,25 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
         private void select3_SelectedIndexChanged_1(object sender, IntEventArgs e)
         {
-            // e.Value 就是选中的索引
+            // e.Value is the selected index
             BuildEliteCandidatePool.SortBy = (e.Value == 0)
                 ? ModuleOptimizer.SortMode.ByTotalAttr
                 : ModuleOptimizer.SortMode.ByScore;
         }
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            // 1) 清空这次界面的所有“目标/排除/等级”选择
+            // 1) Clear all target/exclusion/level selections in the UI
             BuildEliteCandidatePool.ResetSelections(keepSortMode: false);
-            // keepSortMode=false：连排序模式也恢复到默认（上面方法里指定的默认）。
-            // 若你想保留用户上次的排序模式：传 true。
+            // keepSortMode=false: also reset the sort mode to the default defined above.
+            // Pass true if you prefer to preserve the previous sort mode.
 
-            // 2)（可选）清空界面卡片缓存/显示
+            // 2) (Optional) Clear cached/visible cards in the UI
             try
             {
                 virtualPanel1?.Items?.Clear();
                 virtualPanel1?.Refresh();
             }
-            catch { /* 忽略释放时控件已销毁的异常 */ }
+            catch { /* Ignore disposal-time exceptions when controls are already destroyed */ }
 
             base.OnFormClosed(e);
         }

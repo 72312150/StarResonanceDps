@@ -47,7 +47,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             sortedProgressBarList1.Margin = new Padding(5, 4, 5, 4);
             sortedProgressBarList1.Name = "sortedProgressBarList1";
             sortedProgressBarList1.OrderColor = Color.Black;
-            sortedProgressBarList1.OrderFont = new Font("宋体", 9F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            sortedProgressBarList1.OrderFont = new Font("Microsoft YaHei UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 134);
             sortedProgressBarList1.OrderImageAlign = Control.GDI.RenderContent.ContentAlign.MiddleLeft;
             sortedProgressBarList1.OrderImageRenderSize = new Size(0, 0);
             sortedProgressBarList1.OrderImages = null;
@@ -74,7 +74,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button1.Name = "button1";
             button1.Size = new Size(127, 34);
             button1.TabIndex = 3;
-            button1.Text = "新增/变更";
+            button1.Text = "Add / Update";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
@@ -84,7 +84,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button2.Name = "button2";
             button2.Size = new Size(127, 34);
             button2.TabIndex = 4;
-            button2.Text = "删除";
+            button2.Text = "Delete";
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
             // 

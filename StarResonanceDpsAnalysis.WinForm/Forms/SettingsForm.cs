@@ -151,10 +151,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             if (_netcardChanged)
             {
                 if (AppMessageBox.ShowMessage("""
-                    您已更改网卡设置。
+                    The network adapter setting has been updated.
 
-                    请注意，修改网卡后需要重新启动应用程序以使更改生效。
-                    是否立刻重新启动应用程序？
+                    You need to restart the application for the change to take effect.
+                    Restart now?
                     """, this) == DialogResult.OK)
                 {
                     // 重新启动应用程序
@@ -164,7 +164,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 }
                 else
                 {
-                    AppMessageBox.ShowMessage("您的网卡设置将在下次启动应用时生效。", this);
+                    AppMessageBox.ShowMessage("The new network adapter will be applied on the next launch.", this);
                 }
             }
 

@@ -99,7 +99,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_TitleText.Name = "label_TitleText";
             label_TitleText.Size = new Size(455, 27);
             label_TitleText.TabIndex = 0;
-            label_TitleText.Text = "BasicSetup";
+            label_TitleText.Text = "Settings";
             label_TitleText.TextAlign = ContentAlignment.MiddleCenter;
             label_TitleText.MouseDown += label_TitleText_MouseDown;
             // 
@@ -119,14 +119,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // label_SettingTitle
             // 
             label_SettingTitle.BackColor = Color.Transparent;
-            label_SettingTitle.Font = new Font("阿里妈妈数黑体", 10F, FontStyle.Bold, GraphicsUnit.Point, 134);
+            label_SettingTitle.Font = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 134);
             label_SettingTitle.ForeColor = Color.White;
             label_SettingTitle.Location = new Point(12, 5);
             label_SettingTitle.Margin = new Padding(2);
             label_SettingTitle.Name = "label_SettingTitle";
             label_SettingTitle.Size = new Size(231, 22);
             label_SettingTitle.TabIndex = 0;
-            label_SettingTitle.Text = "设置";
+            label_SettingTitle.Text = "Settings";
             // 
             // panel_CombatSettings
             // 
@@ -162,17 +162,17 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // select_DamageDisplayType
             // 
             select_DamageDisplayType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            select_DamageDisplayType.Items.AddRange(new object[] { "三位分节法 (KMBT)", "四位分节法 (万亿兆)" });
+            select_DamageDisplayType.Items.AddRange(new object[] { "3-digit grouping (K/M/B/T)", "4-digit grouping (Ten-thousands)" });
             select_DamageDisplayType.List = true;
             select_DamageDisplayType.Location = new Point(235, 191);
             select_DamageDisplayType.Margin = new Padding(2);
             select_DamageDisplayType.Name = "select_DamageDisplayType";
             select_DamageDisplayType.Radius = 3;
-            select_DamageDisplayType.SelectedValue = "KBM显示";
+            select_DamageDisplayType.SelectedValue = "3-digit grouping (K/M/B/T)";
             select_DamageDisplayType.SelectionStart = 12;
             select_DamageDisplayType.Size = new Size(158, 48);
             select_DamageDisplayType.TabIndex = 8;
-            select_DamageDisplayType.Text = "三位分节法 (KMBT)";
+            select_DamageDisplayType.Text = "3-digit grouping (K/M/B/T)";
             select_DamageDisplayType.SelectedValueChanged += select_DamageDisplayType_SelectedValueChanged;
             // 
             // label_DpsShowType
@@ -183,7 +183,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_DpsShowType.Name = "label_DpsShowType";
             label_DpsShowType.Size = new Size(149, 41);
             label_DpsShowType.TabIndex = 7;
-            label_DpsShowType.Text = "DPS统计伤害显示类型";
+            label_DpsShowType.Text = "DPS damage display format";
             // 
             // slider_Transparency
             // 
@@ -207,7 +207,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_Transparent.Name = "label_Transparent";
             label_Transparent.Size = new Size(88, 41);
             label_Transparent.TabIndex = 9;
-            label_Transparent.Text = "窗体透明度";
+            label_Transparent.Text = "Window transparency";
             // 
             // inputNumber_ClearSectionedDataTime
             // 
@@ -215,11 +215,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             inputNumber_ClearSectionedDataTime.Location = new Point(23, 80);
             inputNumber_ClearSectionedDataTime.Margin = new Padding(2);
             inputNumber_ClearSectionedDataTime.Name = "inputNumber_ClearSectionedDataTime";
-            inputNumber_ClearSectionedDataTime.PrefixText = "脱战";
+            inputNumber_ClearSectionedDataTime.PrefixText = "Leave combat";
             inputNumber_ClearSectionedDataTime.Radius = 3;
             inputNumber_ClearSectionedDataTime.SelectionStart = 1;
             inputNumber_ClearSectionedDataTime.Size = new Size(370, 46);
-            inputNumber_ClearSectionedDataTime.SuffixText = "/秒后清除当前统计";
+            inputNumber_ClearSectionedDataTime.SuffixText = "/ seconds before clearing current stats";
             inputNumber_ClearSectionedDataTime.TabIndex = 4;
             inputNumber_ClearSectionedDataTime.Text = "5";
             inputNumber_ClearSectionedDataTime.TextAlign = HorizontalAlignment.Center;
@@ -237,7 +237,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_CombatSettingsTip.Name = "label_CombatSettingsTip";
             label_CombatSettingsTip.Size = new Size(158, 22);
             label_CombatSettingsTip.TabIndex = 2;
-            label_CombatSettingsTip.Text = "脱战清空为当前统计非全程统计";
+            label_CombatSettingsTip.Text = "Clearing on exit combat affects only the current fight.";
             label_CombatSettingsTip.TextAlign = ContentAlignment.MiddleRight;
             // 
             // label_ClearAllDataWhenSwitch
@@ -248,7 +248,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_ClearAllDataWhenSwitch.Name = "label_ClearAllDataWhenSwitch";
             label_ClearAllDataWhenSwitch.Size = new Size(149, 41);
             label_ClearAllDataWhenSwitch.TabIndex = 5;
-            label_ClearAllDataWhenSwitch.Text = "换地图是否清空全程统计";
+            label_ClearAllDataWhenSwitch.Text = "Clear overall stats when switching zones";
             // 
             // switch_ClearAllDataWhenSwitch
             // 
@@ -284,7 +284,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_CombatSettingsTitle.Name = "label_CombatSettingsTitle";
             label_CombatSettingsTitle.Size = new Size(67, 22);
             label_CombatSettingsTitle.TabIndex = 1;
-            label_CombatSettingsTitle.Text = "战斗设置";
+            label_CombatSettingsTitle.Text = "Combat Settings";
             // 
             // panel_KeySettings
             // 
@@ -323,7 +323,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_KeySettingsTip.Name = "label_KeySettingsTip";
             label_KeySettingsTip.Size = new Size(126, 22);
             label_KeySettingsTip.TabIndex = 2;
-            label_KeySettingsTip.Text = "Delete删除当前键位";
+            label_KeySettingsTip.Text = "Press Delete to remove the binding.";
             label_KeySettingsTip.TextAlign = ContentAlignment.MiddleRight;
             // 
             // input_ClearData
@@ -333,7 +333,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             input_ClearData.Location = new Point(213, 79);
             input_ClearData.Margin = new Padding(2);
             input_ClearData.Name = "input_ClearData";
-            input_ClearData.PrefixText = "清空数据:";
+            input_ClearData.PrefixText = "Clear data:";
             input_ClearData.Radius = 3;
             input_ClearData.ReadOnly = true;
             input_ClearData.Size = new Size(180, 46);
@@ -347,7 +347,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             input_MouseThroughKey.Location = new Point(22, 79);
             input_MouseThroughKey.Margin = new Padding(2);
             input_MouseThroughKey.Name = "input_MouseThroughKey";
-            input_MouseThroughKey.PrefixText = "鼠标穿透:";
+            input_MouseThroughKey.PrefixText = "Mouse passthrough:";
             input_MouseThroughKey.Radius = 3;
             input_MouseThroughKey.ReadOnly = true;
             input_MouseThroughKey.Size = new Size(180, 46);
@@ -376,7 +376,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_KeySettingsTitle.Name = "label_KeySettingsTitle";
             label_KeySettingsTitle.Size = new Size(67, 22);
             label_KeySettingsTitle.TabIndex = 1;
-            label_KeySettingsTitle.Text = "按键设置";
+            label_KeySettingsTitle.Text = "Key Bindings";
             // 
             // panel_BasicSetup
             // 
@@ -414,7 +414,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_BasicSetupTip.Name = "label_BasicSetupTip";
             label_BasicSetupTip.Size = new Size(126, 22);
             label_BasicSetupTip.TabIndex = 2;
-            label_BasicSetupTip.Text = "自动设置错误时可手动设置";
+            label_BasicSetupTip.Text = "Configure manually if auto-detection fails.";
             label_BasicSetupTip.TextAlign = ContentAlignment.MiddleRight;
             // 
             // select_NetcardSelector
@@ -425,7 +425,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             select_NetcardSelector.Location = new Point(23, 81);
             select_NetcardSelector.Margin = new Padding(2);
             select_NetcardSelector.Name = "select_NetcardSelector";
-            select_NetcardSelector.PrefixText = "请选择网卡：";
+            select_NetcardSelector.PrefixText = "Select network adapter:";
             select_NetcardSelector.Radius = 3;
             select_NetcardSelector.Size = new Size(370, 40);
             select_NetcardSelector.TabIndex = 4;
@@ -453,7 +453,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label_BasicSetupTitle.Name = "label_BasicSetupTitle";
             label_BasicSetupTitle.Size = new Size(67, 22);
             label_BasicSetupTitle.TabIndex = 1;
-            label_BasicSetupTitle.Text = "基础设置";
+            label_BasicSetupTitle.Text = "Basic Settings";
             // 
             // panel_FooterPanel
             // 
@@ -532,7 +532,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             Name = "SettingsForm";
             Opacity = 0.95D;
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "基础设置";
+            Text = "Basic Settings";
             FormClosing += SettingsForm_FormClosing;
             Load += SettingsForm_Load;
             ForeColorChanged += SettingsForm_ForeColorChanged;

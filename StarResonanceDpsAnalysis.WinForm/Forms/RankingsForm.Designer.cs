@@ -184,15 +184,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             segmented1.Font = new Font("HarmonyOS Sans SC", 9F, FontStyle.Bold, GraphicsUnit.Point, 134);
             segmented1.Full = true;
             segmented1.IconGap = 0F;
-            segmentedItem1.Text = "全职业";
-            segmentedItem2.Text = "冰魔导师";
-            segmentedItem3.Text = "巨刃守护者";
-            segmentedItem4.Text = "雷影剑士";
-            segmentedItem5.Text = "灵魂乐手";
-            segmentedItem6.Text = "青岚骑士";
-            segmentedItem7.Text = "森语者";
-            segmentedItem8.Text = "神盾骑士";
-            segmentedItem9.Text = "神射手";
+            segmentedItem1.Text = "All Classes";
+            segmentedItem2.Text = "Frost Mage";
+            segmentedItem3.Text = "Heavy Guardian";
+            segmentedItem4.Text = "Stormblade";
+            segmentedItem5.Text = "Soul Musician";
+            segmentedItem6.Text = "Wind Knight";
+            segmentedItem7.Text = "Verdant Oracle";
+            segmentedItem8.Text = "Shield Knight";
+            segmentedItem9.Text = "Marksman";
             segmented1.Items.Add(segmentedItem1);
             segmented1.Items.Add(segmentedItem2);
             segmented1.Items.Add(segmentedItem3);
@@ -215,27 +215,27 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             // 
             button1.ColorScheme = AntdUI.TAMode.Light;
             button1.DefaultBack = Color.FromArgb(153, 204, 255);
-            button1.Font = new Font("阿里妈妈数黑体", 9F, FontStyle.Bold, GraphicsUnit.Point, 134);
+            button1.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 134);
             button1.ForeColor = Color.White;
             button1.Location = new Point(18, 9);
             button1.Name = "button1";
             button1.Radius = 3;
             button1.Size = new Size(249, 56);
             button1.TabIndex = 35;
-            button1.Text = "伤害参考";
+            button1.Text = "Damage Reference";
             button1.Click += button1_Click;
             // 
             // divider3
             // 
             divider3.BackColor = Color.Transparent;
             divider3.Dock = DockStyle.Top;
-            divider3.Font = new Font("阿里妈妈数黑体", 9F, FontStyle.Bold);
+            divider3.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold);
             divider3.Location = new Point(0, 0);
             divider3.Name = "divider3";
             divider3.OrientationMargin = 1F;
             divider3.Size = new Size(1213, 40);
             divider3.TabIndex = 36;
-            divider3.Text = "伤害参考";
+            divider3.Text = "Damage Reference";
             // 
             // panel1
             // 
@@ -271,7 +271,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label2.Name = "label2";
             label2.Size = new Size(1213, 36);
             label2.TabIndex = 37;
-            label2.Text = "以上数据仅供自身职业DPS参考[无需焦虑可能有人吃药了]，切勿用于战力歧视等破坏游戏社区环境行为，一经发现，关闭此功能";
+            label2.Text = "These figures are for DPS self-review only (don’t panic—people may use buffs). Never weaponize the data for gear discrimination or other toxic behavior; we will disable this feature if misuse is detected.";
             label2.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // RankingsForm
@@ -287,7 +287,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "RankingsForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "伤害参考";
+            Text = "Damage Reference";
             Load += RankingsForm_Load;
             ForeColorChanged += RankingsForm_ForeColorChanged;
             pageHeader1.ResumeLayout(false);

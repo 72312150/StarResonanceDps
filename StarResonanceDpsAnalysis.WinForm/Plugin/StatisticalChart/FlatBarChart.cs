@@ -3,11 +3,11 @@ using System.Drawing.Drawing2D;
 namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 {
     /// <summary>
-    /// 扁平化条形图控件
+    /// Flat bar chart control.
     /// </summary>
     public class FlatBarChart : UserControl
     {
-        #region 字段和属性
+        #region Fields and Properties
 
         private readonly List<BarChartData> _data = new();
         private bool _isDarkTheme = false;
@@ -16,24 +16,24 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
         private string _yAxisLabel = "";
         private bool _showLegend = true;
 
-        // 边距设置 - 减少边距以增大图表占比
-        private const int PaddingLeft = 35;   // 从60减少到35
-        private const int PaddingRight = 15;  // 从20减少到15
-        private const int PaddingTop = 25;    // 从10增加到25，以提供更多空间给条形上方的文本标签
-        private const int PaddingBottom = 50; // 从100减少到50
+        // Compact padding to maximize chart space
+        private const int PaddingLeft = 35;
+        private const int PaddingRight = 15;
+        private const int PaddingTop = 25;
+        private const int PaddingBottom = 50;
 
-        // 现代化配色
+        // Modern palette
         private readonly Color[] _colors = {
-            Color.FromArgb(74, 144, 226),   // 蓝
-            Color.FromArgb(126, 211, 33),   // 绿
-            Color.FromArgb(245, 166, 35),   // 橙
-            Color.FromArgb(208, 2, 27),     // 红
-            Color.FromArgb(144, 19, 254),   // 紫
-            Color.FromArgb(80, 227, 194),   // 青
-            Color.FromArgb(184, 233, 134),  // 浅绿
-            Color.FromArgb(75, 213, 238),   // 天蓝
-            Color.FromArgb(248, 231, 28),   // 黄
-            Color.FromArgb(189, 16, 224)    // 品红
+            Color.FromArgb(74, 144, 226),   // blue
+            Color.FromArgb(126, 211, 33),   // green
+            Color.FromArgb(245, 166, 35),   // orange
+            Color.FromArgb(208, 2, 27),     // red
+            Color.FromArgb(144, 19, 254),   // purple
+            Color.FromArgb(80, 227, 194),   // teal
+            Color.FromArgb(184, 233, 134),  // light green
+            Color.FromArgb(75, 213, 238),   // sky blue
+            Color.FromArgb(248, 231, 28),   // yellow
+            Color.FromArgb(189, 16, 224)    // magenta
         };
 
         public bool IsDarkTheme
@@ -89,7 +89,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 构造函数
+        #region Constructors
 
         public FlatBarChart()
         {
@@ -101,7 +101,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 数据管理
+        #region Data Management
 
         public void SetData(List<(string Label, double Value)> data)
         {
@@ -128,7 +128,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 主题设置
+        #region Theming
 
         private void ApplyTheme()
         {
@@ -146,7 +146,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 绘制方法
+        #region Rendering
 
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -156,7 +156,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            // 清除背景
+            // Clear background
             g.Clear(BackColor);
 
             if (_data.Count == 0)
@@ -165,31 +165,31 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                 return;
             }
 
-            // 计算最大值
+            // Determine max value
             var maxValue = _data.Max(d => d.Value);
             if (maxValue <= 0) return;
 
-            // 计算图表区域
+            // Compute chart bounds
             var chartRect = new Rectangle(PaddingLeft, PaddingTop,
                                         Width - PaddingLeft - PaddingRight,
                                         Height - PaddingTop - PaddingBottom);
 
-            // 绘制网格
+            // Draw grid
             DrawGrid(g, chartRect, maxValue);
 
-            // 绘制坐标轴
+            // Draw axes
             DrawAxes(g, chartRect, maxValue);
 
-            // 绘制柱状条
+            // Draw bar series
             DrawBars(g, chartRect, maxValue);
 
-            // 绘制标题（如果有）
+            // Draw title
             DrawTitle(g);
         }
 
         private void DrawNoDataMessage(Graphics g)
         {
-            var message = "暂无数据";
+            var message = "No data available";
             var font = new Font("Microsoft YaHei", 12, FontStyle.Regular);
             var brush = new SolidBrush(_isDarkTheme ? Color.Gray : Color.DarkGray);
 
@@ -208,8 +208,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             var gridColor = _isDarkTheme ? Color.FromArgb(64, 64, 64) : Color.FromArgb(230, 230, 230);
             using var gridPen = new Pen(gridColor, 1);
 
-            // 绘制水平网格线 - 减少网格线数量
-            for (int i = 0; i <= 5; i++) // 从10条减少到5条
+            // Horizontal gridlines at 20% intervals
+            for (int i = 0; i <= 5; i++)
             {
                 var y = chartRect.Y + (float)chartRect.Height * i / 5;
                 g.DrawLine(gridPen, chartRect.X, y, chartRect.Right, y);
@@ -221,15 +221,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             var axisColor = _isDarkTheme ? Color.FromArgb(128, 128, 128) : Color.FromArgb(180, 180, 180);
             using var axisPen = new Pen(axisColor, 1);
             using var textBrush = new SolidBrush(ForeColor);
-            using var font = new Font("Microsoft YaHei", 7); // 从9减少到7
+            using var font = new Font("Microsoft YaHei", 7);
 
-            // 绘制X轴
+            // X axis
             g.DrawLine(axisPen, chartRect.X, chartRect.Bottom, chartRect.Right, chartRect.Bottom);
 
-            // 绘制Y轴
+            // Y axis
             g.DrawLine(axisPen, chartRect.X, chartRect.Y, chartRect.X, chartRect.Bottom);
 
-            // X轴标签（类型标签）
+            // Category labels
             var barWidth = (float)chartRect.Width / _data.Count;
             for (int i = 0; i < _data.Count; i++)
             {
@@ -238,30 +238,30 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
                 var size = g.MeasureString(text, font);
 
-                // 简化标签显示，直接水平显示而不旋转
+                // Render horizontally
                 var textX = x - size.Width / 2;
-                var textY = chartRect.Bottom + 5; // 减少间距
+                var textY = chartRect.Bottom + 5;
 
                 g.DrawString(text, font, textBrush, textX, textY);
             }
 
-            // Y轴标签 - 简化显示
-            for (int i = 0; i <= 5; i++) // 从10个刻度减少到5个
+            // Y-axis ticks
+            for (int i = 0; i <= 5; i++)
             {
                 var y = chartRect.Bottom - (float)chartRect.Height * i / 5;
                 var value = maxValue * i / 5;
-                var text = $"{value:F0}%"; // 直接显示百分比，简化格式
+                var text = $"{value:F0}%";
 
                 var size = g.MeasureString(text, font);
                 g.DrawString(text, font, textBrush, chartRect.X - size.Width - 3, y - size.Height / 2);
             }
 
-            // 轴标签（如果有）- 使用更小字体
+            // Axis labels
             if (!string.IsNullOrEmpty(_xAxisLabel))
             {
                 var size = g.MeasureString(_xAxisLabel, font);
                 var x = chartRect.X + (chartRect.Width - size.Width) / 2;
-                var y = chartRect.Bottom + 35; // 调整位置
+                var y = chartRect.Bottom + 35;
                 g.DrawString(_xAxisLabel, font, textBrush, x, y);
             }
 
@@ -278,8 +278,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         private void DrawBars(Graphics g, Rectangle chartRect, double maxValue)
         {
-            var barWidth = (float)chartRect.Width / _data.Count * 0.85f; // 增加条形宽度从0.8f到0.85f
-            var barSpacing = (float)chartRect.Width / _data.Count * 0.075f; // 减少间距
+            var barWidth = (float)chartRect.Width / _data.Count * 0.85f;
+            var barSpacing = (float)chartRect.Width / _data.Count * 0.075f;
 
             for (int i = 0; i < _data.Count; i++)
             {
@@ -291,35 +291,33 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
                 var barRect = new RectangleF(x, y, barWidth, barHeight);
 
-                // 绘制条形 - 扁平化无边框设计
+                // Flat fill without border
                 using var brush = new SolidBrush(data.Color);
                 g.FillRectangle(brush, barRect);
 
-                // 绘制数值标签 - 智能调整标签位置
-                if (barHeight > 15) // 只有足够高的条形才显示标签
+                // Draw value label when the bar is tall enough
+                if (barHeight > 15)
                 {
-                    var valueText = $"{data.Value:F1}%"; // 简化数值格式显示
-                    using var font = new Font("Microsoft YaHei", 6, FontStyle.Regular); // 从8减少到6
+                    var valueText = $"{data.Value:F1}%";
+                    using var font = new Font("Microsoft YaHei", 6, FontStyle.Regular);
                     using var textBrush = new SolidBrush(ForeColor);
 
                     var textSize = g.MeasureString(valueText, font);
                     var textX = x + (barWidth - textSize.Width) / 2;
 
-                    // 智能选择标签位置：优先放在条形上方，否则放在条形内部
-                    var textAboveY = y - textSize.Height - 2; // 条形上方位置
-                    var textInsideY = y + 2; // 条形内部上端位置
+                    var textAboveY = y - textSize.Height - 2;
+                    var textInsideY = y + 2;
 
-                    // 检查上方位置是否有足够空间
+                    // Prefer above-bar placement when space allows
                     var textY = (textAboveY >= chartRect.Y) ? textAboveY : textInsideY;
 
-                    // 确保标签在图表区域内
+                    // Keep label within chart bounds
                     if (textY + textSize.Height <= chartRect.Bottom && textY >= chartRect.Y)
                     {
-                        // 根据标签位置选择合适的文本颜色
+                        // Choose contrasting color when drawn inside the bar
                         Color textColor = ForeColor;
-                        if (textY == textInsideY) // 如果标签在条形内部
+                        if (textY == textInsideY)
                         {
-                            // 使用与背景对比的颜色
                             textColor = GetContrastColor(data.Color);
                         }
 
@@ -331,14 +329,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
         }
 
         /// <summary>
-        /// 根据背景色获取对比色（黑色或白色）
+        /// Compute a contrasting text color for the given background.
         /// </summary>
         private Color GetContrastColor(Color backgroundColor)
         {
-            // 计算RGB亮度值
+            // Calculate perceived brightness
             var brightness = (backgroundColor.R * 0.299 + backgroundColor.G * 0.587 + backgroundColor.B * 0.114);
 
-            // 根据亮度选择黑色或白色作为对比色
+            // Return black or white depending on brightness
             return brightness > 128 ? Color.Black : Color.White;
         }
 
@@ -360,7 +358,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
     }
 
     /// <summary>
-    /// 条形图数据项
+    /// Bar chart data item.
     /// </summary>
     public class BarChartData
     {

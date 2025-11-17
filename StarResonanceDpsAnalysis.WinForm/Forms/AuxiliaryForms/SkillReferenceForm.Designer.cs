@@ -136,7 +136,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.AuxiliaryForms
             divider1.Name = "divider1";
             divider1.Size = new Size(1101, 54);
             divider1.TabIndex = 33;
-            divider1.Text = "玩家 ** 技能伤害参考";
+            divider1.Text = "Player ** Skill Damage Reference";
             // 
             // SkillReferenceForm
             // 

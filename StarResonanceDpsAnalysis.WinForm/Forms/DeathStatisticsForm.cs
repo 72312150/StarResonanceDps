@@ -19,16 +19,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         public DeathStatisticsForm()
         {
             InitializeComponent();
-            FormGui.SetDefaultGUI(this); // 统一设置窗体默认 GUI 风格（字体、间距、阴影等）
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色 // 根据配置设置窗体的颜色主题（明亮/深色）
-            //加载死亡信息
+            FormGui.SetDefaultGUI(this); // Apply the default UI styling (fonts, spacing, shadows, etc.)
+            FormGui.SetColorMode(this, AppConfig.IsLight); // Apply the configured theme colors
+            // Load death statistics
             ToggleTableView();
-            //设置字体
+            // Apply fonts
             SetDefaultFontFromResources();
         }
 
         /// <summary>
-        /// 设置字体
+        /// Apply default fonts.
         /// </summary>
         private void SetDefaultFontFromResources()
         {
@@ -44,14 +44,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
 
             table_DpsDetailDataTable.Columns = new AntdUI.ColumnCollection
-            {   new("", "序号")
+            {   new("", "No.")
                 {
 
                     Render = (value, record, rowIndex) => rowIndex + 1,
                     Fixed = true
                 },
-                new AntdUI.Column("NickName","玩家昵称"){ Fixed = true},
-                new AntdUI.Column("TotalDeathCount","死亡次数"){ Fixed = true},
+                new AntdUI.Column("NickName","Player"){ Fixed = true},
+                new AntdUI.Column("TotalDeathCount","Deaths"){ Fixed = true},
 
 
             };
@@ -70,7 +70,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 更新信息
+        /// Refresh death statistics from full-record data.
         /// </summary>
         private void LoadInformation()
         {
@@ -82,7 +82,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 var uid = item.Uid;
                 string nickName = item.Nickname;
                 int totalDeathCount = item.Deaths;
-                // 查找是否已有该玩家
+                // Look for an existing entry for this player
                 var existing = DeathStatisticsTableDatas.DeathStatisticsTable
                     .FirstOrDefault(x => x.Uid == uid);
 
@@ -98,28 +98,28 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                         .Add(new DeathStatisticsTable(uid, nickName, totalDeathCount));
                 }
             }
-            // === 统计总死亡数并加到表尾 ===
+            // === Compute total deaths and append to the table ===
             int totalDeaths = rows.Sum(r => r.Deaths);
 
-            // 查找是否已有“总计”行（Uid=0 作为标记）
+            // Check whether a “Total” row (Uid = 0) already exists
             var totalRow = DeathStatisticsTableDatas.DeathStatisticsTable
                 .FirstOrDefault(x => x.Uid == 0);
 
             if (totalRow != null)
             {
                 totalRow.TotalDeathCount = totalDeaths;
-                totalRow.NickName = "总计";
+                totalRow.NickName = "Total";
             }
             else
             {
                 DeathStatisticsTableDatas.DeathStatisticsTable
-                    .Add(new DeathStatisticsTable(0, "总计", totalDeaths));
+                    .Add(new DeathStatisticsTable(0, "Total", totalDeaths));
             }
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            LoadInformation();//刷新
+            LoadInformation(); // Refresh
         }
 
         private void TitleText_MouseDown(object sender, MouseEventArgs e)
@@ -138,7 +138,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            LoadInformation();//刷新
+            LoadInformation(); // Refresh
         }
     }
 }

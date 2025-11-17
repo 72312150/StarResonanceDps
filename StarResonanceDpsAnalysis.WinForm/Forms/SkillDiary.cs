@@ -127,13 +127,16 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                         string v = kv.Groups["v"].Value; // 保留完整数字（不做 K/M 简化）
 
                         if (k == "伤害")
-                            Write($"{k}:{v}", colorDmg, FontStyle.Regular);
+                            Write($"Damage:{v}", colorDmg, FontStyle.Regular);
                         else
-                            Write($"{k}:{v}", colorHeal, FontStyle.Regular);
+                            Write($"Healing:{v}", colorHeal, FontStyle.Regular);
                     }
                     else if (part.StartsWith("释放次数:") || part.StartsWith("次数:"))
                     {
-                        Write(part, colorCount, FontStyle.Regular);
+                        var normalized = part
+                            .Replace("释放次数:", "Casts:")
+                            .Replace("次数:", "Casts:");
+                        Write(normalized, colorCount, FontStyle.Regular);
                     }
                     else if (part.StartsWith("暴击"))
                     {
@@ -141,12 +144,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                         var n = Regex.Match(part, @"^暴击(?::\s*(?<n>\d+))?$");
                         if (n.Success)
                         {
-                            string label = n.Groups["n"].Success ? $"暴击 ×{n.Groups["n"].Value}" : "暴击";
+                            string label = n.Groups["n"].Success ? $"Critical ×{n.Groups["n"].Value}" : "Critical";
                             Badge(label, badgeCritBack, badgeCritFore, bold: true);
                         }
                         else
                         {
-                            Badge("暴击", badgeCritBack, badgeCritFore, bold: true);
+                            Badge("Critical", badgeCritBack, badgeCritFore, bold: true);
                         }
                     }
                     else if (part.StartsWith("幸运"))
@@ -154,12 +157,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                         var n = Regex.Match(part, @"^幸运(?::\s*(?<n>\d+))?$");
                         if (n.Success)
                         {
-                            string label = n.Groups["n"].Success ? $"幸运 ×{n.Groups["n"].Value}" : "幸运";
+                            string label = n.Groups["n"].Success ? $"Lucky ×{n.Groups["n"].Value}" : "Lucky";
                             Badge(label, badgeLuckyBack, badgeLuckyFore, bold: true);
                         }
                         else
                         {
-                            Badge("幸运", badgeLuckyBack, badgeLuckyFore, bold: true);
+                            Badge("Lucky", badgeLuckyBack, badgeLuckyFore, bold: true);
                         }
                     }
                     else

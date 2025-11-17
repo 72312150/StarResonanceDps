@@ -7,28 +7,28 @@ using StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics;
 namespace StarResonanceDpsAnalysis.WinForm.Plugin
 {
     /// <summary>
-    /// 数据导出服务，支持Excel和CSV格式
+    /// Data export helper that supports Excel, CSV, and screenshots.
     /// </summary>
     public static class DataExportService
     {
-        #region Excel导出
+        #region Excel Export
 
         /// <summary>
-        /// 导出DPS数据到Excel文件
+        /// Export DPS data to an Excel file.
         /// </summary>
-        /// <param name="players">玩家数据列表</param>
-        /// <param name="includeSkillDetails">是否包含技能详情</param>
-        /// <returns>是否导出成功</returns>
+        /// <param name="players">Player summaries.</param>
+        /// <param name="includeSkillDetails">Whether to append skill-level sheets.</param>
+        /// <returns>Whether the export succeeded.</returns>
         public static bool ExportToExcel(List<PlayerData> players, bool includeSkillDetails = true)
         {
             try
             {
                 using var saveDialog = new SaveFileDialog
                 {
-                    Filter = "Excel文件 (*.xlsx)|*.xlsx",
+                    Filter = "Excel files (*.xlsx)|*.xlsx",
                     DefaultExt = "xlsx",
-                    FileName = $"DPS统计_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.xlsx",
-                    Title = "保存DPS统计数据"
+                    FileName = $"DPS_Report_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.xlsx",
+                    Title = "Save DPS report"
                 };
 
                 if (saveDialog.ShowDialog() != DialogResult.OK)
@@ -36,48 +36,48 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
 
                 using var workbook = new XLWorkbook();
 
-                // 创建玩家总览表
+                // Player overview
                 CreatePlayerOverviewSheet(workbook, players);
 
                 if (includeSkillDetails)
                 {
-                    // 创建技能详情表
+                    // Skill details
                     CreateSkillDetailsSheet(workbook, players);
 
-                    // 创建团队技能统计表
+                    // Team skill summary
                     CreateTeamSkillStatsSheet(workbook, players);
                 }
 
                 workbook.SaveAs(saveDialog.FileName);
 
-                MessageBox.Show($"数据已成功导出到:\n{saveDialog.FileName}", "导出成功",
+                MessageBox.Show($"Data exported to:\n{saveDialog.FileName}", "Export Successful",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"导出Excel文件时发生错误:\n{ex.Message}", "导出失败",
+                MessageBox.Show($"Failed to export Excel file:\n{ex.Message}", "Export Failed",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
 
         /// <summary>
-        /// 创建玩家总览工作表
+        /// Populate the player overview worksheet.
         /// </summary>
         private static void CreatePlayerOverviewSheet(XLWorkbook workbook, List<PlayerData> players)
         {
-            var worksheet = workbook.Worksheets.Add("玩家总览");
+            var worksheet = workbook.Worksheets.Add("Player Overview");
 
-            // 设置表头
+            // Headers
             var headers = new[]
             {
-                "玩家昵称", "职业", "战力", "总伤害", "总DPS", "暴击伤害", "幸运伤害",
-                "暴击率", "幸运率", "瞬时DPS峰值", "总治疗", "总HPS", "承受伤害", "命中次数"
+                "Player Name", "Class", "Combat Power", "Total Damage", "Total DPS", "Critical Damage", "Lucky Damage",
+                "Critical Rate", "Lucky Rate", "Peak Instant DPS", "Total Healing", "Total HPS", "Damage Taken", "Hit Count"
             };
 
-            // 写入表头
+            // Write header row
             for (int i = 0; i < headers.Length; i++)
             {
                 worksheet.Cell(1, i + 1).Value = headers[i];
@@ -85,7 +85,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
             }
 
-            // 写入数据
+            // Data rows
             int row = 2;
             foreach (var player in players.OrderByDescending(p => p.DamageStats.Total))
             {
@@ -107,28 +107,28 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 row++;
             }
 
-            // 自动调整列宽
+            // Auto-fit columns
             worksheet.ColumnsUsed().AdjustToContents();
 
-            // 添加筛选
+            // Enable filters
             worksheet.Range(1, 1, row - 1, headers.Length).SetAutoFilter();
         }
 
         /// <summary>
-        /// 创建技能详情工作表
+        /// Populate the skill details worksheet.
         /// </summary>
         private static void CreateSkillDetailsSheet(XLWorkbook workbook, List<PlayerData> players)
         {
-            var worksheet = workbook.Worksheets.Add("技能详情");
+            var worksheet = workbook.Worksheets.Add("Skill Details");
 
-            // 设置表头
+            // Headers
             var headers = new[]
             {
-                "玩家昵称", "技能名称", "总伤害", "命中次数", "平均伤害",
-                "暴击率", "幸运率", "技能DPS", "伤害占比"
+                "Player Name", "Skill Name", "Total Damage", "Hit Count", "Average Damage",
+                "Critical Rate", "Lucky Rate", "Skill DPS", "Damage Share"
             };
 
-            // 写入表头
+            // Header row
             for (int i = 0; i < headers.Length; i++)
             {
                 worksheet.Cell(1, i + 1).Value = headers[i];
@@ -136,7 +136,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightGreen;
             }
 
-            // 写入数据
+            // Data rows
             int row = 2;
             foreach (var player in players.OrderByDescending(p => p.DamageStats.Total))
             {
@@ -159,31 +159,31 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 }
             }
 
-            // 自动调整列宽
+            // Auto-fit columns
             worksheet.ColumnsUsed().AdjustToContents();
 
-            // 添加筛选
+            // Enable filters if data exists
             if (row > 2)
                 worksheet.Range(1, 1, row - 1, headers.Length).SetAutoFilter();
         }
 
         /// <summary>
-        /// 创建团队技能统计工作表
+        /// Populate the team skill summary worksheet.
         /// </summary>
         private static void CreateTeamSkillStatsSheet(XLWorkbook workbook, List<PlayerData> players)
         {
-            var worksheet = workbook.Worksheets.Add("团队技能统计");
+            var worksheet = workbook.Worksheets.Add("Team Skill Summary");
 
-            // 获取团队技能数据
+            // Gather team skill data
             var teamSkills = StatisticData._manager.GetTeamTopSkillsByTotal(50);
 
-            // 设置表头
+            // Headers
             var headers = new[]
             {
-                "技能名称", "总伤害", "总命中次数", "团队占比"
+                "Skill Name", "Total Damage", "Total Hit Count", "Team Share"
             };
 
-            // 写入表头
+            // Header row
             for (int i = 0; i < headers.Length; i++)
             {
                 worksheet.Cell(1, i + 1).Value = headers[i];
@@ -191,10 +191,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightYellow;
             }
 
-            // 计算总伤害用于百分比计算
+            // Total damage to calculate percentages
             ulong totalTeamDamage = (ulong)teamSkills.Sum(s => (double)s.Total);
 
-            // 写入数据
+            // Data rows
             int row = 2;
             foreach (var skill in teamSkills)
             {
@@ -207,33 +207,33 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
                 row++;
             }
 
-            // 自动调整列宽
+            // Auto-fit columns
             worksheet.ColumnsUsed().AdjustToContents();
 
-            // 添加筛选
+            // Enable filters if data exists
             if (row > 2)
                 worksheet.Range(1, 1, row - 1, headers.Length).SetAutoFilter();
         }
 
         #endregion
 
-        #region CSV导出
+        #region CSV Export
 
         /// <summary>
-        /// 导出DPS数据到CSV文件
+        /// Export DPS data to a CSV file.
         /// </summary>
-        /// <param name="players">玩家数据列表</param>
-        /// <returns>是否导出成功</returns>
+        /// <param name="players">Player summaries.</param>
+        /// <returns>Whether the export succeeded.</returns>
         public static bool ExportToCsv(List<PlayerData> players)
         {
             try
             {
                 using var saveDialog = new SaveFileDialog
                 {
-                    Filter = "CSV文件 (*.csv)|*.csv",
+                    Filter = "CSV files (*.csv)|*.csv",
                     DefaultExt = "csv",
-                    FileName = $"DPS统计_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv",
-                    Title = "保存DPS统计数据"
+                    FileName = $"DPS_Report_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv",
+                    Title = "Save DPS report"
                 };
 
                 if (saveDialog.ShowDialog() != DialogResult.OK)
@@ -241,13 +241,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
 
                 var csv = new StringBuilder();
 
-                // 添加BOM以确保Excel正确显示中文
+                // Add BOM so Excel opens UTF-8 correctly
                 csv.Append('\uFEFF');
 
-                // CSV表头
-                csv.AppendLine("玩家昵称,职业,战力,总伤害,总DPS,暴击伤害,幸运伤害,暴击率,幸运率,瞬时DPS峰值,总治疗,总HPS,承受伤害,命中次数");
+                // CSV header
+                csv.AppendLine("Player Name,Class,Combat Power,Total Damage,Total DPS,Critical Damage,Lucky Damage,Critical Rate,Lucky Rate,Peak Instant DPS,Total Healing,Total HPS,Damage Taken,Hit Count");
 
-                // 数据行
+                // Data rows
                 foreach (var player in players.OrderByDescending(p => p.DamageStats.Total))
                 {
                     csv.AppendLine($"\"{EscapeCsvField(player.Nickname)}\"," +
@@ -268,28 +268,28 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
 
                 File.WriteAllText(saveDialog.FileName, csv.ToString(), Encoding.UTF8);
 
-                MessageBox.Show($"数据已成功导出到:\n{saveDialog.FileName}", "导出成功",
+                MessageBox.Show($"Data exported to:\n{saveDialog.FileName}", "Export Successful",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"导出CSV文件时发生错误:\n{ex.Message}", "导出失败",
+                MessageBox.Show($"Failed to export CSV file:\n{ex.Message}", "Export Failed",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
 
         /// <summary>
-        /// 转义CSV字段中的特殊字符
+        /// Escape CSV fields that contain special characters.
         /// </summary>
         private static string EscapeCsvField(string field)
         {
             if (string.IsNullOrEmpty(field))
                 return "";
 
-            // 如果包含逗号、引号或换行符，需要用引号包围并转义内部引号
+            // Quote the field and escape embedded quotes if needed.
             if (field.Contains(',') || field.Contains('"') || field.Contains('\n') || field.Contains('\r'))
             {
                 return field.Replace("\"", "\"\"");
@@ -300,37 +300,37 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
 
         #endregion
 
-        #region 截图功能
+        #region Screenshot Support
 
         /// <summary>
-        /// 保存窗口截图
+        /// Save a screenshot of the specified form.
         /// </summary>
-        /// <param name="form">要截图的窗口</param>
-        /// <returns>是否保存成功</returns>
+        /// <param name="form">The window to capture.</param>
+        /// <returns>Whether the screenshot succeeded.</returns>
         public static bool SaveScreenshot(Form form)
         {
             try
             {
                 using var saveDialog = new SaveFileDialog
                 {
-                    Filter = "PNG图片 (*.png)|*.png|JPEG图片 (*.jpg)|*.jpg",
+                    Filter = "PNG images (*.png)|*.png|JPEG images (*.jpg)|*.jpg",
                     DefaultExt = "png",
-                    FileName = $"DPS截图_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png",
-                    Title = "保存DPS界面截图"
+                    FileName = $"DPS_Screenshot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png",
+                    Title = "Save DPS UI screenshot"
                 };
 
                 if (saveDialog.ShowDialog() != DialogResult.OK)
                     return false;
 
-                // 创建与窗口大小相同的位图
+                // Render bitmap at window size
                 var bounds = form.Bounds;
                 using var bitmap = new System.Drawing.Bitmap(bounds.Width, bounds.Height);
                 using var graphics = System.Drawing.Graphics.FromImage(bitmap);
 
-                // 截取窗口内容
+                // Capture window contents
                 graphics.CopyFromScreen(bounds.Location, System.Drawing.Point.Empty, bounds.Size);
 
-                // 根据文件扩展名保存
+                // Save using the requested format
                 var extension = Path.GetExtension(saveDialog.FileName).ToLower();
                 var format = extension switch
                 {
@@ -340,14 +340,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
 
                 bitmap.Save(saveDialog.FileName, format);
 
-                MessageBox.Show($"截图已成功保存到:\n{saveDialog.FileName}", "截图成功",
+                MessageBox.Show($"Screenshot saved to:\n{saveDialog.FileName}", "Screenshot Saved",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"保存截图时发生错误:\n{ex.Message}", "截图失败",
+                MessageBox.Show($"Failed to save screenshot:\n{ex.Message}", "Screenshot Failed",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
@@ -355,12 +355,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
 
         #endregion
 
-        #region 辅助方法
+        #region Helper Methods
 
         /// <summary>
-        /// 获取当前有战斗数据的玩家列表
+        /// Gather players that currently have combat data.
         /// </summary>
-        /// <returns>玩家数据列表</returns>
+        /// <returns>The player list.</returns>
         public static List<PlayerData> GetCurrentPlayerData()
         {
             return StatisticData._manager
@@ -369,9 +369,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
         }
 
         /// <summary>
-        /// 检查是否有数据可导出
+        /// Check whether there is any data to export.
         /// </summary>
-        /// <returns>是否有数据</returns>
+        /// <returns>True when data exists.</returns>
         public static bool HasDataToExport()
         {
             return GetCurrentPlayerData().Count > 0;

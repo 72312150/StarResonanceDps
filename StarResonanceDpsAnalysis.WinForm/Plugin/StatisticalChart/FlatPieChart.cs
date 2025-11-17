@@ -3,11 +3,11 @@ using System.Drawing.Drawing2D;
 namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 {
     /// <summary>
-    /// 扁平化饼图控件
+    /// Flat pie chart control.
     /// </summary>
     public class FlatPieChart : UserControl
     {
-        #region 字段和属性
+        #region Fields and Properties
 
         private readonly List<PieChartData> _data = new();
         private bool _isDarkTheme = false;
@@ -15,18 +15,18 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
         private bool _showLabels = true;
         private bool _showPercentages = true;
 
-        // 现代化扁平配色
+        // Modern flat palette
         private readonly Color[] _colors = {
-            Color.FromArgb(255, 107, 107),  // 红
-            Color.FromArgb(78, 205, 196),   // 青
-            Color.FromArgb(69, 183, 209),   // 蓝
-            Color.FromArgb(150, 206, 180),  // 绿
-            Color.FromArgb(255, 234, 167),  // 黄
-            Color.FromArgb(221, 160, 221),  // 紫
-            Color.FromArgb(152, 216, 200),  // 薄荷
-            Color.FromArgb(247, 220, 111),  // 金
-            Color.FromArgb(187, 143, 206),  // 淡紫
-            Color.FromArgb(133, 193, 233)   // 天蓝
+            Color.FromArgb(255, 107, 107),  // red
+            Color.FromArgb(78, 205, 196),   // teal
+            Color.FromArgb(69, 183, 209),   // blue
+            Color.FromArgb(150, 206, 180),  // green
+            Color.FromArgb(255, 234, 167),  // yellow
+            Color.FromArgb(221, 160, 221),  // purple
+            Color.FromArgb(152, 216, 200),  // mint
+            Color.FromArgb(247, 220, 111),  // gold
+            Color.FromArgb(187, 143, 206),  // lilac
+            Color.FromArgb(133, 193, 233)   // sky blue
         };
 
         public bool IsDarkTheme
@@ -72,7 +72,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 构造函数
+        #region Constructors
 
         public FlatPieChart()
         {
@@ -84,7 +84,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 数据管理
+        #region Data Management
 
         public void SetData(List<(string Label, double Value)> data)
         {
@@ -116,7 +116,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 主题设置
+        #region Theming
 
         private void ApplyTheme()
         {
@@ -134,7 +134,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         #endregion
 
-        #region 绘制方法
+        #region Rendering
 
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -144,7 +144,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            // 清除背景
+            // Clear background
             g.Clear(BackColor);
 
             if (_data.Count == 0)
@@ -153,12 +153,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                 return;
             }
 
-            // 绘制标题（如果有）
+            // Title
             DrawTitle(g);
 
-            // 计算饼图区域 - 去掉标题高度，增大饼图占比
-            var titleHeight = string.IsNullOrEmpty(_titleText) ? 0 : 30; // 减少标题高度
-            var margin = 10; // 减少边距
+            // Chart rectangle
+            var titleHeight = string.IsNullOrEmpty(_titleText) ? 0 : 30;
+            var margin = 10;
             var pieSize = Math.Min(Width - margin * 2, Height - titleHeight - margin * 2);
             var pieRect = new Rectangle(
                 (Width - pieSize) / 2,
@@ -167,10 +167,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                 pieSize
             );
 
-            // 绘制饼图
+            // Slices
             DrawPieSlices(g, pieRect);
 
-            // 绘制标签
+            // Labels
             if (_showLabels)
             {
                 DrawLabels(g, pieRect);
@@ -179,7 +179,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         private void DrawNoDataMessage(Graphics g)
         {
-            var message = "暂无数据";
+            var message = "No data available";
             var font = new Font("Microsoft YaHei", 12, FontStyle.Regular);
             var brush = new SolidBrush(_isDarkTheme ? Color.Gray : Color.DarkGray);
 
@@ -215,7 +215,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
             {
                 var sweepAngle = (float)(data.Percentage * 360 / 100);
 
-                // 绘制饼片 - 扁平化设计（无边框）
+                // Flat slice (no border)
                 using var brush = new SolidBrush(data.Color);
                 g.FillPie(brush, pieRect, startAngle, sweepAngle);
 
@@ -225,8 +225,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
 
         private void DrawLabels(Graphics g, Rectangle pieRect)
         {
-            // 使用更小的字体适应紧凑布局
-            using var font = new Font("Microsoft YaHei", 7, FontStyle.Regular); // 从9减少到7
+            // Compact font for dense UI
+            using var font = new Font("Microsoft YaHei", 7, FontStyle.Regular);
             using var brush = new SolidBrush(ForeColor);
 
             float startAngle = 0;
@@ -239,20 +239,20 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                 var sweepAngle = (float)(data.Percentage * 360 / 100);
                 var labelAngle = startAngle + sweepAngle / 2;
 
-                // 调整标签位置，更靠近饼图中心
-                var labelRadius = radius * 0.75f; // 从0.7f增加到0.75f，稍微外移
+                // Place label closer to the center
+                var labelRadius = radius * 0.75f;
                 var labelX = centerX + labelRadius * (float)Math.Cos(labelAngle * Math.PI / 180);
                 var labelY = centerY + labelRadius * (float)Math.Sin(labelAngle * Math.PI / 180);
 
-                // 生成标签文本 - 简化文本以减少拥挤
+                // Compose label text
                 var labelText = "";
-                if (_showLabels && _showPercentages && data.Percentage >= 5.0) // 只显示占比大于5%的标签
+                if (_showLabels && _showPercentages && data.Percentage >= 5.0)
                 {
-                    // 简化标签格式，技能名太长时截断
+                    // Trim long names
                     var skillName = data.Label.Length > 6 ? data.Label.Substring(0, 6) + ".." : data.Label;
                     labelText = $"{skillName}\n{data.Percentage:F1}%";
                 }
-                else if (_showPercentages && data.Percentage >= 3.0) // 小占比只显示百分比
+                else if (_showPercentages && data.Percentage >= 3.0)
                 {
                     labelText = $"{data.Percentage:F1}%";
                 }
@@ -263,12 +263,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
                     var textX = labelX - textSize.Width / 2;
                     var textY = labelY - textSize.Height / 2;
 
-                    // 调整半透明背景，使其更轻量
+                    // Lightweight translucent background
                     var bgColor = _isDarkTheme ? Color.FromArgb(150, 0, 0, 0) : Color.FromArgb(150, 255, 255, 255);
                     using var bgBrush = new SolidBrush(bgColor);
                     g.FillRectangle(bgBrush, textX - 1, textY - 1, textSize.Width + 2, textSize.Height + 2);
 
-                    // 绘制文本
+                    // Label text
                     g.DrawString(labelText, font, brush, textX, textY);
                 }
 
@@ -280,7 +280,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.Charts
     }
 
     /// <summary>
-    /// 饼图数据项
+    /// Pie chart entry metadata.
     /// </summary>
     public class PieChartData
     {

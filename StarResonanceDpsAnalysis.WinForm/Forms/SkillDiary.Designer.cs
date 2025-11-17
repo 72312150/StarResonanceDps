@@ -130,10 +130,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             label10.Font = new Font("HarmonyOS Sans SC", 9F);
             label10.Location = new Point(0, 752);
             label10.Name = "label10";
-            label10.Prefix = "温馨提示：";
+            label10.Prefix = "Reminder: ";
             label10.Size = new Size(727, 37);
             label10.TabIndex = 35;
-            label10.Text = "如果不显示技能，请切换一次地图";
+            label10.Text = "If no skills appear, swap zones once.";
             label10.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // SkillDiary
@@ -148,7 +148,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             Controls.Add(pageHeader1);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "SkillDiary";
-            Text = "技能释放记录";
+            Text = "Skill Cast Log";
             Load += SkillDiary_Load;
             ForeColorChanged += SkillDiary_ForeColorChanged;
             pageHeader1.ResumeLayout(false);

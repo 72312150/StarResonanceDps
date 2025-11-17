@@ -652,7 +652,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin
             SubProfessional = new CellText(subProfessional);
             CritRate = new CellText(critRate.ToString() + "%") { Font = AppConfig.DigitalFont };
             LuckyRate = new CellText(luckyRate.ToString() + "%") { Font = AppConfig.DigitalFont };
-            Button = new CellButton("Button","查看技能数据",TTypeMini.Primary);
+            Button = new CellButton("Button","View Skill Data",TTypeMini.Primary);
         }
         #endregion
 

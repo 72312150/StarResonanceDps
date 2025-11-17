@@ -78,10 +78,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
                 AppMessageBox.ShowMessage(
                     """
-                    本次等待监听服务器比预想得耗时更久...
-                    
-                    没有启动游戏 或 网卡选择错误 也会造成监听不到服务器,
-                    请确认您是否已经启动了游戏或您的网卡选择没有问题。
+                    Listening for the server is taking longer than expected.
+
+                    If the game is not running or the network adapter is misconfigured,
+                    the sniffer cannot capture any packets.
+                    Please verify that the game is running and the adapter selection is correct.
                     """,
                     this);
 
@@ -93,9 +94,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
                 AppMessageBox.ShowMessage(
                     """
-                    本次等待监听服务器比预想得... 更加不顺利...
-                    
-                    如果您已经启动游戏, 那么我们强烈建议您检查网卡设置。
+                    Still no connection to the server.
+
+                    If the game is already running, we strongly recommend double-checking the network adapter settings.
                     """,
                     this);
             });
@@ -131,7 +132,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             catch (Exception ex)
             {
                 // # 异常保护：避免抓包线程因未处理异常中断
-                Console.WriteLine($"数据包到达后进行处理时发生异常 {ex.Message}\r\n{ex.StackTrace}");
+                Console.WriteLine($"Error while processing captured packets: {ex.Message}\r\n{ex.StackTrace}");
             }
         }
 
@@ -153,7 +154,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 Invoke(() =>
                 {
                     timer_BattleTimeLabelUpdater.Enabled = false;
-                    label_BattleTimeText.Text = $"请稍等，正在准备监听服务器...";
+                    label_BattleTimeText.Text = "Please wait, initializing server listener...";
                 });
             }
         }
@@ -406,10 +407,10 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             return type switch
             {
-                0 => "伤害",
-                1 => "治疗",
-                2 => "承伤",
-                3 => "NPC承伤",
+                0 => "Damage",
+                1 => "Healing",
+                2 => "Damage Taken",
+                3 => "NPC Damage Taken",
 
                 _ => string.Empty
             };
@@ -420,7 +421,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         /// </summary>
         private void UpdateHeaderText()
         {
-            pageHeader_MainHeader.SubText = $"{(_isShowFullData ? "全程" : "当前")} · {StasticsTypeToName(_stasticsType)}";
+            pageHeader_MainHeader.SubText = $"{(_isShowFullData ? "Full Session" : "Current")} · {StasticsTypeToName(_stasticsType)}";
         }
 
 
@@ -463,9 +464,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         private readonly IContextMenuStripItem[] _menulist =
         [
-            new ContextMenuStripItem("基础设置"){ IconSvg = HandledAssets.Set_Up },
-            new ContextMenuStripItem("关于"){ IconSvg = HandledAssets.HomeIcon },
-            new ContextMenuStripItem("退出"){ IconSvg = HandledAssets.Quit, },
+            new ContextMenuStripItem("Settings"){ IconSvg = HandledAssets.Set_Up },
+            new ContextMenuStripItem("About"){ IconSvg = HandledAssets.HomeIcon },
+            new ContextMenuStripItem("Exit"){ IconSvg = HandledAssets.Quit, },
         ];
         /// <summary>
         /// 设置按钮点击
@@ -478,15 +479,15 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             {
                 switch (it.Text)
                 {
-                    case "基础设置":
+                case "Settings":
                         OpenSettingsDialog();
                         break;
 
-                    case "关于":
+                case "About":
                         FormManager.MainForm.Show();
                         break;
 
-                    case "退出":
+                case "Exit":
                         Application.Exit();
                         break;
                 }
@@ -509,19 +510,19 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         private void button_AlwaysOnTop_MouseEnter(object sender, EventArgs e)
         {
             // 显示 "置顶窗口" 的气泡提示
-            ToolTip(button_AlwaysOnTop, "置顶窗口");
+            ToolTip(button_AlwaysOnTop, "Pin window on top");
         }
 
         // # 按钮提示气泡（清空）
         private void button_RefreshDps_MouseEnter(object sender, EventArgs e) // 鼠标进入“清空”按钮时显示提示
         {
-            ToolTip(button_RefreshDps, "清空当前数据"); // 显示“清空当前数据”的气泡提示
+            ToolTip(button_RefreshDps, "Clear current data"); // 显示“清空当前数据”的气泡提示
         }
 
         // # 按钮提示气泡（单次/全程切换）
         private void button_SwitchStatisticsMode_MouseEnter(object sender, EventArgs e) // 鼠标进入“单次/全程切换”按钮时显示提示
         {
-            ToolTip(button_SwitchStatisticsMode, "点击切换：单次统计/全程统"); // 显示切换提示（原文如此，保留）
+            ToolTip(button_SwitchStatisticsMode, "Toggle: single battle / full session"); // 显示切换提示（原文如此，保留）
         }
 
         /// <summary>
@@ -675,7 +676,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             DataStorage.SavePlayerInfoToFile();
 
             try { KbHook?.UnHook(); }
-            catch (Exception ex) { Console.WriteLine($"窗体关闭清理时出错: {ex.Message}"); }
+            catch (Exception ex) { Console.WriteLine($"Error while cleaning up on window close: {ex.Message}"); }
         }
 
         private void button_ThemeSwitch_Click(object sender, EventArgs e)

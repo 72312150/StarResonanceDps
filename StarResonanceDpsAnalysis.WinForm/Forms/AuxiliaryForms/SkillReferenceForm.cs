@@ -20,8 +20,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.AuxiliaryForms
         public SkillReferenceForm()
         {
             InitializeComponent();
-            FormGui.SetDefaultGUI(this); // 统一设置窗体默认 GUI 风格（字体、间距、阴影等）
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色 // 根据配置设置窗体的颜色主题（明亮/深色）
+            FormGui.SetDefaultGUI(this); // Apply the default UI styling (fonts, spacing, shadows, etc.)
+            FormGui.SetColorMode(this, AppConfig.IsLight); // Apply the configured theme colors
             ToggleTableView();
         }
 
@@ -38,20 +38,20 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.AuxiliaryForms
 
 
             table_DpsDetailDataTable.Columns = new AntdUI.ColumnCollection
-            {   new("", "序号")
+            {   new("", "No.")
                 {
 
                     Render = (value, record, rowIndex) => rowIndex + 1,
                     Fixed = true
                 },
-                new AntdUI.Column("Name","技能名称"){ Fixed = true},
-                new AntdUI.Column("Damage","总伤害"){ Fixed = true},
-                new AntdUI.Column("HitCount","命中次数") { Fixed = true},
-                new AntdUI.Column("CritRate","爆击率") { Fixed = true},
-                new AntdUI.Column("LuckyRate","幸运率") { Fixed = true},
-                new Column("AvgPerHit","平均值") { Fixed = true},
-                new AntdUI.Column("TotalDps","秒伤") { Fixed = true},
-                new AntdUI.Column("Share","技能占比") { Fixed = true},
+                new AntdUI.Column("Name","Skill Name"){ Fixed = true},
+                new AntdUI.Column("Damage","Total Damage"){ Fixed = true},
+                new AntdUI.Column("HitCount","Hits") { Fixed = true},
+                new AntdUI.Column("CritRate","Critical Rate") { Fixed = true},
+                new AntdUI.Column("LuckyRate","Lucky Rate") { Fixed = true},
+                new Column("AvgPerHit","Average") { Fixed = true},
+                new AntdUI.Column("TotalDps","DPS") { Fixed = true},
+                new AntdUI.Column("Share","Skill Share") { Fixed = true},
 
 
 
@@ -63,7 +63,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.AuxiliaryForms
 
         public async void LoadInformation(string battleId, string nickName)
         {
-            //divider1.Text = nickName + "的技能参考数据";
+            //divider1.Text = nickName + " skill reference data";
             //DamageReferenceSkillData.DamageReferenceSkillTable.Clear();
             //string url = @$"{AppConfig.url}/get_user_dps";
             //var query = new
@@ -75,14 +75,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.AuxiliaryForms
             //{
             //    foreach (var item in data["data"])
             //    {
-            //        string name = item["name"].ToString();//用户名
-            //        string damage = Common.FormatWithEnglishUnits(item["damage"]);//总伤害
-            //        int hitCount = Convert.ToInt32(item["hitCount"]);//命中次数
-            //        string critRate = item["critRate"].ToString() + "%";//爆击率
-            //        string luckyRate = item["luckyRate"].ToString() + "%";//幸运率
-            //        string avgPerHit = Common.FormatWithEnglishUnits(item["avgPerHit"]);//平均值
-            //        string totalDps = Common.FormatWithEnglishUnits(item["totalDps"]);//秒伤
-            //        double share = Convert.ToDouble(item["share"]) * 100;//技能占比
+            //        string name = item["name"].ToString(); // Player name
+            //        string damage = Common.FormatWithEnglishUnits(item["damage"]); // Total damage
+            //        int hitCount = Convert.ToInt32(item["hitCount"]); // Hit count
+            //        string critRate = item["critRate"].ToString() + "%"; // Critical rate
+            //        string luckyRate = item["luckyRate"].ToString() + "%"; // Lucky rate
+            //        string avgPerHit = Common.FormatWithEnglishUnits(item["avgPerHit"]); // Average per hit
+            //        string totalDps = Common.FormatWithEnglishUnits(item["totalDps"]); // DPS
+            //        double share = Convert.ToDouble(item["share"]) * 100; // Skill share percentage
             //        DamageReferenceSkillData.DamageReferenceSkillTable.Add(new DamageReferenceSkill(name, damage, hitCount, critRate, luckyRate, avgPerHit, totalDps, share));
             //    }
 
@@ -109,7 +109,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.AuxiliaryForms
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("装饰用的按钮");
+            MessageBox.Show("Decorative button.");
         }
     }
 }

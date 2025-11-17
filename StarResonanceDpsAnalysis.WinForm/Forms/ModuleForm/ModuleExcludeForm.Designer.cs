@@ -71,7 +71,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             button1.Name = "button1";
             button1.Size = new Size(150, 53);
             button1.TabIndex = 1;
-            button1.Text = "清空排除";
+            button1.Text = "Clear Exclusions";
             button1.Type = AntdUI.TTypeMini.Error;
             button1.Click += button1_Click;
             // 
@@ -136,7 +136,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             groupBox5.Size = new Size(350, 286);
             groupBox5.TabIndex = 52;
             groupBox5.TabStop = false;
-            groupBox5.Text = "特殊类";
+            groupBox5.Text = "Special";
             // 
             // chkExtremeDesperateGuardian
             // 
@@ -145,7 +145,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExtremeDesperateGuardian.Name = "chkExtremeDesperateGuardian";
             chkExtremeDesperateGuardian.Size = new Size(153, 54);
             chkExtremeDesperateGuardian.TabIndex = 53;
-            chkExtremeDesperateGuardian.Text = "极-绝境守护";
+            chkExtremeDesperateGuardian.Text = "Extreme - Desperate Guardian";
             // 
             // chkExtremeTeamCrit
             // 
@@ -154,7 +154,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExtremeTeamCrit.Name = "chkExtremeTeamCrit";
             chkExtremeTeamCrit.Size = new Size(153, 54);
             chkExtremeTeamCrit.TabIndex = 52;
-            chkExtremeTeamCrit.Text = "极-全队幸暴";
+            chkExtremeTeamCrit.Text = "Extreme - Team Lucky Crit";
             // 
             // chkExtremeLifeDrain
             // 
@@ -163,7 +163,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExtremeLifeDrain.Name = "chkExtremeLifeDrain";
             chkExtremeLifeDrain.Size = new Size(153, 54);
             chkExtremeLifeDrain.TabIndex = 51;
-            chkExtremeLifeDrain.Text = "极-生命汲取";
+            chkExtremeLifeDrain.Text = "Extreme - Life Drain";
             // 
             // chkExtremeLifeFluctuation
             // 
@@ -172,7 +172,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExtremeLifeFluctuation.Name = "chkExtremeLifeFluctuation";
             chkExtremeLifeFluctuation.Size = new Size(153, 54);
             chkExtremeLifeFluctuation.TabIndex = 50;
-            chkExtremeLifeFluctuation.Text = "极-生命波动";
+            chkExtremeLifeFluctuation.Text = "Extreme - Life Flux";
             // 
             // chkExtremeEmergencyMeasures
             // 
@@ -181,7 +181,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExtremeEmergencyMeasures.Name = "chkExtremeEmergencyMeasures";
             chkExtremeEmergencyMeasures.Size = new Size(153, 54);
             chkExtremeEmergencyMeasures.TabIndex = 49;
-            chkExtremeEmergencyMeasures.Text = "极-急救措施";
+            chkExtremeEmergencyMeasures.Text = "Extreme - Emergency Measures";
             // 
             // chkExtremeLifeConvergence
             // 
@@ -190,7 +190,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExtremeLifeConvergence.Name = "chkExtremeLifeConvergence";
             chkExtremeLifeConvergence.Size = new Size(153, 54);
             chkExtremeLifeConvergence.TabIndex = 48;
-            chkExtremeLifeConvergence.Text = "极-生命凝聚";
+            chkExtremeLifeConvergence.Text = "Extreme - Life Convergence";
             // 
             // chkExtremeDamageStack
             // 
@@ -199,7 +199,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExtremeDamageStack.Name = "chkExtremeDamageStack";
             chkExtremeDamageStack.Size = new Size(153, 54);
             chkExtremeDamageStack.TabIndex = 47;
-            chkExtremeDamageStack.Text = "极-伤害叠加";
+            chkExtremeDamageStack.Text = "Extreme - Damage Stack";
             // 
             // chkExtremeFlexibleMovement
             // 
@@ -208,7 +208,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExtremeFlexibleMovement.Name = "chkExtremeFlexibleMovement";
             chkExtremeFlexibleMovement.Size = new Size(153, 54);
             chkExtremeFlexibleMovement.TabIndex = 46;
-            chkExtremeFlexibleMovement.Text = "极-灵活身法";
+            chkExtremeFlexibleMovement.Text = "Extreme - Agile Footwork";
             // 
             // groupBox2
             // 
@@ -222,7 +222,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             groupBox2.Size = new Size(350, 156);
             groupBox2.TabIndex = 49;
             groupBox2.TabStop = false;
-            groupBox2.Text = "治疗/防御类";
+            groupBox2.Text = "Healing / Defense";
             // 
             // chkMagicResistance
             // 
@@ -231,7 +231,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkMagicResistance.Name = "chkMagicResistance";
             chkMagicResistance.Size = new Size(126, 54);
             chkMagicResistance.TabIndex = 46;
-            chkMagicResistance.Text = "抵御魔法";
+            chkMagicResistance.Text = "Resist Magic";
             // 
             // chkPhysicalResistance
             // 
@@ -240,7 +240,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkPhysicalResistance.Name = "chkPhysicalResistance";
             chkPhysicalResistance.Size = new Size(126, 54);
             chkPhysicalResistance.TabIndex = 47;
-            chkPhysicalResistance.Text = "抵御物理";
+            chkPhysicalResistance.Text = "Resist Physical";
             // 
             // chkSpecialHealingBoost
             // 
@@ -249,7 +249,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkSpecialHealingBoost.Name = "chkSpecialHealingBoost";
             chkSpecialHealingBoost.Size = new Size(162, 54);
             chkSpecialHealingBoost.TabIndex = 40;
-            chkSpecialHealingBoost.Text = "特攻治疗加持";
+            chkSpecialHealingBoost.Text = "Special Healing Boost";
             // 
             // chkExpertHealingBoost
             // 
@@ -258,7 +258,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkExpertHealingBoost.Name = "chkExpertHealingBoost";
             chkExpertHealingBoost.Size = new Size(162, 54);
             chkExpertHealingBoost.TabIndex = 41;
-            chkExpertHealingBoost.Text = "专精治疗加持";
+            chkExpertHealingBoost.Text = "Expert Healing Boost";
             // 
             // groupBox4
             // 
@@ -272,7 +272,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             groupBox4.Size = new Size(350, 177);
             groupBox4.TabIndex = 51;
             groupBox4.TabStop = false;
-            groupBox4.Text = "通用类";
+            groupBox4.Text = "General";
             // 
             // chkStrengthBoost
             // 
@@ -281,7 +281,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkStrengthBoost.Name = "chkStrengthBoost";
             chkStrengthBoost.Size = new Size(126, 54);
             chkStrengthBoost.TabIndex = 36;
-            chkStrengthBoost.Text = "力量加持";
+            chkStrengthBoost.Text = "Strength Boost";
             // 
             // chkAgilityBoost
             // 
@@ -290,7 +290,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkAgilityBoost.Name = "chkAgilityBoost";
             chkAgilityBoost.Size = new Size(126, 54);
             chkAgilityBoost.TabIndex = 37;
-            chkAgilityBoost.Text = "敏捷加持";
+            chkAgilityBoost.Text = "Agility Boost";
             // 
             // chkIntelligenceBoost
             // 
@@ -299,7 +299,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkIntelligenceBoost.Name = "chkIntelligenceBoost";
             chkIntelligenceBoost.Size = new Size(126, 54);
             chkIntelligenceBoost.TabIndex = 38;
-            chkIntelligenceBoost.Text = "智力加持";
+            chkIntelligenceBoost.Text = "Intelligence Boost";
             // 
             // chkCastingFocus
             // 
@@ -308,7 +308,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkCastingFocus.Name = "chkCastingFocus";
             chkCastingFocus.Size = new Size(126, 54);
             chkCastingFocus.TabIndex = 42;
-            chkCastingFocus.Text = "施法专注";
+            chkCastingFocus.Text = "Casting Focus";
             // 
             // groupBox1
             // 
@@ -323,7 +323,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             groupBox1.Size = new Size(350, 217);
             groupBox1.TabIndex = 48;
             groupBox1.TabStop = false;
-            groupBox1.Text = "攻击类";
+            groupBox1.Text = "Offense";
             // 
             // chkEliteStrike
             // 
@@ -332,7 +332,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkEliteStrike.Name = "chkEliteStrike";
             chkEliteStrike.Size = new Size(126, 54);
             chkEliteStrike.TabIndex = 46;
-            chkEliteStrike.Text = "精英打击";
+            chkEliteStrike.Text = "Elite Strike";
             // 
             // chkAttackSpeedFocus
             // 
@@ -341,7 +341,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkAttackSpeedFocus.Name = "chkAttackSpeedFocus";
             chkAttackSpeedFocus.Size = new Size(126, 54);
             chkAttackSpeedFocus.TabIndex = 43;
-            chkAttackSpeedFocus.Text = "攻速专注";
+            chkAttackSpeedFocus.Text = "Attack Speed Focus";
             // 
             // chkSpecialAttackDamage
             // 
@@ -350,7 +350,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkSpecialAttackDamage.Name = "chkSpecialAttackDamage";
             chkSpecialAttackDamage.Size = new Size(126, 54);
             chkSpecialAttackDamage.TabIndex = 39;
-            chkSpecialAttackDamage.Text = "特攻伤害";
+            chkSpecialAttackDamage.Text = "Special Attack Damage";
             // 
             // chkCriticalFocus
             // 
@@ -359,7 +359,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkCriticalFocus.Name = "chkCriticalFocus";
             chkCriticalFocus.Size = new Size(126, 54);
             chkCriticalFocus.TabIndex = 44;
-            chkCriticalFocus.Text = "暴击专注";
+            chkCriticalFocus.Text = "Critical Focus";
             // 
             // chkLuckFocus
             // 
@@ -368,7 +368,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
             chkLuckFocus.Name = "chkLuckFocus";
             chkLuckFocus.Size = new Size(126, 54);
             chkLuckFocus.TabIndex = 45;
-            chkLuckFocus.Text = "幸运专注";
+            chkLuckFocus.Text = "Luck Focus";
             // 
             // ModuleExcludeForm
             // 

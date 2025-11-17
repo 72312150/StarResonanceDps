@@ -326,7 +326,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         public long Id { get; init; }
 
         /// <summary>技能名称（可从资源/协议注入）。</summary>
-        public string Name { get; init; } = "未知技能";
+        public string Name { get; init; } = "Unknown Skill";
 
         /// <summary>流派/元素系（可选）。</summary>
         public string School { get; init; } = "";
@@ -389,9 +389,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         /// 获取技能元数据；若不存在则返回带占位名的对象（不会写入缓存）。
         /// </summary>
         /// <param name="id">技能 ID。</param>
-        /// <returns>若缓存中不存在，返回 Name="技能[id]" 的占位对象。</returns>
+        /// <returns>Returns a placeholder “Skill[id]” when not present in the cache.</returns>
         public static SkillMeta Get(long id) =>
-            _metas.TryGetValue(id, out var m) ? m : new SkillMeta { Id = id, Name = $"技能[{id}]" };
+            _metas.TryGetValue(id, out var m) ? m : new SkillMeta { Id = id, Name = $"Skill[{id}]" };
 
         /// <summary>
         /// 尝试获取技能元数据。
@@ -415,8 +415,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         /// <summary>技能ID（唯一标识技能，可用于数据库关联）。</summary>
         public long SkillId { get; init; }
 
-        /// <summary>技能名称（默认值为“未知技能”）。</summary>
-        public string SkillName { get; init; } = "未知技能";
+        /// <summary>Skill name (defaults to “Unknown Skill”).</summary>
+        public string SkillName { get; init; } = "Unknown Skill";
 
         /// <summary>技能总伤害或总治疗（取决于来源集合）。</summary>
         public ulong Total { get; init; }
@@ -466,8 +466,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         /// <summary>技能 ID。</summary>
         public long SkillId { get; init; }
 
-        /// <summary>技能名称。</summary>
-        public string SkillName { get; init; } = "未知技能";
+        /// <summary>Skill name.</summary>
+        public string SkillName { get; init; } = "Unknown Skill";
 
         /// <summary>全队该技能的总量（伤害合计）。</summary>
         public ulong Total { get; init; }
@@ -495,13 +495,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         public long Uid { get; }
 
         /// <summary>玩家昵称。</summary>
-        public string Nickname { get; set; } = "未知";
+        public string Nickname { get; set; } = "Unknown";
 
         /// <summary>战力。</summary>
         public int CombatPower { get; set; } = 0;
 
         /// <summary>职业。</summary>
-        public string Profession { get; set; } = "未知";
+        public string Profession { get; set; } = "Unknown";
 
         public string SubProfession { get; set; } = null;
         public ClassSpec Spec { get; set; } = ClassSpec.Unknown;
@@ -867,7 +867,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             {
                 ulong others = denom - chosenSum;
                 int p = (int)Math.Round((double)others / denom * 100.0);
-                result.Add((0, "其他", others, p));
+                result.Add((0, "Others", others, p));
             }
 
             return result;
@@ -880,7 +880,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             HealingStats.Reset();
             TakenStats.Reset();          // ★ 新增
             TakenDamage = 0;
-            Profession = "未知";
+            Profession = "Unknown";
             SkillUsage.Clear();
             TakenDamageBySkill.Clear();
             HealingBySkill.Clear();
@@ -931,7 +931,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             {
                 ulong others = denom - chosenSum;
                 int p = (int)Math.Round((double)others / denom * 100.0);
-                result.Add((0, "其他", others, p));
+                result.Add((0, "Others", others, p));
             }
 
             return result;
@@ -1127,7 +1127,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         /// </summary>
         private void MarkCombatActivity()
         {
-            throw new NotImplementedException("该功能已不在此处实现, 详情请查看 SRDA.Core.Data.DataStorage");
+            throw new NotImplementedException("This functionality now lives in SRDA.Core.Data.DataStorage.");
 
             //var now = DateTime.Now;
             //// —— 新增：如果上一场已超时结束但未清空，则在此刻（新战斗的首个事件）清空上一场 —— 
@@ -1541,7 +1541,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         /// <param name="keepCombatTime">true=保留战斗时钟；false=同时清除战斗时钟。</param>
         public void ClearAll(bool keepCombatTime = true)
         {
-            throw new NotImplementedException("该功能已不在此处实现, 详情请查看 SRDA.Core.Data.DataStorage");
+            throw new NotImplementedException("This functionality now lives in SRDA.Core.Data.DataStorage.");
 
             //bool hadPlayers;
             //lock (_playersLock) { hadPlayers = _players.Count > 0; }
@@ -1717,7 +1717,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             {
                 ulong others = denom - chosenSum;
                 int pcent = (int)Math.Round((double)others / denom * 100.0);
-                result.Add((0, "其他", others, pcent));
+                result.Add((0, "Others", others, pcent));
             }
             return result;
         }
@@ -1741,9 +1741,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             }
 
             // 没有 PlayerData，则用缓存字典
-            string nickname = _nicknameRequestedUids.TryGetValue(uid, out var name) ? name : "未知";
+            string nickname = _nicknameRequestedUids.TryGetValue(uid, out var name) ? name : "Unknown";
             int combatPower = _combatPowerByUid.TryGetValue(uid, out var power) ? power : 0;
-            string profession = _professionByUid.TryGetValue(uid, out var prof) ? prof : "未知";
+            string profession = _professionByUid.TryGetValue(uid, out var prof) ? prof : "Unknown";
 
             return (nickname, combatPower, profession);
         }
@@ -1762,7 +1762,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         GetPlayerFullStats(long uid)
         {
             if (!_players.TryGetValue(uid, out var p))
-                return (uid, "未知", 0, "未知", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
+                return (uid, "Unknown", 0, "Unknown", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
 
             var dmg = p.DamageStats;
             var heal = p.HealingStats;
@@ -1892,7 +1892,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             var duration = _combatEnd.HasValue ? _combatEnd.Value - startedAt : endedAt - startedAt;
             if (duration < TimeSpan.Zero) duration = TimeSpan.Zero;
 
-            var label = $"结束时间：{endedAt:HH:mm:ss}";
+            var label = $"End Time: {endedAt:HH:mm:ss}";
 
             ulong teamDmg = 0, teamHeal = 0, teamTaken = 0;
             var snapPlayers = new Dictionary<long, SnapshotPlayer>(players.Length);
@@ -1995,7 +1995,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
             public long NpcId { get; }
 
             /// <summary>NPC 名称（可选）。</summary>
-            public string Name { get; private set; } = "未知NPC";
+            public string Name { get; private set; } = "Unknown NPC";
 
             /// <summary>NPC 承伤聚合（总承伤/实时/峰值/极值等）。</summary>
             public StatisticData TakenStats { get; } = new();
@@ -2356,14 +2356,14 @@ namespace StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics
         /// <summary>玩家 UID。</summary>
         public long Uid { get; init; }
 
-        /// <summary>昵称。</summary>
-        public string Nickname { get; init; } = "未知";
+        /// <summary>Nickname.</summary>
+        public string Nickname { get; init; } = "Unknown";
 
         /// <summary>战力。</summary>
         public int CombatPower { get; init; }
 
-        /// <summary>职业。</summary>
-        public string Profession { get; init; } = "未知";
+        /// <summary>Profession.</summary>
+        public string Profession { get; init; } = "Unknown";
 
         public string? SubProfession { get; init; }
 

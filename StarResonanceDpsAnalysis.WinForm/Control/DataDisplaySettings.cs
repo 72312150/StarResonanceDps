@@ -56,11 +56,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                     setStyleMethod.Invoke(flowPanel1, new object[] { ControlStyles.ResizeRedraw, true });
                 }
 
-                Console.WriteLine("FlowPanel显示优化已启用");
+                Console.WriteLine("FlowPanel optimization enabled.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"FlowPanel显示优化失败: {ex.Message}");
+                Console.WriteLine($"FlowPanel optimization failed: {ex.Message}");
             }
         }
 
@@ -87,21 +87,21 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                 // 步骤2：重新定义分组数据
                 var groups = new Dictionary<string, string[]>
                 {
-                    { "⚔️ 伤害数据", new[] { "TotalDamage", "CriticalDamage", "LuckyDamage", "CritLuckyDamage", "DamageTaken" } },
-                    { "💥 DPS数据", new[] { "InstantDps", "MaxInstantDps", "TotalDps", "CritRate", "LuckyRate" } },
-                    { "🛡️ 治疗数据", new[] { "TotalHealingDone", "CriticalHealingDone", "LuckyHealingDone", "CritLuckyHealingDone" } },
-                    { "💚 HPS数据", new[] { "InstantHps", "MaxInstantHps", "TotalHps" } }
+                    { "⚔️ Damage Overview", new[] { "TotalDamage", "CriticalDamage", "LuckyDamage", "CritLuckyDamage", "DamageTaken" } },
+                    { "💥 DPS Metrics", new[] { "InstantDps", "MaxInstantDps", "TotalDps", "CritRate", "LuckyRate" } },
+                    { "🛡️ Healing Metrics", new[] { "TotalHealingDone", "CriticalHealingDone", "LuckyHealingDone", "CritLuckyHealingDone" } },
+                    { "💚 HPS Metrics", new[] { "InstantHps", "MaxInstantHps", "TotalHps" } }
                 };
 
                 // 步骤3：创建两列布局容器
                 CreateTwoColumnLayout(groups);
 
                 // 调试输出
-                Console.WriteLine("=== 布局初始化完成 ===");
+                Console.WriteLine("=== Layout initialization complete ===");
                 for (int i = 0; i < flowPanel1.Controls.Count; i++)
                 {
                     var control = flowPanel1.Controls[i];
-                    Console.WriteLine($"控件{i}: {control.GetType().Name} - Height: {control.Height}");
+                    Console.WriteLine($"Control {i}: {control.GetType().Name} - Height: {control.Height}");
                 }
             }
             finally
@@ -567,11 +567,11 @@ namespace StarResonanceDpsAnalysis.WinForm.Control
                 _refreshDelayTimer?.Stop();
                 _refreshDelayTimer?.Dispose();
                 _refreshDelayTimer = null;
-                Console.WriteLine("数据显示设置资源已清理");
+                Console.WriteLine("Data display settings resources released.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"清理资源时出错: {ex.Message}");
+                Console.WriteLine($"Failed to clean resources: {ex.Message}");
             }
         }
     }

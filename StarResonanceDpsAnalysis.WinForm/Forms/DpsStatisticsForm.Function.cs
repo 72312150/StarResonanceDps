@@ -70,7 +70,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             }
             catch (DataTamperedException)
             {
-                AppMessageBox.ShowMessage("用户缓存被篡改，或文件损坏。为软件正常运行，将清空用户缓存。", this);
+                AppMessageBox.ShowMessage("User cache appears tampered or corrupted. Clearing the cache to keep the tool stable.", this);
 
                 DataStorage.ClearAllPlayerInfos();
                 DataStorage.SavePlayerInfoToFile();
@@ -178,7 +178,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             var devices = CaptureDeviceList.Instance;
             if (devices == null || devices.Count == 0)
             {
-                AppMessageBox.ShowMessage("没有找到可用的网络抓包设备, 请检查您的系统设置", this);
+                AppMessageBox.ShowMessage("No usable network capture device found. Please verify your system configuration.", this);
                 return;
             }
 
@@ -192,7 +192,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 netcardIndex = CaptureDeviceHelper.GetBestNetworkCardIndex(devices);
                 if (netcardIndex < 0)
                 {
-                    AppMessageBox.ShowMessage("我们未能为您自动设置网卡设备，请前往设置界面手动设置", this);
+                    AppMessageBox.ShowMessage("Unable to auto-select a network adapter. Please configure it manually in Settings.", this);
                     return;
                 }
 
@@ -211,12 +211,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 netcardIndex = CaptureDeviceHelper.GetBestNetworkCardIndex(devices);
                 if (netcardIndex < 0)
                 {
-                    AppMessageBox.ShowMessage("网卡信息发生变动，我们未能为您自动设置网卡设备，请前往设置界面手动设置", this);
+                    AppMessageBox.ShowMessage("Network adapter details changed. Auto-selection failed; please configure the adapter manually in Settings.", this);
                     return;
                 }
                 else
                 {
-                    AppMessageBox.ShowMessage("网卡信息发生变动，已为您重新设置网卡设备，如有软件无法识别等情况，请手动重设设备", this);
+                    AppMessageBox.ShowMessage("Network adapter details changed. A new adapter was selected automatically; if issues persist, please reconfigure manually.", this);
                 }
             }
 
@@ -224,7 +224,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             SelectedDevice = devices[netcardIndex];
             if (SelectedDevice == null)
             {
-                AppMessageBox.ShowMessage($"获取网卡设备失败，[索引]名称: [{netcardIndex}]{netcardName}", this);
+                AppMessageBox.ShowMessage($"Failed to acquire the network adapter. [Index]Name: [{netcardIndex}]{netcardName}", this);
                 return;
             }
 
@@ -240,7 +240,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             SelectedDevice.OnPacketArrival += new PacketArrivalEventHandler(Device_OnPacketArrival);
             SelectedDevice.StartCapture();
 
-            Console.WriteLine("开始抓包...");
+            Console.WriteLine("Begin capturing packets...");
         }
 
         #endregion

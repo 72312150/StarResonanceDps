@@ -125,7 +125,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             select1.SelectionStart = 5;
             select1.Size = new Size(289, 50);
             select1.TabIndex = 33;
-            select1.Text = "玩家选择：";
+            select1.Text = "Player:";
             // 
             // button3
             // 
@@ -133,7 +133,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button3.Name = "button3";
             button3.Size = new Size(153, 50);
             button3.TabIndex = 34;
-            button3.Text = "开始检测循环";
+            button3.Text = "Start Monitoring";
             button3.Type = AntdUI.TTypeMini.Primary;
             // 
             // button4
@@ -142,7 +142,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             button4.Name = "button4";
             button4.Size = new Size(153, 50);
             button4.TabIndex = 35;
-            button4.Text = "清空历史";
+            button4.Text = "Clear History";
             button4.Type = AntdUI.TTypeMini.Primary;
             // 
             // SkillRotationMonitorForm
@@ -161,7 +161,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             MaximizeBox = false;
             Name = "SkillRotationMonitorForm";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "技能释放循环监测";
+            Text = "Skill Rotation Monitor";
             pageHeader1.ResumeLayout(false);
             panel6.ResumeLayout(false);
             ResumeLayout(false);

@@ -14,24 +14,24 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
             table_DpsDetailDataTable.Columns = new AntdUI.ColumnCollection
             {   
-                new AntdUI.Column("Button", "操作"),
-                new("", "序号")
+                new AntdUI.Column("Button", "Actions"),
+                new("", "No.")
                 {
                    
                     Render = (value, record, rowIndex) => rowIndex + 1,
                     Fixed = true
                 },
 
-                new AntdUI.Column("NickName","玩家昵称"){ Fixed = true},
-                new AntdUI.Column("Professional","职业"){ Fixed = true},
-                new AntdUI.Column("SubProfessional","分支"){ Fixed = true},
-                new AntdUI.Column("CombatPower","战力"){ Fixed = true,SortOrder=true },
-                new AntdUI.Column("TotalDamage","总伤"){ Fixed = true,SortOrder=true},
-                new AntdUI.Column("InstantDps","秒伤"){ Fixed = true,SortOrder=true},
-                new AntdUI.Column("CritRate","暴击率"){ Fixed = true},
-                new AntdUI.Column("LuckyRate","幸运率"){ Fixed = true},
+                new AntdUI.Column("NickName","Player Name"){ Fixed = true},
+                new AntdUI.Column("Professional","Class"){ Fixed = true},
+                new AntdUI.Column("SubProfessional","Spec"){ Fixed = true},
+                new AntdUI.Column("CombatPower","Combat Power"){ Fixed = true,SortOrder=true },
+                new AntdUI.Column("TotalDamage","Total Damage"){ Fixed = true,SortOrder=true},
+                new AntdUI.Column("InstantDps","DPS"){ Fixed = true,SortOrder=true},
+                new AntdUI.Column("CritRate","Crit Rate"){ Fixed = true},
+                new AntdUI.Column("LuckyRate","Luck Rate"){ Fixed = true},
               
-                new AntdUI.Column("MaxInstantDps","最大瞬时"){ Fixed = true,SortOrder=true},
+                new AntdUI.Column("MaxInstantDps","Peak DPS"){ Fixed = true,SortOrder=true},
 
                 //new AntdUI.Column("battleTime","战斗时长"),
             };
@@ -45,7 +45,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
 
         Dictionary<string, string> rank_type_dict = new Dictionary<string, string>()
         {
-            {"伤害参考","damage_all"},
+            {"Damage Reference","damage_all"},
         };
         /// <summary>
         /// 
