@@ -4,10 +4,10 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
 
-    <!--  引入 System.Double 类型（用于定义数值资源）  -->
+    <!--  Import System.Double for numeric resources  -->
     <sys:Double x:Key="MainCornerRadiusDouble">6</sys:Double>
 
-    <!--  以 CornerRadius 资源形式定义圆角（四个角相同）  -->
+    <!--  Corner radius resource (identical radius for all corners)  -->
     <CornerRadius x:Key="MainCornerRadius">6,6,6,6</CornerRadius>
 
     <sys:Double x:Key="CardHeaderHeight">25</sys:Double>
@@ -17,42 +17,42 @@
     <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">10</sys:Double>
 
 
-    <!--  Window 风格：透明窗口（没有系统边框/标题栏），背景透明  -->
+    <!--  Window style: borderless transparent window  -->
     <Style x:Key="TransparentWindow" TargetType="Window">
-        <!--  允许透明（Enable per-pixel transparency）  -->
+        <!--  Enable per-pixel transparency  -->
         <Setter Property="AllowsTransparency" Value="True" />
-        <!--  去掉系统窗体样式（无标题栏、无边框）  -->
+        <!--  Remove system chrome (no title bar, no border)  -->
         <Setter Property="WindowStyle" Value="None" />
-        <!--  窗口背景设为完全透明（常用于自定义 chrome）  -->
+        <!--  Make the window background fully transparent (for custom chrome)  -->
         <Setter Property="Background" Value="Transparent" />
 
-        <!--  新增：强制布局取整和像素对齐  -->
+        <!--  Force layout rounding and pixel snapping  -->
         <Setter Property="UseLayoutRounding" Value="True" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <!--  更高性能的透明Window 风格：透明窗口（没有系统边框/标题栏），背景透明  -->
+    <!--  Alternative transparent window style with better performance  -->
     <!--  https://blog.walterlv.com/post/wpf-transparent-window-without-allows-transparency.html  -->
     <Style x:Key="TransparentWindowAlt" TargetType="Window">
         <Setter Property="WindowStyle" Value="None" />
         <Setter Property="ResizeMode" Value="NoResize" />
         <Setter Property="WindowChrome.GlassFrameThickness" Value="-1" />
-        <!--  新增：强制布局取整和像素对齐  -->
+        <!--  Force layout rounding and pixel snapping  -->
         <Setter Property="UseLayoutRounding" Value="True" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
 
     </Style>
 
-    <!--  Border 风格：给窗口内容区留边距并加圆角和投影  -->
+    <!--  Border style: adds padding, rounded corners, and a drop shadow  -->
     <Style x:Key="ShadowWindowBorder" TargetType="Border">
-        <!--  给外部留出空间以显示投影（shadow）  -->
+        <!--  Reserve outer margin so the shadow remains visible  -->
         <Setter Property="Margin" Value="5" />
-        <!--  使用上面定义的圆角资源  -->
+        <!--  Use the shared corner radius resource  -->
         <Setter Property="CornerRadius" Value="{DynamicResource MainCornerRadius}" />
-        <!--  使用 DropShadowEffect 作为简单投影效果  -->
+        <!--  Apply DropShadowEffect for a simple shadow  -->
         <Setter Property="Effect">
             <Setter.Value>
-                <!--  BlurRadius: 模糊半径；Opacity: 透明度；ShadowDepth: 阴影偏移（0 = 居中扩散）  -->
+                <!--  BlurRadius (blur amount), Opacity (shadow opacity), ShadowDepth (0 = centered diffusion)  -->
                 <DropShadowEffect
                     BlurRadius="5"
                     Opacity="0.5"
@@ -106,10 +106,10 @@
         <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
 
-    <!--  设置默认字体  -->
+    <!--  Default TextBlock style  -->
     <Style BasedOn="{StaticResource NormalTextBlockBaseStyle}" TargetType="TextBlock" />
 
-    <!--  设置默认滚动条样式  -->
+    <!--  Default ScrollBar style  -->
     <Style TargetType="ScrollBar">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template">

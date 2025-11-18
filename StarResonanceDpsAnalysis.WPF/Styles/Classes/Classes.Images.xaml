@@ -4,23 +4,24 @@
     xmlns:models="clr-namespace:StarResonanceDpsAnalysis.Core.Models;assembly=StarResonanceDpsAnalysis.Core">
 
     <!--
-        说明（中文）：
-        本资源字典定义了每个职业对应的颜色与笔刷，资源键命名规则基于 ViewModel 中的枚举 StarResonanceDpsAnalysis.WPF.ViewModels：
-        - ShieldKnight       -> ClassesShieldKnightColor / ClassesShieldKnightBrush （神盾骑士）
-        - HeavyGuardian      -> ClassesHeavyGuardianColor / ClassesHeavyGuardianBrush （巨刃守卫者）
-        - Stormblade         -> ClassesStormbladeColor / ClassesStormbladeBrush （雷影剑士）
-        - WindKnight         -> ClassesWindKnightColor / ClassesWindKnightBrush （青岚骑士）
-        - FrostMage          -> ClassesFrostMageColor / ClassesFrostMageBrush （冰魔导师）
-        - Marksman           -> ClassesMarksmanColor / ClassesMarksmanBrush （神射手）
-        - VerdantOracle      -> ClassesVerdantOracleColor / ClassesVerdantOracleBrush （森语者）
-        - SoulMusician       -> ClassesSoulMusicianColor / ClassesSoulMusicianBrush （灵魂乐手）
-        
-        用途：
-        - 在界面中通过引用相应的 Brushes 或 Colors 来保证不同职业使用统一配色。
-        - 请勿随意更改资源键名，以免与代码中对资源键的引用不一致。
+        Overview:
+        This resource dictionary defines the colors and brushes associated with each class.
+        Resource keys follow the enum names declared in StarResonanceDpsAnalysis.WPF.ViewModels:
+        - ShieldKnight       -> ClassesShieldKnightColor / ClassesShieldKnightBrush
+        - HeavyGuardian      -> ClassesHeavyGuardianColor / ClassesHeavyGuardianBrush
+        - Stormblade         -> ClassesStormbladeColor / ClassesStormbladeBrush
+        - WindKnight         -> ClassesWindKnightColor / ClassesWindKnightBrush
+        - FrostMage          -> ClassesFrostMageColor / ClassesFrostMageBrush
+        - Marksman           -> ClassesMarksmanColor / ClassesMarksmanBrush
+        - VerdantOracle      -> ClassesVerdantOracleColor / ClassesVerdantOracleBrush
+        - SoulMusician       -> ClassesSoulMusicianColor / ClassesSoulMusicianBrush
+
+        Usage:
+        - Reference these brushes or colors in the UI to keep class theming consistent.
+        - Avoid renaming resource keys to maintain alignment with code references.
     -->
 
-    <!--  未知职业 (Unknown)  -->
+    <!--  Unknown profession  -->
     <DrawingImage x:Key="ClassesUnknownIcon" RenderOptions.EdgeMode="Aliased">
         <DrawingImage.Drawing>
             <DrawingGroup>
@@ -39,7 +40,7 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
-    <!--  神盾骑士 (ShieldKnight)  -->
+    <!--  Shield Knight  -->
     <BitmapImage x:Key="ClassesShieldKnightIcon" UriSource="pack://application:,,,/Assets/Images/Classes_ShieldKnight.png" />
     <!-- <BitmapImage x:Key="{x:Static models:Classes.ShieldKnight}" UriSource="pack://application:,,,/Assets/Images/Classes_ShieldKnight.png" /> -->
     <DrawingImage x:Key="{x:Static models:Classes.ShieldKnight}" RenderOptions.EdgeMode="Aliased">
@@ -53,7 +54,7 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
-    <!--  巨刃守卫者 (HeavyGuardian)  -->
+    <!--  Heavy Guardian  -->
     <BitmapImage x:Key="ClassesHeavyGuardianIcon" UriSource="pack://application:,,,/Assets/Images/Classes_HeavyGuardian.png" />
     <!-- <BitmapImage x:Key="{x:Static models:Classes.HeavyGuardian}" UriSource="pack://application:,,,/Assets/Images/Classes_HeavyGuardian.png" /> -->
     <DrawingImage x:Key="{x:Static models:Classes.HeavyGuardian}" RenderOptions.EdgeMode="Aliased">
@@ -67,7 +68,7 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
-    <!--  雷影剑士 (Stormblade)  -->
+    <!--  Stormblade  -->
     <BitmapImage x:Key="ClassesStormbladeIcon" UriSource="pack://application:,,,/Assets/Images/Classes_Stormblade.png" />
     <!-- <BitmapImage x:Key="{x:Static models:Classes.Stormblade}" UriSource="pack://application:,,,/Assets/Images/Classes_Stormblade.png" /> -->
     <DrawingImage x:Key="{x:Static models:Classes.Stormblade}" RenderOptions.EdgeMode="Aliased">
@@ -81,7 +82,7 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
-    <!--  青岚骑士 (WindKnight)  -->
+    <!--  Wind Knight  -->
     <BitmapImage x:Key="ClassesWindKnightIcon" UriSource="pack://application:,,,/Assets/Images/Classes_WIndKnight.png" />
     <!-- <BitmapImage x:Key="{x:Static models:Classes.WindKnight}" UriSource="pack://application:,,,/Assets/Images/Classes_WIndKnight.png" /> -->
     <DrawingImage x:Key="{x:Static models:Classes.WindKnight}" RenderOptions.EdgeMode="Aliased">
@@ -95,7 +96,7 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
-    <!--  冰魔导师 (FrostMage)  -->
+    <!--  Frost Mage  -->
     <BitmapImage x:Key="ClassesFrostMageIcon" UriSource="pack://application:,,,/Assets/Images/Classes_FrostMage.png" />
     <!-- <BitmapImage x:Key="{x:Static models:Classes.FrostMage}" UriSource="pack://application:,,,/Assets/Images/Classes_FrostMage.png" /> -->
     <DrawingImage x:Key="{x:Static models:Classes.FrostMage}" RenderOptions.EdgeMode="Aliased">
@@ -112,7 +113,7 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
-    <!--  神射手 (Marksman)  -->
+    <!--  Marksman  -->
     <BitmapImage x:Key="ClassesMarksmanIcon" UriSource="pack://application:,,,/Assets/Images/Classes_Marksman.png" />
     <!-- <BitmapImage x:Key="{x:Static models:Classes.Marksman}" UriSource="pack://application:,,,/Assets/Images/Classes_Marksman.png" /> -->
     <DrawingImage x:Key="{x:Static models:Classes.Marksman}" RenderOptions.EdgeMode="Aliased">
@@ -128,7 +129,7 @@
 
 
 
-    <!--  森语者 (VerdantOracle)  -->
+    <!--  Verdant Oracle  -->
     <BitmapImage x:Key="ClassesIconVerdantOracleIcon" UriSource="pack://application:,,,/Assets/Images/Classes_VerdantOracle.png" />
     <!-- <BitmapImage x:Key="{x:Static models:Classes.VerdantOracle}" UriSource="pack://application:,,,/Assets/Images/Classes_VerdantOracle.png" /> -->
     <DrawingImage x:Key="{x:Static models:Classes.VerdantOracle}" RenderOptions.EdgeMode="Aliased">
@@ -142,7 +143,7 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
-    <!--  灵魂乐手 (SoulMusician)  -->
+    <!--  Soul Musician  -->
     <BitmapImage x:Key="ClassesIconShieldKnightIcon" UriSource="pack://application:,,,/Assets/Images/Classes_SoulMusician.png" />
     <!-- <BitmapImage x:Key="{x:Static models:Classes.SoulMusician}" UriSource="pack://application:,,,/Assets/Images/Classes_SoulMusician.png" /> -->
     <DrawingImage x:Key="{x:Static models:Classes.SoulMusician}" RenderOptions.EdgeMode="Aliased">

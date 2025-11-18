@@ -4,14 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!--  ===== 颜色（用自带 Alpha，避免多层透明叠加导致黑边） =====  -->
+    <!--  ===== Colors (use alpha values to avoid dark edges from stacked transparency) =====  -->
     <SolidColorBrush x:Key="MenuBg" Color="#F2FFFFFF" />
     <SolidColorBrush x:Key="MenuFg" Color="#222222" />
     <SolidColorBrush x:Key="MenuHover" Color="#12000000" />
     <SolidColorBrush x:Key="MenuPressed" Color="#1E000000" />
     <SolidColorBrush x:Key="MenuSep" Color="#14000000" />
 
-    <!--  阴影强度预设  -->
+    <!--  Shadow intensity presets  -->
     <DropShadowEffect
         x:Key="MenuShadow.Light"
         BlurRadius="24"
@@ -31,49 +31,49 @@
         ShadowDepth="0"
         Color="#22000000" />
 
-    <!--  ===== 勾圈/箭头：参数化资源（改这里就能全局生效） =====  -->
-    <!--  ✔ 勾（左圈）  -->
+    <!--  ===== Checkmarks / arrows: parameterized resources (change here for global effect) =====  -->
+    <!--  ✔ Check glyph (left circle)  -->
     <sys:Double x:Key="Menu.Check.Diameter">16</sys:Double>
-    <!--  勾“圆圈”直径（px）→ 改这个=圈大小  -->
+    <!--  Check circle diameter (px). Adjust to change circle size.  -->
     <sys:Double x:Key="Menu.Check.FontSize">6</sys:Double>
 
-    <!--  勾字符字号 → 改这个=勾大小  -->
+    <!--  Check glyph font size. Adjust to change glyph size.  -->
     <Thickness x:Key="Menu.Check.GlyphMargin">0,0.0,0,0</Thickness>
-    <!--  勾字符位置偏移(左,上,右,下)。第二个值为负=上移，正=下移；第一个/第三个值可左右移动  -->
+    <!--  Glyph offset (left, top, right, bottom). Second value negative = move up; positive = move down. First/third adjust horizontal.  -->
     <SolidColorBrush x:Key="Menu.Check.Bg" Color="#222222" />
-    <!--  勾圈背景色  -->
+    <!--  Background color for the check circle  -->
     <SolidColorBrush x:Key="Menu.Check.Fg" Color="#FFFFFFFF" />
-    <!--  勾字符颜色  -->
+    <!--  Check glyph color  -->
     <sys:String x:Key="Menu.Check.Glyph">✔</sys:String>
-    <!--  勾字符（可换成 ✅ 等）  -->
+    <!--  Check glyph character (can be replaced with ✅, etc.)  -->
 
-    <!--  › 箭头（右圈）  -->
+    <!--  › Arrow glyph (right circle)  -->
     <sys:Double x:Key="Menu.Arrow.Diameter">16</sys:Double>
-    <!--  箭头“圆圈”直径（px）→ 改这个=圈大小  -->
+    <!--  Arrow circle diameter (px). Adjust to change circle size.  -->
     <sys:Double x:Key="Menu.Arrow.FontSize">16</sys:Double>
-    <!--  箭头字符字号 → 改这个=箭头大小  -->
+    <!--  Arrow glyph font size. Adjust to change arrow size.  -->
     <Thickness x:Key="Menu.Arrow.GlyphMargin">0,0,0,5</Thickness>
-    <!--  箭头位置偏移(左,上,右,下)。第二个值为负=上移；改第1/3个值可左右微调  -->
+    <!--  Arrow glyph offset (left, top, right, bottom). Negative second value = move up; adjust first/third for horizontal tweaks.  -->
     <SolidColorBrush x:Key="Menu.Arrow.Bg" Color="#222222" />
-    <!--  箭头圈背景色  -->
+    <!--  Background color for the arrow circle  -->
     <SolidColorBrush x:Key="Menu.Arrow.Fg" Color="#FFFFFFFF" />
-    <!--  箭头字符颜色  -->
+    <!--  Arrow glyph color  -->
     <sys:String x:Key="Menu.Arrow.Glyph">›</sys:String>
-    <!--  箭头字符（可换 ⟩、❯ 等看基线更顺眼的）  -->
+    <!--  Arrow glyph character (swap to ⟩, ❯, etc. for baseline preference)  -->
     <FontFamily x:Key="Menu.Arrow.FontFamily">Segoe UI</FontFamily>
-    <!--  箭头字符字体（影响基线/样式）  -->
+    <!--  Arrow glyph font family (affects baseline/style)  -->
 
-    <!--  圆角为“足够大”即可保持圆（宽高相等时）  -->
+    <!--  Use a very large corner radius to keep circles perfectly round when width/height match  -->
     <CornerRadius x:Key="Menu.CircleCorner">999</CornerRadius>
-    <!--  圆角半径（一般不用改，保持超大即可）  -->
+    <!--  Corner radius (normally leave oversized)  -->
 
 
-    <!--  不显示滚动条的 ScrollViewer 模板  -->
+    <!--  ScrollViewer template without scrollbars  -->
     <ControlTemplate x:Key="NoScrollViewerTemplate" TargetType="ScrollViewer">
         <ScrollContentPresenter />
     </ControlTemplate>
 
-    <!--  ===== ContextMenu 外壳：圆角 + 投影 =====  -->
+    <!--  ===== ContextMenu chrome: rounded corners + shadow =====  -->
     <Style x:Key="ModernContextMenu" TargetType="ContextMenu">
         <Style.Triggers>
             <EventTrigger RoutedEvent="Opened">
@@ -124,7 +124,7 @@
                         Background="Transparent"
                         SnapsToDevicePixels="True">
                         <Grid>
-                            <!--  阴影层  -->
+                            <!--  Shadow layer  -->
                             <Border
                                 Background="{DynamicResource MenuBg}"
                                 CornerRadius="12"
@@ -133,7 +133,7 @@
                                     <StaticResource ResourceKey="MenuShadow.Light" />
                                 </Border.Effect>
                             </Border>
-                            <!--  前景  -->
+                            <!--  Foreground layer  -->
                             <Border
                                 Padding="6"
                                 Background="{DynamicResource MenuBg}"
@@ -155,7 +155,7 @@
         </Setter>
     </Style>
 
-    <!--  ===== 分隔线 =====  -->
+    <!--  ===== Separator styling =====  -->
     <Style TargetType="Separator">
         <Setter Property="Margin" Value="8,6,8,6" />
         <Setter Property="Template">
@@ -167,7 +167,7 @@
         </Setter>
     </Style>
 
-    <!--  ===== MenuItem：左勾选 / 右箭头 / 圆角悬浮 / 可选左 Icon =====  -->
+    <!--  ===== MenuItem: left check slot / right arrow / rounded hover / optional left icon =====  -->
     <Style x:Key="ModernMenuItem" TargetType="MenuItem">
         <Setter Property="Foreground" Value="{DynamicResource MenuFg}" />
         <Setter Property="FontFamily" Value="pack://application:,,,/Assets/Fonts/#HarmonyOS Sans SC" />
@@ -181,21 +181,21 @@
                     <Grid Margin="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="26" />
-                            <!--  左：勾选/图标  -->
+                            <!--  Left: check slot or icon  -->
                             <ColumnDefinition Width="*" />
-                            <!--  中：文本  -->
+                            <!--  Center: text  -->
                             <ColumnDefinition Width="22" />
-                            <!--  右：箭头  -->
+                            <!--  Right: arrow  -->
                         </Grid.ColumnDefinitions>
 
-                        <!--  悬浮/按下 背景  -->
+                        <!--  Hover/pressed background  -->
                         <Border
                             x:Name="Bg"
                             Grid.ColumnSpan="3"
                             Background="Transparent"
                             CornerRadius="10" />
 
-                        <!--  ✔ 勾（使用资源）  -->
+                        <!--  ✔ Check glyph (resource-driven)  -->
                         <Border
                             x:Name="CheckCircle"
                             Grid.Column="0"
@@ -283,7 +283,7 @@
                                             <StaticResource ResourceKey="MenuShadow.Light" />
                                         </Border.Effect>
                                     </Border>
-                                    <!--  前景层  -->
+                                    <!--  Foreground layer  -->
                                     <Border
                                         Padding="6"
                                         Background="{DynamicResource MenuBg}"
@@ -311,12 +311,12 @@
                             <Setter TargetName="Bg" Property="Background" Value="{DynamicResource MenuPressed}" />
                         </Trigger>
 
-                        <!--  Icon 为空就折叠  -->
+                        <!--  Collapse when no icon is provided  -->
                         <DataTrigger Binding="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
                             <Setter TargetName="LeftIcon" Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
 
-                        <!--  ✅ 只有勾选时显示“勾圈+勾”，并隐藏左侧图标  -->
+                        <!--  Show the check circle/glyph only when checked, and hide the left icon  -->
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="LeftIcon" Property="Visibility" Value="Collapsed" />
                             <Setter TargetName="CheckCircle" Property="Visibility" Value="Visible" />
@@ -337,13 +337,13 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <!--  让某些 MenuItem 具备勾选能力的样式（默认不勾选）  -->
+    <!--  Style enabling checkable MenuItems (unchecked by default)  -->
     <Style
         x:Key="CheckableMenuItem"
         BasedOn="{StaticResource ModernMenuItem}"
         TargetType="MenuItem">
         <Setter Property="IsCheckable" Value="True" />
-        <!--  想点击后菜单不自动关闭可打开这行（当开关用很方便）  -->
+        <!--  Uncomment to keep the menu open after clicking (useful for toggle-style items)  -->
         <Setter Property="StaysOpenOnClick" Value="True" />
     </Style>
 

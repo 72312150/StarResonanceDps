@@ -25,7 +25,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
 
         private void ModuleExcludeForm_Load(object sender, EventArgs e)
         {
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色
+            FormGui.SetColorMode(this, AppConfig.IsLight); // Apply current theme colors
             AddExclusions();
         }
 
@@ -43,13 +43,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.ModuleForm
                     // Width = 20
                 };
 
-                // 👇 打开窗体时，看看是否在排除集合里，是的话就默认勾选
+                // Pre-select any attributes that already exist in the exclusion set
                 if (BuildEliteCandidatePool.ExcludedAttributes.Contains(checkBox.Text))
                 {
                     checkBox.Checked = true;
                 }
 
-                // CheckedChanged 事件：同步到 ExcludedAttributes
+                // Sync CheckedChanged with ExcludedAttributes
                 checkBox.CheckedChanged += (s, e) =>
                 {
                     if (checkBox.Checked)

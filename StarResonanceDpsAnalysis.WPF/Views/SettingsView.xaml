@@ -25,7 +25,7 @@
     Style="{StaticResource TransparentWindow}"
     mc:Ignorable="d">
 
-    <!--  WindowChrome: 开启可拉伸边界  -->
+    <!--  WindowChrome: enable resizable borders  -->
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"
@@ -610,14 +610,14 @@
                                             <TextBlock
                                                 Grid.Column="0"
                                                 Style="{StaticResource FieldName}"
-                                                Text="DPS更新模式"
-                                                ToolTip="被动模式：基于事件触发更新（低CPU占用）&#x0a;主动模式：基于定时器定期更新（可配置刷新间隔）" />
+                                                Text="DPS Update Mode"
+                                                ToolTip="Passive mode: updates on event triggers (lower CPU usage)&#x0a;Active mode: timer-driven updates (configurable refresh interval)" />
                                             <Border Grid.Column="2" HorizontalAlignment="Right">
                                                 <ctrl:SwitchControl
                                                     IsChecked="{Binding AppConfig.DpsUpdateMode, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Active}"
-                                                    OffContent="被动"
-                                                    OnContent="主动"
-                                                    ToolTip="被动模式：基于事件触发更新（低CPU占用）&#x0a;主动模式：基于定时器定期更新（可配置刷新间隔）" />
+                                                    OffContent="Passive"
+                                                    OnContent="Active"
+                                                    ToolTip="Passive mode: updates on event triggers (lower CPU usage)&#x0a;Active mode: timer-driven updates (configurable refresh interval)" />
                                             </Border>
                                         </Grid>
                                     </Border>
@@ -633,8 +633,8 @@
                                             <TextBlock
                                                 Grid.Column="0"
                                                 Style="{StaticResource FieldName}"
-                                                Text="DPS更新间隔"
-                                                ToolTip="仅在主动模式下生效&#x0a;推荐值：500-2000毫秒" />
+                                                Text="DPS Update Interval"
+                                                ToolTip="Applies only in Active mode&#x0a;Recommended: 500-2000 ms" />
                                             <Grid Grid.Column="2">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition />

@@ -12,19 +12,43 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
     {
         private static readonly Dictionary<string, string> ProfessionDisplayToInternal = new(StringComparer.OrdinalIgnoreCase)
         {
-            ["Marksman"] = "神射手",
-            ["Shield Knight"] = "神盾骑士",
-            ["Stormblade"] = "雷影剑士",
-            ["Frost Mage"] = "冰魔导师",
-            ["Wind Knight"] = "青岚骑士",
-            ["Verdant Oracle"] = "森语者",
-            ["Heavy Guardian"] = "巨刃守护者",
-            ["Soul Musician"] = "灵魂乐手",
-            ["Unknown"] = "未知职业"
+            ["Marksman"] = "Marksman",
+            ["Shield Knight"] = "Shield Knight",
+            ["Stormblade"] = "Stormblade",
+            ["Frost Mage"] = "Frost Mage",
+            ["Wind Knight"] = "Wind Knight",
+            ["Verdant Oracle"] = "Verdant Oracle",
+            ["Heavy Guardian"] = "Heavy Guardian",
+            ["Soul Musician"] = "Soul Musician",
+            ["Unknown"] = "Unknown Profession",
+            ["Unknown Profession"] = "Unknown Profession"
         };
 
-        private static readonly Dictionary<string, string> ProfessionInternalToDisplay =
-            ProfessionDisplayToInternal.ToDictionary(kvp => kvp.Value, kvp => kvp.Key, StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, string> ProfessionSynonymsToInternal = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["神射手"] = "Marksman",
+            ["神盾骑士"] = "Shield Knight",
+            ["雷影剑士"] = "Stormblade",
+            ["冰魔导师"] = "Frost Mage",
+            ["青岚骑士"] = "Wind Knight",
+            ["森语者"] = "Verdant Oracle",
+            ["巨刃守护者"] = "Heavy Guardian",
+            ["灵魂乐手"] = "Soul Musician",
+            ["未知职业"] = "Unknown Profession"
+        };
+
+        private static readonly Dictionary<string, string> ProfessionInternalToDisplay = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Marksman"] = "Marksman",
+            ["Shield Knight"] = "Shield Knight",
+            ["Stormblade"] = "Stormblade",
+            ["Frost Mage"] = "Frost Mage",
+            ["Wind Knight"] = "Wind Knight",
+            ["Verdant Oracle"] = "Verdant Oracle",
+            ["Heavy Guardian"] = "Heavy Guardian",
+            ["Soul Musician"] = "Soul Musician",
+            ["Unknown Profession"] = "Unknown"
+        };
 
         public UserUidSetForm()
         {
@@ -77,10 +101,12 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                     // Repair corrupted configuration
                     AppConfig.SetValue("UserConfig", "Uid", "0");
                 }
-                var savedProfession = AppConfig.GetValue("UserConfig", "Profession", "未知职业");
+                var savedProfessionRaw = AppConfig.GetValue("UserConfig", "Profession", "Unknown Profession");
+                var savedProfession = GetProfessionInternal(savedProfessionRaw);
                 if (!ProfessionInternalToDisplay.TryGetValue(savedProfession, out var professionDisplay))
                 {
                     professionDisplay = "Unknown";
+                    savedProfession = "Unknown Profession";
                 }
                 select1.SelectedValue = professionDisplay;
 
@@ -169,8 +195,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             {
                 oldNickname = "Unknown nickname";
             }
-            string oldProfession = AppConfig.GetValue("UserConfig", "Profession", "未知职业");
-
+            string oldProfessionRaw = AppConfig.GetValue("UserConfig", "Profession", "Unknown Profession");
+            string oldProfession = GetProfessionInternal(oldProfessionRaw);
 
             bool uidChanged = !long.TryParse(oldUidStr, out long oldUid) || oldUid != newUid;
             bool nicknameChanged = oldNickname != newNickname;
@@ -229,25 +255,25 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 }
             }
 
-            // 显示保存成功的反馈
+            // Provide a success notification
             Console.WriteLine($"Settings saved successfully - UID: {newUid}, Nickname: {newNickname}, Profession: {professionInternal}");
         }
 
         /// <summary>
-        /// 验证用户输入
+        /// Validate user input
         /// </summary>
         private bool ValidateInput(out string errorMessage)
         {
             errorMessage = string.Empty;
 
-            // 验证UID
+            // Validate UID
             if (inputNumber1.Value <= 0)
             {
                 errorMessage = "UID must be greater than 0.";
                 return false;
             }
 
-            // 验证昵称
+            // Validate nickname
             string nickname = input2.Text.Trim();
             if (string.IsNullOrEmpty(nickname))
             {
@@ -261,7 +287,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 return false;
             }
 
-            // 可以添加更多验证规则，如特殊字符检查
+            // Additional validation rules can go here (e.g., special character checks)
             if (nickname.Contains("<") || nickname.Contains(">") || nickname.Contains("&"))
             {
                 errorMessage = "Nickname cannot contain special characters < > &.";
@@ -272,7 +298,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
 
         /// <summary>
-        /// 原始的保存按钮逻辑 - 保留向后兼容性
+        /// Original save button logic — retained for backward compatibility
         /// </summary>
         private async void button2_Click(object sender, EventArgs e)
         {
@@ -320,9 +346,17 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 return ProfessionDisplayToInternal["Unknown"];
             }
 
-            return ProfessionDisplayToInternal.TryGetValue(displayName, out var internalName)
-                ? internalName
-                : displayName;
+            if (ProfessionDisplayToInternal.TryGetValue(displayName, out var internalName))
+            {
+                return internalName;
+            }
+
+            if (ProfessionSynonymsToInternal.TryGetValue(displayName, out internalName))
+            {
+                return internalName;
+            }
+
+            return displayName;
         }
     }
 }

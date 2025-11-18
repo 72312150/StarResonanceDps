@@ -33,13 +33,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Effects
                     _fontCache[(fontFamily, fontSize, fontStyle)] = font;
                 }
 
-                // Console.WriteLine($"通过 {fontName} 取得{(ffFlag ? "缓存中的" : string.Empty)}字体族: {fontFamily!.Name}, 并取得{(fFlag ? "缓存中的" : string.Empty)}字体: Size({fontSize})");
+                // Console.WriteLine($"Loaded font family {fontFamily!.Name} for {fontName} with size {fontSize}");
 
                 return font;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"字体从内存转换时出错: {fontName}({fontSize}) {ex.Message}\r\n{ex.StackTrace}");
+                Console.WriteLine($"Failed to load font from memory: {fontName}({fontSize}) {ex.Message}\r\n{ex.StackTrace}");
 
                 return SystemFonts.DefaultFont;
             }

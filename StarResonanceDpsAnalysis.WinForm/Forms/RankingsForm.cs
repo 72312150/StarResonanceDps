@@ -64,13 +64,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             if (Config.IsLight)
             {
-                //浅色
+                // Light theme
                 table_DpsDetailDataTable.RowSelectedBg = ColorTranslator.FromHtml("#AED4FB");
                 button1.DefaultBack = ColorTranslator.FromHtml("#67AEF6");
             }
             else
             {
-                //深色
+                // Dark theme
                 table_DpsDetailDataTable.RowSelectedBg = ColorTranslator.FromHtml("#10529a");
                 button1.DefaultBack = ColorTranslator.FromHtml("#255AD0");
 

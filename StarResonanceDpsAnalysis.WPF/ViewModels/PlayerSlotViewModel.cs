@@ -4,7 +4,7 @@ using StarResonanceDpsAnalysis.Core.Models;
 namespace StarResonanceDpsAnalysis.WPF.ViewModels;
 
 /// <summary>
-/// 用于 DataTemplate 绑定的数据载体（挂到 ProgressBarData.Data 上）
+/// Data carrier used for DataTemplate bindings (attached to ProgressBarData.Data)
 /// </summary>
 public partial class PlayerSlotViewModel : OrderingDataViewModel
 {

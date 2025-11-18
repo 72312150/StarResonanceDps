@@ -257,7 +257,7 @@ namespace StarResonanceDpsAnalysis.WinForm
             }
             else
             {
-                throw new Exception($"无法编码类型: {value.GetType()}");
+                throw new Exception($"Unable to encode value of type {value.GetType()}");
             }
         }
 

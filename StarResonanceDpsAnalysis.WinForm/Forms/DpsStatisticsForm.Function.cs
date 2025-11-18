@@ -169,7 +169,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         }
         #region StartCapture() - capture lifecycle events and statistics
         /// <summary>
-        /// 开始抓包
+        /// Start packet capture
         /// </summary>
         public void StartCapture()
         {

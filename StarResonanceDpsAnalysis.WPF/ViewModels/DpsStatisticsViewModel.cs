@@ -200,7 +200,7 @@ public partial class DpsStatisticsViewModel : BaseViewModel, IDisposable
 
     /// <summary>
     /// 切换窗口置顶状态（命令）。
-    /// 通过绑定 Window.Topmost 到 AppConfig.TopmostEnabled 实现。
+    /// Achieved by binding Window.Topmost to AppConfig.TopmostEnabled.
     /// </summary>
     [RelayCommand]
     private async Task ToggleTopmost()

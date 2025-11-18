@@ -197,7 +197,7 @@
                     </ctrl:RingProgressBar>
 
                     <StackPanel Style="{StaticResource DpsStackPanel}" Grid.Column="1">
-                        <TextBlock Style="{StaticResource DpsTextBase}" Text="当前伤害"/>
+                        <TextBlock Style="{StaticResource DpsTextBase}" Text="Current Damage"/>
                         <TextBlock Style="{StaticResource DpsText}" Text="22.4K (4603.4)"/>
                     </StackPanel>
                 </Grid>
@@ -242,12 +242,12 @@
 
                         <ToggleButton
                             Click="TabSelector_Click"
-                            Content="关闭"
+                            Content="Off"
                             Style="{StaticResource SelectorToggleButton}"
                             Tag="0" />
                         <ToggleButton
                             Click="TabSelector_Click"
-                            Content="开启"
+                            Content="On"
                             Style="{StaticResource SelectorToggleButton}"
                             Tag="1" />
 

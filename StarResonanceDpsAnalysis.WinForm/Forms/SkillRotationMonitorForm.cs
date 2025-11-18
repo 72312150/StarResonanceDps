@@ -8,7 +8,7 @@ using StarResonanceDpsAnalysis.WinForm.Plugin.DamageStatistics;
 namespace StarResonanceDpsAnalysis.WinForm.Forms
 {
     /// <summary>
-    /// 技能释放循环监测窗口
+    /// Skill rotation monitoring window
     /// </summary>
     public partial class SkillRotationMonitorForm : BorderlessForm
     {

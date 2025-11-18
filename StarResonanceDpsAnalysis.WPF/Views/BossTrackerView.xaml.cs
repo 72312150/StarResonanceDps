@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 namespace StarResonanceDpsAnalysis.WPF.Views
 {
     /// <summary>
-    /// BossTrackerView.xaml 的交互逻辑
+    /// Interaction logic for BossTrackerView.xaml
     /// </summary>
     public partial class BossTrackerView : Window
     {

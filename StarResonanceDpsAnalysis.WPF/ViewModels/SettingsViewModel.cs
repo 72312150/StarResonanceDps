@@ -446,14 +446,14 @@ public sealed class SettingsDesignTimeViewModel : SettingsViewModel
         AvailableLanguages = new List<Option<Language>>
         {
             new Option<Language>(Language.Auto, "Follow System"),
-            new Option<Language>(Language.ZhCn, "中文 (简体)"),
+            new Option<Language>(Language.ZhCn, "Chinese (Simplified)"),
             new Option<Language>(Language.EnUs, "English")
         };
 
         AvailableNumberDisplayModes = new List<Option<NumberDisplayMode>>
         {
-            new Option<NumberDisplayMode>(NumberDisplayMode.Wan, "四位计数法 (万)"),
-            new Option<NumberDisplayMode>(NumberDisplayMode.KMB, "三位计数法 (KMB)")
+            new Option<NumberDisplayMode>(NumberDisplayMode.Wan, "Ten-thousands grouping (Wan)"),
+            new Option<NumberDisplayMode>(NumberDisplayMode.KMB, "Thousands grouping (K / M / B)")
         };
 
         SelectedLanguage = AvailableLanguages[0];

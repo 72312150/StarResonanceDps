@@ -23,7 +23,7 @@
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
-    <!--  WindowChrome: 开启可拉伸边界  -->
+    <!--  WindowChrome: enable resizable border  -->
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"

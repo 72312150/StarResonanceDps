@@ -24,7 +24,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             InitializeComponent();
             FormGui.SetDefaultGUI(this);
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色
+            FormGui.SetColorMode(this, AppConfig.IsLight); // Apply current theme colors
         }
     }
 }

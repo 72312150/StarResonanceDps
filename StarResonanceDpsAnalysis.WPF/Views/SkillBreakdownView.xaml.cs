@@ -6,7 +6,7 @@ using StarResonanceDpsAnalysis.WPF.ViewModels;
 namespace StarResonanceDpsAnalysis.WPF.Views;
 
 /// <summary>
-/// SkillBreakdownView.xaml 的交互逻辑
+/// Interaction logic for SkillBreakdownView.xaml
 /// </summary>
 public partial class SkillBreakdownView : Window
 {

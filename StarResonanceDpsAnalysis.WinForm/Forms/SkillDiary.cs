@@ -119,29 +119,28 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                 }
                 else
                 {
-                    // Match "伤害:12345" or "治疗:54321"
-                    var kv = Regex.Match(part, @"^(?<k>伤害|治疗)\s*:\s*(?<v>\d+)$");
+                    // Match "Damage:12345" / "伤害:12345" or "Healing:54321" / "治疗:54321"
+                    var kv = Regex.Match(part, @"^(?<k>伤害|Damage|治疗|Healing)\s*:\s*(?<v>\d+)$", RegexOptions.IgnoreCase);
                     if (kv.Success)
                     {
                         string k = kv.Groups["k"].Value;
                         string v = kv.Groups["v"].Value; // Preserve full number (no K/M formatting)
 
-                        if (k == "伤害")
+                        if (IsDamageLabel(k))
                             Write($"Damage:{v}", colorDmg, FontStyle.Regular);
                         else
                             Write($"Healing:{v}", colorHeal, FontStyle.Regular);
                     }
-                    else if (part.StartsWith("释放次数:") || part.StartsWith("次数:"))
+                    else if (StartsWithAny(part, "释放次数:", "次数:", "Casts:", "Cast:"))
                     {
-                        var normalized = part
-                            .Replace("释放次数:", "Casts:")
-                            .Replace("次数:", "Casts:");
-                        Write(normalized, colorCount, FontStyle.Regular);
+                        var segments = part.Split(new[] { ':' }, 2);
+                        var value = segments.Length == 2 ? segments[1].Trim() : string.Empty;
+                        Write($"Casts:{value}", colorCount, FontStyle.Regular);
                     }
-                    else if (part.StartsWith("暴击"))
+                    else if (StartsWithAny(part, "暴击", "Critical"))
                     {
-                        // Supports "暴击" or "暴击:3"
-                        var n = Regex.Match(part, @"^暴击(?::\s*(?<n>\d+))?$");
+                        // Supports "暴击"/"Critical" or variants with counts
+                        var n = Regex.Match(part, @"^(暴击|Critical)(?::\s*(?<n>\d+))?$", RegexOptions.IgnoreCase);
                         if (n.Success)
                         {
                             string label = n.Groups["n"].Success ? $"Critical ×{n.Groups["n"].Value}" : "Critical";
@@ -152,9 +151,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                             Badge("Critical", badgeCritBack, badgeCritFore, bold: true);
                         }
                     }
-                    else if (part.StartsWith("幸运"))
+                    else if (StartsWithAny(part, "幸运", "Lucky"))
                     {
-                        var n = Regex.Match(part, @"^幸运(?::\s*(?<n>\d+))?$");
+                        var n = Regex.Match(part, @"^(幸运|Lucky)(?::\s*(?<n>\d+))?$", RegexOptions.IgnoreCase);
                         if (n.Success)
                         {
                             string label = n.Groups["n"].Success ? $"Lucky ×{n.Groups["n"].Value}" : "Lucky";
@@ -182,6 +181,22 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
             richTextBox1.ScrollToCaret();
         }
 
+
+        private static bool IsDamageLabel(string label) =>
+            string.Equals(label, "伤害", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(label, "Damage", StringComparison.OrdinalIgnoreCase);
+
+        private static bool StartsWithAny(string source, params string[] prefixes)
+        {
+            foreach (var prefix in prefixes)
+            {
+                if (source.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
 
         private void SkillDiary_Load(object sender, EventArgs e)

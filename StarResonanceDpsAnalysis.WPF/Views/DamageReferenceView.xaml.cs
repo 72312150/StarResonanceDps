@@ -4,7 +4,7 @@ using System.Windows.Controls.Primitives;
 namespace StarResonanceDpsAnalysis.WPF.Views;
 
 /// <summary>
-/// DamageReferenceView.xaml 的交互逻辑
+/// Interaction logic for DamageReferenceView.xaml
 /// </summary>
 public partial class DamageReferenceView : Window
 {

@@ -7,7 +7,7 @@ using StarResonanceDpsAnalysis.WPF.ViewModels;
 namespace StarResonanceDpsAnalysis.WPF.Views;
 
 /// <summary>
-///     DpsStatisticsForm.xaml 的交互逻辑
+/// Interaction logic for DpsStatisticsView.xaml
 /// </summary>
 public partial class DpsStatisticsView : Window
 {
@@ -108,7 +108,7 @@ public partial class DpsStatisticsView : Window
             // me 已经是 true，不用再设
         }
 
-        // 这次点击后变成 false：允许“全不选”，什么也不做
+        // When it becomes false after this click: allow "select none", do nothing
         e.Handled = true;
     }
 
@@ -133,7 +133,7 @@ public partial class DpsStatisticsView : Window
             // me 已经是 true，不用再设
         }
 
-        // 这次点击后变成 false：允许“全不选”，什么也不做
+        // When it becomes false after this click: allow "select none", do nothing
         e.Handled = true;
     }
 }

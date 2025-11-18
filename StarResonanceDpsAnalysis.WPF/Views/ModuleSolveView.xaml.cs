@@ -4,7 +4,7 @@ using System.Windows.Input;
 namespace StarResonanceDpsAnalysis.WPF.Views;
 
 /// <summary>
-/// ModuleSolveView.xaml 的交互逻辑
+/// Interaction logic for ModuleSolveView.xaml
 /// </summary>
 public partial class ModuleSolveView : Window
 {

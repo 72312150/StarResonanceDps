@@ -6,7 +6,7 @@ using System.Windows.Navigation;
 namespace StarResonanceDpsAnalysis.WPF.Views;
 
 /// <summary>
-/// AboutView.xaml 的交互逻辑
+/// Interaction logic for AboutView.xaml
 /// </summary>
 public partial class AboutView : Window
 {

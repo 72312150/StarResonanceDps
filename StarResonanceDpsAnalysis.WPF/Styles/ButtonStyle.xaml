@@ -67,7 +67,7 @@
         </Style.Triggers>
     </Style>
 
-    <!--  可以定义隐式样式（如果想默认所有 Button 都应用）  -->
+    <!--  Define an implicit style if you want all Buttons to adopt it by default  -->
     <!-- <Style TargetType="Button" BasedOn="{StaticResource IconButtonStyle}" /> -->
 
 </ResourceDictionary>

@@ -16,8 +16,8 @@
     Style="{StaticResource TransparentWindow}"
     mc:Ignorable="d">
 
-    <!--  不可拉伸  -->
-    <!--  WindowChrome: 开启可拉伸边界  -->
+    <!--  Window is not resizable  -->
+    <!--  WindowChrome: enable resizable borders  -->
     <!--<WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"

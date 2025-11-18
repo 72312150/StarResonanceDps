@@ -7,7 +7,7 @@ using StarResonanceDpsAnalysis.WPF.ViewModels;
 namespace StarResonanceDpsAnalysis.WPF.Views;
 
 /// <summary>
-///     SettingForm.xaml 的交互逻辑
+/// Interaction logic for SettingsView.xaml
 /// </summary>
 public partial class SettingsView : Window
 {

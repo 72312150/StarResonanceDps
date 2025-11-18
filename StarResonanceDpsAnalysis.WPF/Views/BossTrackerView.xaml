@@ -16,7 +16,7 @@
     lex:ResxLocalizationProvider.DefaultDictionary="Resources"
     Style="{StaticResource TransparentWindow}">
 
-    <!--  WindowChrome: 开启可拉伸边界  -->
+    <!--  WindowChrome: enable resizable borders  -->
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"

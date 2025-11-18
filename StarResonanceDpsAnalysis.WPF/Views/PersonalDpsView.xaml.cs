@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace StarResonanceDpsAnalysis.WPF.Views
 {
     /// <summary>
-    /// PersonalDpsView.xaml 的交互逻辑
+    /// Interaction logic for PersonalDpsView.xaml
     /// </summary>
     public partial class PersonalDpsView : Window
     {

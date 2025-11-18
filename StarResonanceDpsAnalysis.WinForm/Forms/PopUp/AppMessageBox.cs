@@ -22,7 +22,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.PopUp
 
             FormGui.SetDefaultGUI(this);
 
-            FormGui.SetColorMode(this, AppConfig.IsLight);//设置窗体颜色
+            FormGui.SetColorMode(this, AppConfig.IsLight); // Apply current theme colors
 
             labelMessage.Text = message;
         }
@@ -31,8 +31,8 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.PopUp
         {
             using var box = new AppMessageBox(message);
 
-            if (owner == null) return box.ShowDialog(); // 默认居中屏幕
-            else return box.ShowDialog(owner); // 相对 owner 居中
+            if (owner == null) return box.ShowDialog(); // Center on screen by default
+            else return box.ShowDialog(owner); // Center relative to owner
         }
 
 
@@ -44,13 +44,13 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms.PopUp
 
         private void button4_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.OK; // 表示用户确认
+            this.DialogResult = DialogResult.OK; // Confirm
             this.Close();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel; // 表示用户关闭
+            this.DialogResult = DialogResult.Cancel; // Cancel/close
             this.Close();
         }
 

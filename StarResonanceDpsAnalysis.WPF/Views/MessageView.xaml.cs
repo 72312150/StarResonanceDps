@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 namespace StarResonanceDpsAnalysis.WPF.Views
 {
     /// <summary>
-    /// MessageView.xaml 的交互逻辑
+    /// Interaction logic for MessageView.xaml
     /// </summary>
     public partial class MessageView : Window
     {

@@ -40,7 +40,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         {
             if (Config.IsLight)
             {
-                //浅色
+                // Light theme
                 panel_BasicSetup.Back = panel_KeySettings.Back = panel_CombatSettings.Back = ColorTranslator.FromHtml("#FFFFFF");
                 stackPanel_MainPanel.Back = ColorTranslator.FromHtml("#EFEFEF");
             }
@@ -57,7 +57,7 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
         /// <param name="sender"></param>
         /// <param name="e"></param>
         /// <remarks>
-        /// 处理鼠标拖拽窗口
+        /// Handles window dragging with the mouse
         /// </remarks>
         private void label_TitleText_MouseDown(object sender, MouseEventArgs e)
         {
@@ -157,9 +157,9 @@ namespace StarResonanceDpsAnalysis.WinForm.Forms
                     Restart now?
                     """, this) == DialogResult.OK)
                 {
-                    // 重新启动应用程序
+                    // Restart the application
                     Application.Restart();
-                    // 确保退出当前进程
+                    // Ensure the current process exits
                     Environment.Exit(0);
                 }
                 else
